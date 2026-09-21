@@ -8,8 +8,6 @@ import {
   User,
   Moon,
   Sun,
-  ShieldCheck,
-  Smartphone,
   MapPin,
   PhoneCall,
   Menu,
@@ -30,9 +28,7 @@ export const WebHeader: React.FC = () => {
     theme,
     toggleTheme,
     searchQuery,
-    setSearchQuery,
-    androidFrame,
-    setAndroidFrame
+    setSearchQuery
   } = useApp();
 
   const isDark = theme === 'dark';
@@ -201,21 +197,9 @@ export const WebHeader: React.FC = () => {
               <LogIn className="w-3.5 h-3.5" />
               <span>Log In / Regista</span>
             </button>
-
-            <button
-              onClick={() => setActiveTab('admin')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors flex items-center space-x-1 ${
-                activeTab === 'admin'
-                  ? 'bg-amber-500 text-neutral-900 shadow-sm shadow-amber-500/30'
-                  : 'bg-neutral-800 text-amber-400 hover:bg-neutral-700'
-              }`}
-            >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Admin</span>
-            </button>
           </div>
 
-          {/* Quick Actions (Currency, Theme, Phone Mode Toggle, Cart) */}
+          {/* Quick Actions (Currency, Theme, Cart) */}
           <div className="flex items-center space-x-2">
             {/* Currency Switcher */}
             <button
@@ -241,22 +225,6 @@ export const WebHeader: React.FC = () => {
               title="Toggle Dark / Light Mode"
             >
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
-
-            {/* Phone Mockup Toggle (Allows user to inspect the phone view if they want!) */}
-            <button
-              onClick={() => setAndroidFrame(!androidFrame)}
-              className={`hidden sm:flex items-center space-x-1 text-xs font-semibold px-2.5 py-1.5 rounded-xl border transition-colors ${
-                androidFrame
-                  ? 'bg-emerald-500 text-white border-emerald-600 shadow-sm'
-                  : isDark
-                  ? 'bg-neutral-800 border-neutral-700 text-neutral-300 hover:text-white'
-                  : 'bg-neutral-100 border-neutral-300 text-neutral-700 hover:bg-neutral-200'
-              }`}
-              title="Simulate Mobile Device Frame"
-            >
-              <Smartphone className="w-3.5 h-3.5" />
-              <span>{androidFrame ? 'Phone View' : 'Full Web'}</span>
             </button>
 
             {/* Cart Button */}
@@ -349,19 +317,9 @@ export const WebHeader: React.FC = () => {
                 setActiveTab('auth');
                 setMobileMenuOpen(false);
               }}
-              className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-left text-amber-400 font-bold flex items-center space-x-1.5"
+              className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-left text-amber-400 font-bold flex items-center space-x-1.5 col-span-2 justify-center"
             >
               <span>🔑 Log In / Regista</span>
-            </button>
-            <button
-              onClick={() => {
-                setActiveTab('admin');
-                setMobileMenuOpen(false);
-              }}
-              className="p-2.5 rounded-xl bg-amber-500/20 text-amber-400 text-left font-bold col-span-2 flex items-center justify-between"
-            >
-              <span>🛡️ Admin Portal (Dishes & Deliveries)</span>
-              <span>→</span>
             </button>
           </div>
         )}

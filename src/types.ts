@@ -106,6 +106,11 @@ export interface UserProfile {
   phone: string;
   role: 'customer' | 'admin';
   avatar?: string;
+  birthday?: string;
+  locationCoordinates?: {
+    latitude: number;
+    longitude: number;
+  };
   addresses: Array<{
     id: string;
     label: string;

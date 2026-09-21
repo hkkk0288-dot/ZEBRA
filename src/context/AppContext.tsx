@@ -83,8 +83,17 @@ interface AppContextType {
   authMode: AuthMode;
   setAuthMode: (mode: AuthMode) => void;
   isLoggedIn: boolean;
-  login: (email: string, password?: string, name?: string) => Promise<boolean>;
-  signup: (name: string, email: string, password?: string) => Promise<boolean>;
+  login: (identifier: string, password?: string) => Promise<boolean>;
+  signup: (params: {
+    fullName: string;
+    phone: string;
+    email?: string;
+    avatar?: string;
+    birthday?: string;
+    location: string;
+    coordinates?: { latitude: number; longitude: number };
+    password?: string;
+  }) => Promise<boolean>;
   logout: () => void;
   loginWithSocial: (provider: 'google' | 'facebook') => Promise<void>;
 
@@ -263,19 +272,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsLoggedIn(false);
   };
 
-  const login = async (email: string, _password?: string, name?: string): Promise<boolean> => {
-    const displayName = name || (email.includes('@') ? email.split('@')[0].replace('.', ' ') : 'David Johnson');
-    const formattedName = displayName
-      .split(' ')
-      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(' ');
+  const login = async (identifier: string, _password?: string): Promise<boolean> => {
+    const trimmed = identifier.trim();
+    // Check if identifier is email, phone, or 3-part name
+    let displayName = user.name || 'David Johnson';
+    let userEmail = user.email || 'customer@zebradsm.com';
+    let userPhone = user.phone || '+255 754 123 456';
+
+    if (trimmed.includes('@')) {
+      userEmail = trimmed;
+      const part = trimmed.split('@')[0].replace(/[._-]/g, ' ');
+      displayName = part.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    } else if (/^(\+?255|0)[67]\d{8}$/.test(trimmed.replace(/\s+/g, ''))) {
+      userPhone = trimmed;
+    } else {
+      // 3 names or any name
+      displayName = trimmed.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    }
     
     const updatedUser: UserProfile = {
       ...user,
       id: `usr-${Date.now()}`,
-      name: formattedName,
-      email: email,
-      role: email.toLowerCase().includes('admin') ? 'admin' : 'customer'
+      name: displayName,
+      email: userEmail,
+      phone: userPhone,
+      role: trimmed.toLowerCase().includes('admin') ? 'admin' : 'customer'
     };
     setUser(updatedUser);
     setIsLoggedIn(true);
@@ -284,12 +305,40 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return true;
   };
 
-  const signup = async (name: string, email: string, _password?: string): Promise<boolean> => {
+  const signup = async (params: {
+    fullName: string;
+    phone: string;
+    email?: string;
+    avatar?: string;
+    birthday?: string;
+    location: string;
+    coordinates?: { latitude: number; longitude: number };
+    password?: string;
+  }): Promise<boolean> => {
+    const formattedName = params.fullName
+      .trim()
+      .split(/\s+/)
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(' ');
+
+    const newAddress = {
+      id: `addr-${Date.now()}`,
+      label: 'Nyumbani / Makazi',
+      street: params.location || 'Masaki, Dar es Salaam',
+      city: 'Dar es Salaam',
+      isDefault: true
+    };
+
     const newUser: UserProfile = {
       ...user,
       id: `usr-${Date.now()}`,
-      name: name || 'David Johnson',
-      email: email,
+      name: formattedName,
+      phone: params.phone.trim(),
+      email: params.email?.trim() || `${formattedName.toLowerCase().replace(/\s+/g, '.')}@gmail.com`,
+      avatar: params.avatar || user.avatar,
+      birthday: params.birthday,
+      locationCoordinates: params.coordinates,
+      addresses: [newAddress, ...user.addresses.filter(a => !a.isDefault)],
       role: 'customer'
     };
     setUser(newUser);
