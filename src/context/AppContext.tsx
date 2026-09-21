@@ -99,7 +99,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [currency, setCurrency] = useState<'USD' | 'TZS'>('USD');
-  const [androidFrame, setAndroidFrame] = useState<boolean>(true);
+  const [androidFrame, setAndroidFrameState] = useState<boolean>(() => {
+    const saved = localStorage.getItem('zebra_android_frame');
+    return saved === 'true'; // Default to false so user gets full website view
+  });
+
+  const setAndroidFrame = (val: boolean) => {
+    setAndroidFrameState(val);
+    localStorage.setItem('zebra_android_frame', String(val));
+  };
 
   // User state
   const [user, setUser] = useState<UserProfile>(() => {

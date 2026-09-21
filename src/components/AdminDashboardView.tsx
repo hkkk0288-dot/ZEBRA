@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { OrderStatus, MenuItem } from '../types';
 import { CATEGORIES } from '../data/mockData';
+import { FoodImage } from './FoodImage';
 
 export const AdminDashboardView: React.FC = () => {
   const {
@@ -32,7 +33,8 @@ export const AdminDashboardView: React.FC = () => {
     appliedPromo,
     currency,
     theme,
-    setActiveTab
+    setActiveTab,
+    androidFrame
   } = useApp();
 
   const isDark = theme === 'dark';
@@ -102,39 +104,64 @@ export const AdminDashboardView: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen pb-32">
-      {/* Admin Top Bar */}
-      <div
-        className={`sticky top-0 z-20 flex items-center justify-between px-5 py-4 transition-colors ${
-          isDark ? 'bg-[#0f0f11]/90 backdrop-blur-md' : 'bg-white/90 backdrop-blur-md'
-        }`}
-      >
-        <div className="flex items-center space-x-2.5">
+      {/* Admin Top Bar for Phone Frame */}
+      {androidFrame ? (
+        <div
+          className={`sticky top-0 z-20 flex items-center justify-between px-5 py-4 transition-colors ${
+            isDark ? 'bg-[#0f0f11]/90 backdrop-blur-md' : 'bg-white/90 backdrop-blur-md'
+          }`}
+        >
+          <div className="flex items-center space-x-2.5">
+            <button
+              onClick={() => setActiveTab('home')}
+              className="p-1.5 rounded-full hover:bg-neutral-800 text-neutral-300"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <h1 className="text-base font-bold font-display text-neutral-900 dark:text-white flex items-center space-x-1.5">
+                <span>Admin Management</span>
+                <span className="text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full font-bold">
+                  PRO
+                </span>
+              </h1>
+              <p className="text-[11px] text-neutral-400">Zebra Restaurant by AmourCodes</p>
+            </div>
+          </div>
+
           <button
             onClick={() => setActiveTab('home')}
-            className="p-1.5 rounded-full hover:bg-neutral-800 text-neutral-300"
+            className="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-full"
           >
-            <ArrowLeft className="w-5 h-5" />
+            Customer View
           </button>
-          <div>
-            <h1 className="text-base font-bold font-display text-neutral-900 dark:text-white flex items-center space-x-1.5">
-              <span>Admin Management</span>
-              <span className="text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full font-bold">
-                PRO
-              </span>
-            </h1>
-            <p className="text-[11px] text-neutral-400">Zebra Restaurant by AmourCodes</p>
-          </div>
         </div>
+      ) : (
+        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-6 pb-2 flex items-center justify-between border-b border-neutral-800/80">
+          <div>
+            <div className="flex items-center space-x-2.5">
+              <h1 className="text-2xl font-bold font-display text-neutral-900 dark:text-white flex items-center space-x-2">
+                <span>Zebra Admin Management Console</span>
+                <span className="text-xs bg-amber-500 text-neutral-950 font-extrabold px-2.5 py-0.5 rounded-full">
+                  LIVE RESTAURANT
+                </span>
+              </h1>
+            </div>
+            <p className="text-xs text-neutral-400 mt-1">
+              Live Orders, Kitchen Dispatch, Menu Control, Tanzanian USSD Payment Logs • Developed by <strong className="text-amber-400">AmourCodes</strong>
+            </p>
+          </div>
 
-        <button
-          onClick={() => setActiveTab('home')}
-          className="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-full"
-        >
-          Customer App View
-        </button>
-      </div>
+          <button
+            onClick={() => setActiveTab('home')}
+            className="text-xs font-bold text-emerald-500 hover:text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 rounded-2xl transition-all"
+          >
+            ← View Customer Storefront
+          </button>
+        </div>
+      )}
 
-      <div className="px-5 space-y-5">
+      <div className={`w-full ${androidFrame ? 'px-5 space-y-5 mt-2' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6'}`}>
         {/* KPI Metrics Strip */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
@@ -314,12 +341,14 @@ export const AdminDashboardView: React.FC = () => {
                   className="flex items-center justify-between p-3 rounded-2xl bg-neutral-900/80 border border-neutral-800"
                 >
                   <div className="flex items-center space-x-3 min-w-0 flex-1 mr-3">
-                    <img
-                      src={dish.image}
-                      alt={dish.name}
-                      className="w-12 h-12 rounded-xl object-cover border border-neutral-700"
-                      referrerPolicy="no-referrer"
-                    />
+                    <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 border border-neutral-700">
+                      <FoodImage
+                        src={dish.image}
+                        alt={dish.name}
+                        category={dish.category}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                     <div className="truncate">
                       <h4 className="font-bold text-xs text-white truncate">{dish.name}</h4>
                       <p className="text-[11px] text-emerald-400 font-medium">

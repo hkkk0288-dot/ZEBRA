@@ -6,6 +6,8 @@ import { formatPrice } from '../utils/formatters';
 import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
 
+import { FoodImage } from './FoodImage';
+
 export const FoodDetailModal: React.FC = () => {
   const { selectedDish, setSelectedDish, addToCart, toggleFavorite, isFavorite, currency, theme } = useApp();
 
@@ -97,7 +99,7 @@ export const FoodDetailModal: React.FC = () => {
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
           transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-          className={`relative w-full max-w-md h-full sm:h-[94vh] sm:rounded-[36px] flex flex-col overflow-hidden shadow-2xl transition-colors duration-200 ${
+          className={`relative w-full max-w-lg h-full sm:h-auto sm:max-h-[92vh] sm:rounded-[36px] flex flex-col overflow-hidden shadow-2xl transition-colors duration-200 ${
             isDark ? 'bg-[#121215] text-neutral-100' : 'bg-white text-neutral-900'
           }`}
         >
@@ -144,11 +146,11 @@ export const FoodDetailModal: React.FC = () => {
             {/* Dish Circular Food Photo Presentation */}
             <div className="relative flex items-center justify-center my-4">
               <div className="relative w-56 h-56 rounded-full overflow-hidden shadow-2xl border-4 border-amber-500/20 bg-neutral-900">
-                <img
+                <FoodImage
                   src={selectedDish.image}
                   alt={selectedDish.name}
+                  category={selectedDish.category}
                   className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500"
-                  referrerPolicy="no-referrer"
                 />
               </div>
 
