@@ -99,6 +99,19 @@ export interface Order {
 export type NavigationTab = 'home' | 'favorites' | 'cart' | 'orders' | 'profile' | 'admin' | 'auth';
 export type AuthMode = 'login' | 'signup';
 
+export type PendingAction =
+  | {
+      type: 'add_to_cart';
+      item: MenuItem;
+      size: SizeOption;
+      ingredients: IngredientOption[];
+      quantity: number;
+      specialInstructions?: string;
+    }
+  | {
+      type: 'checkout';
+    };
+
 export interface UserProfile {
   id: string;
   name: string;

@@ -10,10 +10,12 @@ import {
   SizeOption,
   UserProfile,
   NavigationTab,
-  AuthMode
+  AuthMode,
+  PendingAction
 } from '../types';
 import {
   DEFAULT_USER,
+  GUEST_USER,
   INITIAL_MENU_ITEMS,
   PROMO_OFFERS,
   USSD_NETWORKS
@@ -105,6 +107,12 @@ interface AppContextType {
   setSearchQuery: (query: string) => void;
   selectedCategory: string;
   setSelectedCategory: (cat: string) => void;
+
+  authRedirectMessage: string | null;
+  setAuthRedirectMessage: (msg: string | null) => void;
+  pendingAction: PendingAction | null;
+  setPendingAction: (action: PendingAction | null) => void;
+  clearPendingAction: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -127,8 +135,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('zebra_android_frame', String(val));
   };
 
-  // User state
+  // Navigation & Authentication states
+  const [activeTab, setActiveTab] = useState<NavigationTab>('home');
+  const [authMode, setAuthMode] = useState<AuthMode>('login');
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
+    const saved = localStorage.getItem('zebra_logged_in');
+    return saved === 'true';
+  });
+
+  // User state: If not logged in, must be guest user (not exposing private account details)
   const [user, setUser] = useState<UserProfile>(() => {
+    const isSavedLoggedIn = localStorage.getItem('zebra_logged_in') === 'true';
+    if (!isSavedLoggedIn) return GUEST_USER;
     const saved = localStorage.getItem('zebra_user');
     return saved ? JSON.parse(saved) : DEFAULT_USER;
   });
@@ -148,15 +166,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved ? JSON.parse(saved) : [];
   });
 
-  // Navigation
-  const [activeTab, setActiveTab] = useState<NavigationTab>('home');
-  const [authMode, setAuthMode] = useState<AuthMode>('login');
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
-    const saved = localStorage.getItem('zebra_logged_in');
-    return saved === 'true';
-  });
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+
+  // Auth gating & pending actions (for redirecting to signup/login on add to cart or checkout)
+  const [authRedirectMessage, setAuthRedirectMessage] = useState<string | null>(null);
+  const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
+  const clearPendingAction = () => {
+    setPendingAction(null);
+    setAuthRedirectMessage(null);
+  };
 
   // Promo code
   const [appliedPromo, setAppliedPromo] = useState<PromoOffer | null>(null);
@@ -166,68 +185,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // USSD modal state
   const [ussdModalOrder, setUssdModalOrder] = useState<Order | null>(null);
 
-  // Orders state
+  // Orders state: If not logged in, orders MUST be empty so unauthenticated users cannot see private orders
   const [orders, setOrders] = useState<Order[]>(() => {
+    const isSavedLoggedIn = localStorage.getItem('zebra_logged_in') === 'true';
+    if (!isSavedLoggedIn) return [];
     const saved = localStorage.getItem('zebra_orders');
-    if (saved) return JSON.parse(saved);
-    // Default initial simulated active order for realistic order tracking
-    const initialOrder: Order = {
-      id: 'ord-zebra-001',
-      orderNumber: 'ZBR-782194',
-      date: 'Today, 7:15 PM',
-      status: 'on_the_way',
-      items: [
-        {
-          cartItemId: 'init-c1',
-          menuItem: INITIAL_MENU_ITEMS[0],
-          selectedSize: INITIAL_MENU_ITEMS[0].sizes[1],
-          selectedIngredients: [INITIAL_MENU_ITEMS[0].ingredients[0]],
-          quantity: 1,
-          unitPrice: 12.39,
-          totalPrice: 12.39
-        },
-        {
-          cartItemId: 'init-c2',
-          menuItem: INITIAL_MENU_ITEMS[1],
-          selectedSize: INITIAL_MENU_ITEMS[1].sizes[0],
-          selectedIngredients: [],
-          quantity: 2,
-          unitPrice: 4.99,
-          totalPrice: 9.98
-        }
-      ],
-      subtotal: 22.37,
-      deliveryFee: 5.00,
-      discount: 3.00,
-      total: 24.37,
-      currency: 'USD',
-      paymentMethod: 'ussd_mpesa',
-      paymentStatus: 'paid',
-      ussdDetails: {
-        network: 'Vodacom M-Pesa',
-        phoneNumber: '+255 712 345 678',
-        referenceCode: 'MP994827',
-        ussdString: '*150*00*1*445566*2437#'
-      },
-      customer: {
-        name: 'Delisas Agency',
-        phone: '+255 712 345 678',
-        address: 'Plot 44, Toure Drive, Masaki Peninsula, Dar es Salaam'
-      },
-      rider: {
-        name: 'Juma "Zebra Rider" Bakari',
-        phone: '+255 684 902 114',
-        vehicle: 'Yamaha YBR 125 (MC-8821)',
-        photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
-        rating: 4.9,
-        currentEtaMinutes: 8
-      },
-      createdAt: Date.now() - 1000 * 60 * 14
-    };
-    return [initialOrder];
+    return saved ? JSON.parse(saved) : [];
   });
 
-  const [activeOrder, setActiveOrder] = useState<Order | null>(orders[0] || null);
+  const [activeOrder, setActiveOrder] = useState<Order | null>(() => {
+    const isSavedLoggedIn = localStorage.getItem('zebra_logged_in') === 'true';
+    if (!isSavedLoggedIn) return null;
+    const saved = localStorage.getItem('zebra_orders');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return parsed[0] || null;
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
 
   // Persistence effects
   useEffect(() => {
@@ -255,6 +234,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('zebra_orders', JSON.stringify(orders));
   }, [orders]);
 
+  useEffect(() => {
+    if (isLoggedIn && user.id !== 'guest-1') {
+      localStorage.setItem('zebra_user', JSON.stringify(user));
+    }
+  }, [user, isLoggedIn]);
+
   const toggleTheme = () => {
     setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
   };
@@ -264,12 +249,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const loginAsGuest = () => {
-    setUser({
-      ...DEFAULT_USER,
-      id: `guest-${Date.now()}`,
-      name: 'Mgeni (Guest User)'
-    });
+    setUser(GUEST_USER);
     setIsLoggedIn(false);
+  };
+
+  const resolvePendingAction = () => {
+    if (pendingAction) {
+      if (pendingAction.type === 'add_to_cart') {
+        const p = pendingAction;
+        executeAddToCart(p.item, p.size, p.ingredients, p.quantity, p.specialInstructions);
+        setPendingAction(null);
+        setAuthRedirectMessage(null);
+        setActiveTab('cart');
+        return;
+      } else if (pendingAction.type === 'checkout') {
+        setPendingAction(null);
+        setAuthRedirectMessage(null);
+        setActiveTab('cart');
+        return;
+      }
+    }
+    setActiveTab('home');
   };
 
   const login = async (identifier: string, _password?: string): Promise<boolean> => {
@@ -296,12 +296,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       name: displayName,
       email: userEmail,
       phone: userPhone,
+      avatar: user.avatar || DEFAULT_USER.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
       role: trimmed.toLowerCase().includes('admin') ? 'admin' : 'customer'
     };
     setUser(updatedUser);
     setIsLoggedIn(true);
     localStorage.setItem('zebra_logged_in', 'true');
     localStorage.setItem('zebra_user', JSON.stringify(updatedUser));
+    
+    // Restore saved orders if available
+    const savedOrders = localStorage.getItem('zebra_orders');
+    if (savedOrders) {
+      try {
+        const parsed = JSON.parse(savedOrders);
+        setOrders(parsed);
+        setActiveOrder(parsed[0] || null);
+      } catch {
+        // ignore
+      }
+    }
+
+    resolvePendingAction();
     return true;
   };
 
@@ -345,18 +360,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsLoggedIn(true);
     localStorage.setItem('zebra_logged_in', 'true');
     localStorage.setItem('zebra_user', JSON.stringify(newUser));
+    resolvePendingAction();
     return true;
   };
 
   const logout = () => {
     setIsLoggedIn(false);
     localStorage.removeItem('zebra_logged_in');
-    setUser({
-      ...DEFAULT_USER,
-      id: `guest-${Date.now()}`,
-      name: 'Guest User',
-      email: 'guest@zebradsm.com'
-    });
+    localStorage.removeItem('zebra_user');
+    setUser(GUEST_USER);
+    setOrders([]);
+    setActiveOrder(null);
+    setPendingAction(null);
+    setAuthRedirectMessage(null);
+    setActiveTab('home');
   };
 
   const loginWithSocial = async (provider: 'google' | 'facebook'): Promise<void> => {
@@ -373,6 +390,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsLoggedIn(true);
     localStorage.setItem('zebra_logged_in', 'true');
     localStorage.setItem('zebra_user', JSON.stringify(socialUser));
+    resolvePendingAction();
   };
 
   const toggleFavorite = (itemId: string) => {
@@ -395,7 +413,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const discountAmount = appliedPromo ? (subtotal * appliedPromo.discountPercent) / 100 : 0;
   const totalAmount = Math.max(0, subtotal + deliveryFee - discountAmount);
 
-  const addToCart = (
+  const executeAddToCart = (
     item: MenuItem,
     size: SizeOption,
     ingredients: IngredientOption[],
@@ -433,6 +451,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
       return [...prev, newItem];
     });
+  };
+
+  const addToCart = (
+    item: MenuItem,
+    size: SizeOption,
+    ingredients: IngredientOption[],
+    quantity: number,
+    specialInstructions?: string
+  ) => {
+    if (!isLoggedIn) {
+      setAuthRedirectMessage('Tafadhali jisajili au ingia kwanza kwenye akaunti yako ili uweze kuongeza vyakula kwenye kapu na kuagiza.');
+      setPendingAction({
+        type: 'add_to_cart',
+        item,
+        size,
+        ingredients,
+        quantity,
+        specialInstructions
+      });
+      setAuthMode('signup');
+      setActiveTab('auth');
+      return;
+    }
+
+    executeAddToCart(item, size, ingredients, quantity, specialInstructions);
   };
 
   const updateCartQuantity = (cartItemId: string, delta: number) => {
@@ -490,6 +533,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     deliveryAddress: string;
     notes?: string;
   }): Promise<Order> => {
+    if (!isLoggedIn) {
+      setAuthRedirectMessage('Tafadhali ingia au jisajili kwanza ili ukamilishe malipo na uagize chakula chako.');
+      setPendingAction({ type: 'checkout' });
+      setAuthMode('login');
+      setActiveTab('auth');
+      throw new Error('Tafadhali ingia au jisajili kwanza');
+    }
+
     const isUssd = details.paymentMethod.startsWith('ussd_');
     const netConfig = USSD_NETWORKS.find(n => n.id === details.paymentMethod);
     const refCode = generateUssdRef();
@@ -666,7 +717,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         searchQuery,
         setSearchQuery,
         selectedCategory,
-        setSelectedCategory
+        setSelectedCategory,
+        authRedirectMessage,
+        setAuthRedirectMessage,
+        pendingAction,
+        setPendingAction,
+        clearPendingAction
       }}
     >
       {children}

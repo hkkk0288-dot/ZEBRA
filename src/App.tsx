@@ -21,7 +21,7 @@ import { AuthView } from './components/AuthView';
 import { Smartphone, Monitor, ShieldCheck, User, LogIn } from 'lucide-react';
 
 const MainContent: React.FC = () => {
-  const { activeTab, setActiveTab, theme, androidFrame, setAndroidFrame } = useApp();
+  const { activeTab, setActiveTab, theme, androidFrame, setAndroidFrame, isLoggedIn } = useApp();
 
   const isDark = theme === 'dark';
 
@@ -32,11 +32,11 @@ const MainContent: React.FC = () => {
       case 'cart':
         return <CartView />;
       case 'orders':
-        return <OrderTrackingView />;
+        return isLoggedIn ? <OrderTrackingView /> : <AuthView />;
       case 'favorites':
         return <FavoritesView />;
       case 'profile':
-        return <ProfileView />;
+        return isLoggedIn ? <ProfileView /> : <AuthView />;
       case 'auth':
         return <AuthView />;
       case 'admin':
@@ -155,8 +155,8 @@ const MainContent: React.FC = () => {
         {renderActiveView()}
       </main>
 
-      {/* Full Website Footer */}
-      <div className="pb-16 lg:pb-0">
+      {/* Website Footer - Desktop always, Mobile only on home feed */}
+      <div className={`pb-16 lg:pb-0 ${activeTab === 'home' ? 'block' : 'hidden lg:block'}`}>
         <WebFooter />
       </div>
 

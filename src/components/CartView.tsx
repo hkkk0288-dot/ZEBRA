@@ -27,7 +27,11 @@ export const CartView: React.FC = () => {
     setSelectedDish,
     theme,
     user,
-    androidFrame
+    androidFrame,
+    isLoggedIn,
+    setAuthRedirectMessage,
+    setPendingAction,
+    setAuthMode
   } = useApp();
 
   const isDark = theme === 'dark';
@@ -40,6 +44,13 @@ export const CartView: React.FC = () => {
 
   const handleCheckout = async () => {
     if (cart.length === 0) return;
+    if (!isLoggedIn) {
+      setAuthRedirectMessage('Tafadhali jisajili au ingia kwanza kwenye akaunti yako ili ukamilishe malipo na kuagiza chakula chako.');
+      setPendingAction({ type: 'checkout' });
+      setAuthMode('login');
+      setActiveTab('auth');
+      return;
+    }
     setIsSubmitting(true);
     try {
       await placeOrder({
@@ -475,10 +486,18 @@ export const CartView: React.FC = () => {
               <button
                 onClick={handleCheckout}
                 disabled={isSubmitting}
-                className="w-full bg-emerald-500 hover:bg-emerald-600 active:scale-[0.98] text-white font-bold py-4 px-6 rounded-full shadow-lg shadow-emerald-500/30 flex items-center justify-center space-x-2 text-base transition-all disabled:opacity-50"
+                className={`w-full active:scale-[0.98] font-bold py-4 px-6 rounded-full shadow-lg flex items-center justify-center space-x-2 text-base transition-all disabled:opacity-50 ${
+                  !isLoggedIn
+                    ? 'bg-amber-500 hover:bg-amber-400 text-neutral-950 shadow-amber-500/25'
+                    : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-500/30'
+                }`}
               >
                 {isSubmitting ? (
                   <span>Processing Order...</span>
+                ) : !isLoggedIn ? (
+                  <span>
+                    🔑 Ingia / Jisajili ili Kulipa · {formatPrice(totalAmount, currency)}
+                  </span>
                 ) : (
                   <span>
                     Checkout Now · {formatPrice(totalAmount, currency)}

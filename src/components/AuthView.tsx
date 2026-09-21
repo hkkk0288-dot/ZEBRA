@@ -37,7 +37,9 @@ export const AuthView: React.FC = () => {
     logout,
     user,
     setActiveTab,
-    androidFrame
+    androidFrame,
+    authRedirectMessage,
+    pendingAction
   } = useApp();
 
   // Mode: 'login' | 'signup'
@@ -211,7 +213,8 @@ export const AuthView: React.FC = () => {
         await login(identifier, loginPassword);
         setSuccessMsg(`Karibu tena! Umefanikiwa kuingia.`);
         confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
-        setTimeout(() => setActiveTab('home'), 1100);
+        const nextTab = pendingAction ? 'cart' : 'home';
+        setTimeout(() => setActiveTab(nextTab), 1100);
       } catch (err: any) {
         setErrorMsg(err?.message || 'Hitilafu imetokea. Tafadhali jaribu tena.');
       } finally {
@@ -273,7 +276,8 @@ export const AuthView: React.FC = () => {
 
         setSuccessMsg(`Hongera ${fullName3}! Akaunti yako ya Zebra Restaurant imetengenezwa kwa mafanikio.`);
         confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
-        setTimeout(() => setActiveTab('home'), 1200);
+        const nextTab = pendingAction ? 'cart' : 'home';
+        setTimeout(() => setActiveTab(nextTab), 1200);
       } catch (err: any) {
         setErrorMsg(err?.message || 'Hitilafu imetokea wakati wa kusajili. Jaribu tena.');
       } finally {
@@ -291,7 +295,8 @@ export const AuthView: React.FC = () => {
       await loginWithSocial(provider);
       setSuccessMsg(`Umefanikiwa kuingia na ${provider === 'google' ? 'Google' : 'Facebook'}!`);
       confetti({ particleCount: 50, spread: 50, origin: { y: 0.6 } });
-      setTimeout(() => setActiveTab('home'), 1000);
+      const nextTab = pendingAction ? 'cart' : 'home';
+      setTimeout(() => setActiveTab(nextTab), 1000);
     } finally {
       setLoading(false);
     }
@@ -348,6 +353,16 @@ export const AuthView: React.FC = () => {
 
       {/* Main Card Container */}
       <div className="w-full max-w-md flex flex-col items-center">
+        {/* Auth Redirect Message Notice (e.g. redirected from Add to Cart or Checkout) */}
+        {authRedirectMessage && (
+          <div className="w-full mb-4 p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-200 text-xs sm:text-sm flex items-start space-x-2.5 shadow-lg shadow-amber-500/10 animate-in fade-in slide-in-from-top duration-300">
+            <AlertCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <span className="font-semibold">{authRedirectMessage}</span>
+            </div>
+          </div>
+        )}
+
         {/* 1. Mascot Illustration (Exact match to screenshots) */}
         <div className="mb-5">
           <FoodAppMascot size={androidFrame ? 'sm' : 'md'} />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   User,
@@ -6,21 +6,28 @@ import {
   Mail,
   MapPin,
   ShieldCheck,
-  Moon,
-  Sun,
-  Smartphone,
-  Info,
   LogOut,
   Edit2,
   Plus,
   Check,
   ReceiptText,
-  Cloud,
-  ExternalLink,
-  LogIn
+  Camera,
+  Upload,
+  Trash2,
+  Headphones,
+  MessageSquare,
+  ChevronRight
 } from 'lucide-react';
 import { formatPrice } from '../utils/formatters';
-import { CloudinaryUploader } from './CloudinaryUploader';
+
+const AVATAR_PRESETS = [
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80',
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
+  'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80',
+  'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+];
 
 export const ProfileView: React.FC = () => {
   const {
@@ -28,11 +35,7 @@ export const ProfileView: React.FC = () => {
     updateUser,
     orders,
     theme,
-    toggleTheme,
     currency,
-    setCurrency,
-    androidFrame,
-    setAndroidFrame,
     setActiveTab,
     setActiveOrder,
     isLoggedIn,
@@ -43,39 +46,100 @@ export const ProfileView: React.FC = () => {
   const isDark = theme === 'dark';
 
   const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [nameInput, setNameInput] = useState(user.name);
-  const [phoneInput, setPhoneInput] = useState(user.phone);
-  const [emailInput, setEmailInput] = useState(user.email);
-  const [avatarInput, setAvatarInput] = useState(user.avatar || '');
+  const [nameInput, setNameInput] = useState(user?.name || 'David Michael Johnson');
+  const [phoneInput, setPhoneInput] = useState(user?.phone || '+255 754 123 456');
+  const [emailInput, setEmailInput] = useState(user?.email || 'customer@zebradsm.com');
+  const [avatarInput, setAvatarInput] = useState(user?.avatar || '');
+  const [avatarError, setAvatarError] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const [showAddAddress, setShowAddAddress] = useState(false);
-  const [newAddressLabel, setNewAddressLabel] = useState('Home');
+  const [newAddressLabel, setNewAddressLabel] = useState('Nyumbani');
   const [newAddressStreet, setNewAddressStreet] = useState('');
 
-  const handleSaveProfile = () => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  const getInitials = (name: string) => {
+    if (!name) return 'ZR';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
+  const handleAvatarFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('Picha isizidi ukubwa wa MB 5');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64Url = reader.result as string;
+      setAvatarInput(base64Url);
+      setAvatarError(false);
+      updateUser({ avatar: base64Url });
+      showToast('Picha ya profile imesasishwa kikamilifu! ✨');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSelectPresetAvatar = (url: string) => {
+    setAvatarInput(url);
+    setAvatarError(false);
+    updateUser({ avatar: url });
+    showToast('Picha ya profile imebadilishwa! ✨');
+  };
+
+  const handleSaveProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nameInput.trim()) {
+      showToast('Tafadhali weka jina lako');
+      return;
+    }
+
     updateUser({
-      name: nameInput,
-      phone: phoneInput,
-      email: emailInput,
+      name: nameInput.trim(),
+      phone: phoneInput.trim(),
+      email: emailInput.trim(),
       avatar: avatarInput || user.avatar
     });
     setIsEditingProfile(false);
+    showToast('Taarifa za wasifu zimehifadhiwa! ✅');
   };
 
-  const handleAddAddress = () => {
+  const handleAddAddress = (e: React.FormEvent) => {
+    e.preventDefault();
     if (!newAddressStreet.trim()) return;
+
     const newAddr = {
       id: `addr-${Date.now()}`,
       label: newAddressLabel,
-      street: newAddressStreet,
+      street: newAddressStreet.trim(),
       city: 'Dar es Salaam',
       isDefault: user.addresses.length === 0
     };
+
     updateUser({
       addresses: [...user.addresses, newAddr]
     });
     setNewAddressStreet('');
     setShowAddAddress(false);
+    showToast('Anwani mpya imeongezwa! 📍');
+  };
+
+  const handleDeleteAddress = (id: string) => {
+    updateUser({
+      addresses: user.addresses.filter(a => a.id !== id)
+    });
+    showToast('Anwani imeondolewa');
   };
 
   const handleToggleAdmin = () => {
@@ -86,329 +150,386 @@ export const ProfileView: React.FC = () => {
     }
   };
 
-  return (
-    <div className="flex flex-col min-h-screen pb-32">
-      {/* Mobile Header (only in phone frame mode) */}
-      {androidFrame && (
-        <div
-          className={`sticky top-0 z-20 flex items-center justify-between px-5 py-4 transition-colors ${
-            isDark ? 'bg-[#0f0f11]/90 backdrop-blur-md' : 'bg-white/90 backdrop-blur-md'
-          }`}
+  if (!isLoggedIn) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[65vh] px-4 py-12 text-center">
+        <div className="w-20 h-20 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center mb-4 text-3xl shadow-inner">
+          <User className="w-10 h-10" />
+        </div>
+        <h2 className="text-xl font-bold font-display text-neutral-900 dark:text-white mb-2">
+          Akaunti Yako (My Account)
+        </h2>
+        <p className="text-sm text-neutral-500 dark:text-neutral-400 max-w-sm mb-6 leading-relaxed">
+          Ili kutazama taarifa zako, anwani za kuletewa chakula, na oda ulizoagiza, tafadhali ingia kwenye akaunti yako.
+        </p>
+        <button
+          onClick={() => {
+            setAuthMode('login');
+            setActiveTab('auth');
+          }}
+          className="bg-amber-500 hover:bg-amber-600 active:scale-95 text-neutral-950 font-bold py-3 px-8 rounded-full shadow-lg shadow-amber-500/25 text-sm flex items-center space-x-2 transition-transform"
         >
-          <h1 className="text-lg font-bold font-display text-neutral-900 dark:text-white">
-            My Account
-          </h1>
+          <span>Ingia au Jisajili Sasa</span>
+          <ChevronRight className="w-4 h-4" />
+        </button>
+      </div>
+    );
+  }
 
-          <button
-            onClick={handleToggleAdmin}
-            className={`text-xs font-bold px-3 py-1.5 rounded-full flex items-center space-x-1.5 transition-colors ${
-              user.role === 'admin'
-                ? 'bg-amber-500 text-neutral-900 shadow-md shadow-amber-500/30'
-                : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
-            }`}
-            title="Switch between Customer & Admin Mode"
-          >
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>{user.role === 'admin' ? 'Admin Active' : 'Switch to Admin'}</span>
-          </button>
+  return (
+    <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-8 space-y-5 pb-24">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-full bg-neutral-900/95 text-white border border-emerald-500/40 text-xs sm:text-sm font-semibold shadow-xl flex items-center space-x-2 animate-fadeIn backdrop-blur-md">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span>{toastMessage}</span>
         </div>
       )}
 
-      {/* Main Container */}
-      <div className={`w-full ${androidFrame ? 'px-5 space-y-5' : 'max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6'}`}>
-        
-        {/* Full Web Breadcrumbs & Switch to Admin button */}
-        {!androidFrame && (
-          <div className="flex items-center justify-between border-b border-neutral-800/80 pb-4 mb-6">
-            <div>
-              <h1 className="text-2xl font-bold font-display text-neutral-900 dark:text-white tracking-tight">
-                Profile & Settings
-              </h1>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-                Manage your personal info, saved delivery addresses, and food preferences
-              </p>
-            </div>
+      {/* Hidden file input for photo upload */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        accept="image/*"
+        onChange={handleAvatarFileUpload}
+        className="hidden"
+      />
 
-            <button
-              onClick={handleToggleAdmin}
-              className={`text-xs font-bold px-4 py-2 rounded-2xl flex items-center space-x-2 transition-all shadow-md ${
-                user.role === 'admin'
-                  ? 'bg-amber-500 text-neutral-950 font-black shadow-amber-500/20'
-                  : 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-emerald-500/20'
-              }`}
-            >
-              <ShieldCheck className="w-4 h-4" />
-              <span>{user.role === 'admin' ? 'Active: Admin Dashboard' : 'Open Admin Dashboard'}</span>
-            </button>
-          </div>
-        )}
+      {/* Header Section */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold font-display text-neutral-900 dark:text-white tracking-tight">
+            Akaunti Yangu
+          </h1>
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
+            Dhibiti wasifu wako, anwani za usafirishaji na oda zako
+          </p>
+        </div>
 
-        {/* 2-Column Responsive Layout for Desktop, 1-Column for Phone Frame */}
-        <div className={androidFrame ? 'space-y-5' : 'lg:grid lg:grid-cols-12 lg:gap-8 items-start'}>
-          
-          {/* Left Column: User Profile Card & Saved Addresses */}
-          <div className={androidFrame ? 'space-y-4' : 'lg:col-span-6 space-y-5'}>
-            
-            {/* User Profile Card */}
+        {/* Small Admin Dashboard Switch */}
+        <button
+          onClick={handleToggleAdmin}
+          className={`text-xs font-semibold px-3 py-1.5 rounded-full flex items-center space-x-1.5 transition-all ${
+            user.role === 'admin'
+              ? 'bg-amber-500 text-neutral-950 font-bold shadow-md shadow-amber-500/20'
+              : 'bg-neutral-800/80 hover:bg-neutral-800 text-neutral-300 border border-neutral-700'
+          }`}
+          title="Fungua dashibodi ya Admin"
+        >
+          <ShieldCheck className="w-3.5 h-3.5" />
+          <span>{user.role === 'admin' ? 'Admin Dashboard' : 'Admin'}</span>
+        </button>
+      </div>
+
+      {/* 1. Main Profile Card */}
+      <div
+        className={`p-5 rounded-3xl border transition-all ${
+          isDark ? 'bg-neutral-900/80 border-neutral-800 shadow-lg shadow-black/20' : 'bg-white border-neutral-200 shadow-sm'
+        }`}
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center space-x-4">
+            {/* Clickable Profile Avatar with Camera Badge */}
             <div
-              className={`p-5 rounded-3xl border ${
-                isDark ? 'bg-neutral-900/80 border-neutral-800' : 'bg-white border-neutral-200 shadow-sm'
-              }`}
+              onClick={() => fileInputRef.current?.click()}
+              className="relative group cursor-pointer shrink-0"
+              title="Gusa kupakia picha kutoka simuni"
             >
-              <div className="flex items-center space-x-4">
-                <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-emerald-500 shrink-0">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-2 border-emerald-500 shadow-md bg-neutral-800 flex items-center justify-center">
+                {user.avatar && !avatarError ? (
                   <img
-                    src={user.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'}
+                    src={user.avatar}
                     alt={user.name}
-                    className="w-full h-full object-cover"
+                    onError={() => setAvatarError(true)}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                     referrerPolicy="no-referrer"
                   />
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-base font-bold text-neutral-900 dark:text-white truncate">
-                      {user.name}
-                    </h2>
-                    <button
-                      onClick={() => setIsEditingProfile(!isEditingProfile)}
-                      className="p-1.5 rounded-xl text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
-                      title="Edit Profile"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-emerald-600 to-teal-800 flex items-center justify-center text-white font-black text-lg sm:text-xl">
+                    {getInitials(user.name)}
                   </div>
-                  <p className="text-xs text-neutral-400 truncate mt-0.5">{user.email}</p>
-                  <p className="text-xs font-mono text-emerald-500 mt-1">{user.phone}</p>
-                </div>
+                )}
               </div>
-
-              {/* Profile Edit Form */}
-              {isEditingProfile && (
-                <div className="mt-4 pt-4 border-t border-neutral-800 space-y-3">
-                  <div>
-                    <label className="text-[11px] font-semibold text-neutral-400 block mb-1">
-                      Full Name
-                    </label>
-                    <input
-                      type="text"
-                      value={nameInput}
-                      onChange={e => setNameInput(e.target.value)}
-                      className="w-full p-2.5 rounded-xl bg-neutral-800 border border-neutral-700 text-xs text-white outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-[11px] font-semibold text-neutral-400 block mb-1">
-                      Phone Number (USSD Delivery Contact)
-                    </label>
-                    <input
-                      type="text"
-                      value={phoneInput}
-                      onChange={e => setPhoneInput(e.target.value)}
-                      className="w-full p-2.5 rounded-xl bg-neutral-800 border border-neutral-700 text-xs text-white outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-[11px] font-semibold text-neutral-400 block mb-1">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      value={emailInput}
-                      onChange={e => setEmailInput(e.target.value)}
-                      className="w-full p-2.5 rounded-xl bg-neutral-800 border border-neutral-700 text-xs text-white outline-none"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-semibold text-neutral-300 flex items-center justify-between">
-                      <span>Profile Avatar (Cloudinary CDN)</span>
-                      <span className="text-[10px] text-emerald-400 font-mono">cy4pidvh</span>
-                    </label>
-                    <CloudinaryUploader
-                      currentImageUrl={avatarInput}
-                      onImageUploaded={(url) => setAvatarInput(url)}
-                      label="Pakia picha ya profile moja kwa moja Cloudinary"
-                      folder="zebra_restaurant/avatars"
-                    />
-                  </div>
-
-                  <div className="flex items-center space-x-2 pt-1">
-                    <button
-                      onClick={handleSaveProfile}
-                      className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center space-x-1"
-                    >
-                      <Check className="w-3.5 h-3.5" />
-                      <span>Save Changes</span>
-                    </button>
-                    <button
-                      onClick={() => setIsEditingProfile(false)}
-                      className="px-4 py-2 rounded-xl bg-neutral-800 text-neutral-400 hover:text-white text-xs"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              )}
+              <div className="absolute -bottom-1 -right-1 bg-emerald-500 hover:bg-emerald-400 text-white p-1.5 rounded-full border-2 border-neutral-900 shadow-md transition-transform active:scale-90 flex items-center justify-center">
+                <Camera className="w-3.5 h-3.5" />
+              </div>
             </div>
 
-            {/* Authentication & Security (Login / Regista) Card */}
-            <div
-              className={`p-5 rounded-3xl border space-y-3.5 ${
-                isDark
-                  ? 'bg-[#121215] border-amber-500/20'
-                  : 'bg-white border-amber-300/80 shadow-sm'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-400">
-                    <LogIn className="w-4 h-4" />
-                  </div>
-                  <h3 className="text-xs font-bold text-neutral-900 dark:text-white uppercase tracking-wider">
-                    Ukurasa wa Login & Regista
-                  </h3>
-                </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400">
-                  {isLoggedIn ? 'Umeingia (Active)' : 'Mgeni'}
+            {/* User Meta */}
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center space-x-2">
+                <h2 className="text-base sm:text-lg font-bold text-neutral-900 dark:text-white truncate">
+                  {user.name}
+                </h2>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-500 border border-emerald-500/20 shrink-0">
+                  {user.role === 'admin' ? 'Admin' : 'Mteja'}
                 </span>
               </div>
-
-              <p className="text-xs text-neutral-400">
-                Tazama na utumie kurasa zilizoundwa kulingana na picha ya mfano (Screenshot 1 & 2):
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 truncate mt-0.5 flex items-center space-x-1">
+                <Mail className="w-3 h-3 shrink-0" />
+                <span className="truncate">{user.email}</span>
               </p>
+              <p className="text-xs font-mono text-emerald-600 dark:text-emerald-400 mt-1 flex items-center space-x-1">
+                <Phone className="w-3 h-3 shrink-0" />
+                <span>{user.phone}</span>
+              </p>
+            </div>
+          </div>
 
-              <div className="grid grid-cols-2 gap-2.5">
-                <button
-                  onClick={() => {
-                    setAuthMode('login');
-                    setActiveTab('auth');
-                  }}
-                  className="py-2.5 px-3 rounded-2xl bg-[#1a1a1e] hover:bg-neutral-800 border border-neutral-700 text-xs font-bold text-white flex items-center justify-center space-x-1.5 transition-all shadow-sm active:scale-95"
-                >
-                  <span>🔑 Ukurasa wa Log In</span>
-                </button>
+          {/* Action Buttons: Edit / Change Picture */}
+          <div className="flex items-center space-x-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-neutral-800/50">
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="flex-1 sm:flex-initial text-xs font-semibold py-2 px-3.5 rounded-xl bg-neutral-800/80 hover:bg-neutral-800 text-neutral-200 border border-neutral-700 flex items-center justify-center space-x-1.5 transition-colors"
+            >
+              <Upload className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Badili Picha</span>
+            </button>
+            <button
+              onClick={() => setIsEditingProfile(!isEditingProfile)}
+              className="flex-1 sm:flex-initial text-xs font-semibold py-2 px-3.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center space-x-1.5 transition-colors"
+            >
+              <Edit2 className="w-3.5 h-3.5" />
+              <span>{isEditingProfile ? 'Funga' : 'Hariri'}</span>
+            </button>
+          </div>
+        </div>
 
-                <button
-                  onClick={() => {
-                    setAuthMode('signup');
-                    setActiveTab('auth');
-                  }}
-                  className="py-2.5 px-3 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-400 text-xs font-bold text-neutral-950 flex items-center justify-center space-x-1.5 transition-all shadow-md shadow-amber-500/20 active:scale-95"
-                >
-                  <span>📝 Ukurasa wa Regista</span>
-                </button>
+        {/* Edit Profile Form Drawer */}
+        {isEditingProfile && (
+          <form onSubmit={handleSaveProfile} className="mt-5 pt-5 border-t border-neutral-800 space-y-4 animate-fadeIn">
+            <h3 className="text-xs font-bold text-neutral-300 uppercase tracking-wider">
+              Hariri Taarifa Zako
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="text-[11px] font-semibold text-neutral-400 block mb-1">
+                  Jina Kamili
+                </label>
+                <input
+                  type="text"
+                  value={nameInput}
+                  onChange={e => setNameInput(e.target.value)}
+                  className="w-full p-2.5 text-xs bg-neutral-800/90 border border-neutral-700 rounded-xl text-white outline-none focus:border-emerald-500"
+                  required
+                />
               </div>
 
-              {isLoggedIn && (
-                <div className="pt-1 flex items-center justify-between border-t border-neutral-800/60">
-                  <span className="text-[11px] text-neutral-400">
-                    Akaunti: <strong className="text-white">{user.email}</strong>
-                  </span>
-                  <button
-                    onClick={logout}
-                    className="text-[11px] font-bold text-red-400 hover:text-red-300 transition-colors"
-                  >
-                    Toka (Log Out)
-                  </button>
-                </div>
-              )}
+              <div>
+                <label className="text-[11px] font-semibold text-neutral-400 block mb-1">
+                  Nambari ya Simu
+                </label>
+                <input
+                  type="text"
+                  value={phoneInput}
+                  onChange={e => setPhoneInput(e.target.value)}
+                  className="w-full p-2.5 text-xs bg-neutral-800/90 border border-neutral-700 rounded-xl text-white outline-none focus:border-emerald-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] font-semibold text-neutral-400 block mb-1">
+                  Barua Pepe (Email)
+                </label>
+                <input
+                  type="email"
+                  value={emailInput}
+                  onChange={e => setEmailInput(e.target.value)}
+                  className="w-full p-2.5 text-xs bg-neutral-800/90 border border-neutral-700 rounded-xl text-white outline-none focus:border-emerald-500"
+                  required
+                />
+              </div>
             </div>
 
-            {/* Saved Delivery Addresses */}
-            <div
-              className={`p-5 rounded-3xl border space-y-3.5 ${
-                isDark ? 'bg-neutral-900/60 border-neutral-800' : 'bg-white border-neutral-200 shadow-sm'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-wider">
-                  Saved Addresses (Dar es Salaam)
-                </h3>
-                <button
-                  onClick={() => setShowAddAddress(!showAddAddress)}
-                  className="text-xs font-semibold text-emerald-500 hover:text-emerald-400 flex items-center space-x-1"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>Add New</span>
-                </button>
-              </div>
-
-              {showAddAddress && (
-                <div className="p-3 rounded-2xl bg-neutral-800/80 border border-neutral-700 space-y-2.5">
-                  <div className="flex space-x-2">
-                    {['Home', 'Office', 'Other'].map(lbl => (
-                      <button
-                        key={lbl}
-                        onClick={() => setNewAddressLabel(lbl)}
-                        className={`text-xs px-3 py-1 rounded-lg border font-medium ${
-                          newAddressLabel === lbl
-                            ? 'border-emerald-500 bg-emerald-500 text-white'
-                            : 'border-neutral-700 text-neutral-300'
-                        }`}
-                      >
-                        {lbl}
-                      </button>
-                    ))}
-                  </div>
-                  <input
-                    type="text"
-                    value={newAddressStreet}
-                    onChange={e => setNewAddressStreet(e.target.value)}
-                    placeholder="Street name, landmark in Dar es Salaam..."
-                    className="w-full p-2.5 text-xs bg-neutral-900 border border-neutral-700 rounded-xl text-white outline-none"
-                  />
+            {/* Quick Avatar Choices */}
+            <div className="space-y-1.5 pt-2">
+              <span className="text-[11px] text-neutral-400 block">
+                Au chagua moja ya picha za haraka:
+              </span>
+              <div className="flex items-center space-x-2 overflow-x-auto pb-1">
+                {AVATAR_PRESETS.map((presetUrl, idx) => (
                   <button
-                    onClick={handleAddAddress}
-                    className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 text-xs rounded-xl"
+                    key={idx}
+                    type="button"
+                    onClick={() => handleSelectPresetAvatar(presetUrl)}
+                    className={`relative w-9 h-9 rounded-full overflow-hidden shrink-0 border-2 transition-all ${
+                      user.avatar === presetUrl
+                        ? 'border-emerald-500 scale-110 shadow-md shadow-emerald-500/30'
+                        : 'border-neutral-700 hover:border-neutral-400'
+                    }`}
                   >
-                    Save Address
+                    <img src={presetUrl} alt={`Avatar ${idx}`} className="w-full h-full object-cover" />
                   </button>
-                </div>
-              )}
-
-              <div className="space-y-2">
-                {user.addresses.map(addr => (
-                  <div
-                    key={addr.id}
-                    className="flex items-start space-x-3 p-3 rounded-2xl bg-neutral-800/40 border border-neutral-800"
-                  >
-                    <MapPin className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                    <div className="flex-1">
-                      <span className="text-xs font-bold text-neutral-200">{addr.label}</span>
-                      <p className="text-xs text-neutral-400 mt-0.5">{addr.street}, {addr.city}</p>
-                    </div>
-                  </div>
                 ))}
               </div>
             </div>
+
+            <div className="flex items-center space-x-2 pt-2">
+              <button
+                type="submit"
+                className="flex-1 sm:flex-initial bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2.5 px-6 rounded-xl text-xs flex items-center justify-center space-x-1.5 transition-all shadow-md shadow-emerald-500/20"
+              >
+                <Check className="w-3.5 h-3.5" />
+                <span>Hifadhi Mabadiliko</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsEditingProfile(false)}
+                className="px-4 py-2.5 rounded-xl bg-neutral-800 text-neutral-400 hover:text-white text-xs"
+              >
+                Ghairi
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+
+      {/* 2-Column Grid on Tablet/Desktop for Clean Hierarchy */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        
+        {/* Left Column: Saved Addresses & Recent Orders */}
+        <div className="space-y-5">
+          {/* Saved Delivery Addresses */}
+          <div
+            className={`p-5 rounded-3xl border space-y-3.5 ${
+              isDark ? 'bg-neutral-900/80 border-neutral-800' : 'bg-white border-neutral-200 shadow-sm'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500">
+                  <MapPin className="w-4 h-4" />
+                </div>
+                <h3 className="text-xs font-bold text-neutral-900 dark:text-neutral-200 uppercase tracking-wider">
+                  Anwani za Kuletewa Chakula
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowAddAddress(!showAddAddress)}
+                className="text-xs font-semibold text-emerald-500 hover:text-emerald-400 flex items-center space-x-1 py-1 px-2.5 rounded-lg hover:bg-emerald-500/10 transition-colors"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Weka Mpya</span>
+              </button>
+            </div>
+
+            {showAddAddress && (
+              <form onSubmit={handleAddAddress} className="p-3.5 rounded-2xl bg-neutral-800/80 border border-neutral-700 space-y-3 animate-fadeIn">
+                <div className="flex space-x-2">
+                  {['Nyumbani', 'Ofisini', 'Nyingine'].map(lbl => (
+                    <button
+                      key={lbl}
+                      type="button"
+                      onClick={() => setNewAddressLabel(lbl)}
+                      className={`text-xs px-3 py-1 rounded-lg border font-medium transition-colors ${
+                        newAddressLabel === lbl
+                          ? 'border-emerald-500 bg-emerald-500 text-white'
+                          : 'border-neutral-700 text-neutral-300 hover:border-neutral-600'
+                      }`}
+                    >
+                      {lbl}
+                    </button>
+                  ))}
+                </div>
+                <input
+                  type="text"
+                  value={newAddressStreet}
+                  onChange={e => setNewAddressStreet(e.target.value)}
+                  placeholder="Mtaa, Eneo maarufu, jengo mfano: Toure Drive, Masaki..."
+                  className="w-full p-2.5 text-xs bg-neutral-900 border border-neutral-700 rounded-xl text-white outline-none focus:border-emerald-500"
+                  required
+                />
+                <div className="flex items-center space-x-2">
+                  <button
+                    type="submit"
+                    className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 text-xs rounded-xl transition-colors shadow-sm"
+                  >
+                    Hifadhi Anwani
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddAddress(false)}
+                    className="px-3 py-2 text-xs text-neutral-400 hover:text-white rounded-xl bg-neutral-700"
+                  >
+                    Ghairi
+                  </button>
+                </div>
+              </form>
+            )}
+
+            <div className="space-y-2">
+              {user.addresses.length === 0 ? (
+                <p className="text-xs text-neutral-500 py-2">Bado haujaweka anwani ya kuletewa chakula.</p>
+              ) : (
+                user.addresses.map(addr => (
+                  <div
+                    key={addr.id}
+                    className="flex items-start justify-between p-3 rounded-2xl bg-neutral-800/40 border border-neutral-800 hover:border-neutral-700/80 transition-colors"
+                  >
+                    <div className="flex items-start space-x-3">
+                      <div className="p-1 rounded-lg bg-emerald-500/10 text-emerald-500 mt-0.5">
+                        <MapPin className="w-3.5 h-3.5" />
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold text-neutral-200">{addr.label}</span>
+                        <p className="text-xs text-neutral-400 mt-0.5">{addr.street}, {addr.city}</p>
+                      </div>
+                    </div>
+                    {user.addresses.length > 1 && (
+                      <button
+                        onClick={() => handleDeleteAddress(addr.id)}
+                        className="text-neutral-500 hover:text-rose-400 p-1 rounded-lg transition-colors"
+                        title="Ondoa anwani"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
           </div>
 
-          {/* Right Column: Order History & App Preferences & Brand Info */}
-          <div className={androidFrame ? 'space-y-4' : 'lg:col-span-6 space-y-5'}>
-            
-            {/* Order History Summary */}
-            <div
-              className={`p-5 rounded-3xl border space-y-3 ${
-                isDark ? 'bg-neutral-900/60 border-neutral-800' : 'bg-white border-neutral-200 shadow-sm'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-wider">
-                  Recent Orders ({orders.length})
+          {/* Recent Orders Card */}
+          <div
+            className={`p-5 rounded-3xl border space-y-3.5 ${
+              isDark ? 'bg-neutral-900/80 border-neutral-800' : 'bg-white border-neutral-200 shadow-sm'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-500">
+                  <ReceiptText className="w-4 h-4" />
+                </div>
+                <h3 className="text-xs font-bold text-neutral-900 dark:text-neutral-200 uppercase tracking-wider">
+                  Oda za Hivi Karibuni ({orders.length})
                 </h3>
+              </div>
+              {orders.length > 0 && (
                 <button
                   onClick={() => setActiveTab('orders')}
                   className="text-xs font-semibold text-emerald-500 hover:underline"
                 >
-                  View Live Tracking
+                  Tazama Zote
                 </button>
-              </div>
+              )}
+            </div>
 
-              <div className="space-y-2.5">
-                {orders.slice(0, 3).map(ord => (
+            <div className="space-y-2.5">
+              {orders.length === 0 ? (
+                <div className="text-center py-6 text-neutral-500 space-y-2">
+                  <p className="text-xs">Hujafanya oda yoyote bado.</p>
+                  <button
+                    onClick={() => setActiveTab('home')}
+                    className="text-xs text-amber-400 font-semibold hover:underline"
+                  >
+                    Agiza chakula sasa →
+                  </button>
+                </div>
+              ) : (
+                orders.slice(0, 3).map(ord => (
                   <div
                     key={ord.id}
                     onClick={() => {
@@ -417,17 +538,17 @@ export const ProfileView: React.FC = () => {
                     }}
                     className="flex items-center justify-between p-3.5 rounded-2xl bg-neutral-800/40 border border-neutral-800 hover:border-neutral-700 cursor-pointer transition-colors"
                   >
-                    <div className="flex items-center space-x-3">
-                      <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+                    <div className="flex items-center space-x-3 min-w-0">
+                      <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
                         <ReceiptText className="w-4 h-4" />
                       </div>
-                      <div>
-                        <h4 className="text-xs font-bold text-neutral-200">{ord.orderNumber}</h4>
-                        <p className="text-[11px] text-neutral-500">{ord.date} • {ord.items.length} items</p>
+                      <div className="min-w-0">
+                        <h4 className="text-xs font-bold text-neutral-200 truncate">{ord.orderNumber}</h4>
+                        <p className="text-[11px] text-neutral-500 truncate">{ord.date} • {ord.items.length} vyakula</p>
                       </div>
                     </div>
 
-                    <div className="text-right">
+                    <div className="text-right shrink-0 ml-2">
                       <span className="text-xs font-bold text-emerald-500 block">
                         {formatPrice(ord.total, currency)}
                       </span>
@@ -436,123 +557,73 @@ export const ProfileView: React.FC = () => {
                       </span>
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* App Settings & Preferences */}
-            <div
-              className={`p-5 rounded-3xl border space-y-3 ${
-                isDark ? 'bg-neutral-900/60 border-neutral-800' : 'bg-white border-neutral-200 shadow-sm'
-              }`}
-            >
-              <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-wider">
-                Preferences & Device View
-              </h3>
-
-              <div className="space-y-2.5">
-                {/* Theme Toggle */}
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-800/40 border border-neutral-800">
-                  <div className="flex items-center space-x-2.5">
-                    {isDark ? <Moon className="w-4 h-4 text-amber-400" /> : <Sun className="w-4 h-4 text-amber-500" />}
-                    <span className="text-xs font-semibold text-neutral-200">
-                      {isDark ? 'Dark Theme (Foodie Mode)' : 'Light Theme (Clean White)'}
-                    </span>
-                  </div>
-                  <button
-                    onClick={toggleTheme}
-                    className="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-3 py-1.5 rounded-full"
-                  >
-                    Switch
-                  </button>
-                </div>
-
-                {/* Currency Switch */}
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-800/40 border border-neutral-800">
-                  <span className="text-xs font-semibold text-neutral-200">
-                    Display Currency ({currency})
-                  </span>
-                  <button
-                    onClick={() => setCurrency(currency === 'USD' ? 'TZS' : 'USD')}
-                    className="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-3 py-1.5 rounded-full"
-                  >
-                    {currency === 'USD' ? 'Switch to TZS' : 'Switch to USD'}
-                  </button>
-                </div>
-
-                {/* Android Device Frame Toggle */}
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-800/40 border border-neutral-800">
-                  <div className="flex items-center space-x-2.5">
-                    <Smartphone className="w-4 h-4 text-emerald-500" />
-                    <span className="text-xs font-semibold text-neutral-200">
-                      Android Phone Frame Mockup
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => setAndroidFrame(!androidFrame)}
-                    className={`text-xs font-bold px-3 py-1.5 rounded-full ${
-                      androidFrame ? 'bg-emerald-500 text-white' : 'bg-neutral-700 text-neutral-300'
-                    }`}
-                  >
-                    {androidFrame ? 'ON' : 'OFF'}
-                  </button>
-                </div>
-
-                {/* Cloudinary CDN Media Integration Status */}
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-800/40 border border-neutral-800">
-                  <div className="flex items-center space-x-2.5">
-                    <div className="p-1.5 rounded-xl bg-[#4863ff]/20 text-[#4863ff]">
-                      <Cloud className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <span className="text-xs font-semibold text-neutral-200 block">
-                        Cloudinary CDN Connected
-                      </span>
-                      <span className="text-[10px] text-emerald-400 font-mono">
-                        Cloud: cy4pidvh (Active)
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-1.5">
-                    <button
-                      onClick={() => {
-                        updateUser({ role: 'admin' });
-                        setActiveTab('admin');
-                      }}
-                      className="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1.5 rounded-xl transition-colors"
-                    >
-                      Media Hub
-                    </button>
-                    <a
-                      href="https://console.cloudinary.com/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-1.5 rounded-xl text-neutral-400 hover:text-white hover:bg-neutral-700 transition-colors"
-                      title="Fungua Console ya Cloudinary (cy4pidvh)"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Brand & Developer Attribution */}
-            <div className="p-5 rounded-3xl border border-amber-500/20 bg-gradient-to-br from-amber-500/10 to-transparent text-center space-y-2">
-              <div className="text-2xl">🦓</div>
-              <h4 className="text-sm font-bold font-display text-white">
-                Zebra Restaurant App
-              </h4>
-              <p className="text-xs text-neutral-400">
-                Jina la App: <strong>Zebra Restaurant</strong>
-                <br />
-                Mtengenezaji: <strong className="text-amber-400">AmourCodes</strong>
-              </p>
-              <p className="text-[11px] text-neutral-500 pt-1">
-                Lipa kwa USSD *150*00# (Vodacom M-Pesa), Tigo Pesa, Halopesa na Airtel Money kupitia Lipa Namba 445566.
-              </p>
+                ))
+              )}
             </div>
           </div>
+        </div>
+
+        {/* Right Column: Customer Support & Account Actions */}
+        <div className="space-y-5">
+          {/* Customer Support & Contact */}
+          <div
+            className={`p-5 rounded-3xl border space-y-3.5 ${
+              isDark ? 'bg-neutral-900/80 border-neutral-800' : 'bg-white border-neutral-200 shadow-sm'
+            }`}
+          >
+            <h3 className="text-xs font-bold text-neutral-900 dark:text-neutral-200 uppercase tracking-wider">
+              Msaada & Huduma kwa Wateja
+            </h3>
+
+            <div className="space-y-2">
+              <a
+                href="tel:+255712345678"
+                className="flex items-center justify-between p-3 rounded-2xl bg-neutral-800/40 border border-neutral-800 hover:border-emerald-500/40 transition-colors"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
+                    <Headphones className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-neutral-200 block">Simu ya Msaada (Hotline)</span>
+                    <span className="text-[11px] font-mono text-neutral-400">+255 712 345 678</span>
+                  </div>
+                </div>
+                <span className="text-xs text-emerald-400 font-semibold">Piga Simu →</span>
+              </a>
+
+              <a
+                href="https://wa.me/255744883291?text=Habari%20Zebra%20Restaurant,%20naomba%20msaada%20kuhusu%20oda%20yangu"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between p-3 rounded-2xl bg-neutral-800/40 border border-neutral-800 hover:border-emerald-500/40 transition-colors"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
+                    <MessageSquare className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-neutral-200 block">WhatsApp Support</span>
+                    <span className="text-[11px] text-neutral-400">Jibu la haraka ndani ya dakika 5</span>
+                  </div>
+                </div>
+                <span className="text-xs text-emerald-400 font-semibold">Chat Nasi →</span>
+              </a>
+            </div>
+          </div>
+
+          {/* Clean Log Out Button */}
+          <button
+            onClick={() => {
+              if (window.confirm('Je, una uhakika unataka kutoka kwenye akaunti yako?')) {
+                logout();
+              }
+            }}
+            className="w-full py-3.5 px-4 rounded-2xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 active:scale-98 text-rose-400 font-bold text-xs sm:text-sm flex items-center justify-center space-x-2 transition-all shadow-sm"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Toka Kwenye Akaunti (Log Out)</span>
+          </button>
         </div>
       </div>
     </div>

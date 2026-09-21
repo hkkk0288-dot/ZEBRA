@@ -14,7 +14,8 @@ import {
   ShoppingBag,
   ExternalLink,
   ChevronRight,
-  ShieldCheck
+  ShieldCheck,
+  LogIn
 } from 'lucide-react';
 import { OrderStatus } from '../types';
 import confetti from 'canvas-confetti';
@@ -31,7 +32,9 @@ export const OrderTrackingView: React.FC = () => {
     theme,
     setSelectedDish,
     addToCart,
-    androidFrame
+    androidFrame,
+    isLoggedIn,
+    setAuthMode
   } = useApp();
 
   const isDark = theme === 'dark';
@@ -48,6 +51,32 @@ export const OrderTrackingView: React.FC = () => {
       return () => clearInterval(interval);
     }
   }, [order?.status]);
+
+  if (!isLoggedIn) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[70vh] px-6 text-center">
+        <div className="w-20 h-20 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center mb-4 text-3xl">
+          🔒
+        </div>
+        <h2 className="text-xl font-bold font-display text-neutral-900 dark:text-white mb-2">
+          Akaunti Inahitajika (Login Required)
+        </h2>
+        <p className="text-sm text-neutral-500 max-w-sm mb-6">
+          Huwezi kufuatilia oda bila kuingia au kujisajili. Tafadhali ingia au jisajili kwenye akaunti yako ili uone oda zako zote na kufuatilia dereva mubashara (live).
+        </p>
+        <button
+          onClick={() => {
+            setAuthMode('login');
+            setActiveTab('auth');
+          }}
+          className="bg-amber-500 hover:bg-amber-600 active:scale-95 text-neutral-950 font-bold py-3.5 px-8 rounded-full shadow-lg shadow-amber-500/30 text-xs sm:text-sm flex items-center space-x-2 transition-transform"
+        >
+          <LogIn className="w-4 h-4" />
+          <span>Ingia / Jisajili Sasa</span>
+        </button>
+      </div>
+    );
+  }
 
   if (!order) {
     return (

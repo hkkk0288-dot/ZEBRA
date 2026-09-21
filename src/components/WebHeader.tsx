@@ -10,8 +10,6 @@ import {
   Sun,
   MapPin,
   PhoneCall,
-  Menu,
-  X,
   LogIn
 } from 'lucide-react';
 import { formatPrice } from '../utils/formatters';
@@ -23,6 +21,8 @@ export const WebHeader: React.FC = () => {
     cart,
     orders,
     user,
+    isLoggedIn,
+    logout,
     currency,
     setCurrency,
     theme,
@@ -32,7 +32,6 @@ export const WebHeader: React.FC = () => {
   } = useApp();
 
   const isDark = theme === 'dark';
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   const cartTotal = cart.reduce((sum, item) => sum + item.totalPrice, 0);
@@ -154,45 +153,58 @@ export const WebHeader: React.FC = () => {
               )}
             </button>
 
-            <button
-              onClick={() => setActiveTab('orders')}
-              className={`px-3.5 py-2 rounded-xl transition-colors flex items-center space-x-1.5 ${
-                activeTab === 'orders'
-                  ? 'text-emerald-500 font-bold bg-emerald-500/10'
-                  : 'text-neutral-600 dark:text-neutral-300 hover:text-emerald-500'
-              }`}
-            >
-              <Clock className="w-4 h-4" />
-              <span>Track Orders</span>
-              {activeOrdersCount > 0 && (
-                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-              )}
-            </button>
+            {/* Authenticated Navigation Items: Only visible when logged in */}
+            {isLoggedIn ? (
+              <>
+                <button
+                  onClick={() => setActiveTab('orders')}
+                  className={`px-3.5 py-2 rounded-xl transition-colors flex items-center space-x-1.5 ${
+                    activeTab === 'orders'
+                      ? 'text-emerald-500 font-bold bg-emerald-500/10'
+                      : 'text-neutral-600 dark:text-neutral-300 hover:text-emerald-500'
+                  }`}
+                >
+                  <Clock className="w-4 h-4" />
+                  <span>Track Orders</span>
+                  {activeOrdersCount > 0 && (
+                    <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                  )}
+                </button>
 
-            <button
-              onClick={() => setActiveTab('profile')}
-              className={`px-3.5 py-2 rounded-xl transition-colors flex items-center space-x-1.5 ${
-                activeTab === 'profile'
-                  ? 'text-emerald-500 font-bold bg-emerald-500/10'
-                  : 'text-neutral-600 dark:text-neutral-300 hover:text-emerald-500'
-              }`}
-            >
-              <User className="w-4 h-4" />
-              <span>Account</span>
-            </button>
+                <button
+                  onClick={() => setActiveTab('profile')}
+                  className={`px-3.5 py-2 rounded-xl transition-colors flex items-center space-x-1.5 ${
+                    activeTab === 'profile'
+                      ? 'text-emerald-500 font-bold bg-emerald-500/10'
+                      : 'text-neutral-600 dark:text-neutral-300 hover:text-emerald-500'
+                  }`}
+                >
+                  <User className="w-4 h-4" />
+                  <span>{user.name.split(' ')[0] || 'My Account'}</span>
+                </button>
 
-            {/* Login / Regista */}
-            <button
-              onClick={() => setActiveTab('auth')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
-                activeTab === 'auth'
-                  ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-neutral-950 shadow-md shadow-amber-500/30'
-                  : 'bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20'
-              }`}
-            >
-              <LogIn className="w-3.5 h-3.5" />
-              <span>Log In / Regista</span>
-            </button>
+                <button
+                  onClick={logout}
+                  title="Toka kwenye akaunti"
+                  className="px-3 py-1.5 rounded-xl text-xs font-semibold text-neutral-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                >
+                  Toka
+                </button>
+              </>
+            ) : (
+              /* When not logged in: only show Log In / Regista */
+              <button
+                onClick={() => setActiveTab('auth')}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
+                  activeTab === 'auth'
+                    ? 'bg-amber-500 text-neutral-950 shadow-md shadow-amber-500/30'
+                    : 'bg-amber-500/15 border border-amber-500/40 text-amber-400 hover:bg-amber-500 hover:text-neutral-950'
+                }`}
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                <span>Log In / Regista</span>
+              </button>
+            )}
           </div>
 
           {/* Quick Actions (Currency, Theme, Cart, Menu) */}
@@ -241,15 +253,6 @@ export const WebHeader: React.FC = () => {
                 {cartCount === 0 ? 'Cart' : formatPrice(cartTotal, currency)}
               </span>
             </button>
-
-            {/* Mobile Menu Hamburger */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-1.5 sm:p-2 rounded-lg sm:rounded-xl text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors shrink-0"
-              title="Open Navigation Menu"
-            >
-              {mobileMenuOpen ? <X className="w-4 h-4 sm:w-5 sm:h-5" /> : <Menu className="w-4 h-4 sm:w-5 sm:h-5" />}
-            </button>
           </div>
         </div>
 
@@ -270,57 +273,6 @@ export const WebHeader: React.FC = () => {
             />
           </div>
         </div>
-
-        {/* Mobile Dropdown Menu */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden mt-3 pt-3 border-t border-neutral-800 grid grid-cols-2 gap-2 text-xs font-semibold">
-            <button
-              onClick={() => {
-                setActiveTab('home');
-                setMobileMenuOpen(false);
-              }}
-              className="p-2.5 rounded-xl bg-neutral-800/60 text-left text-neutral-200"
-            >
-              🍽️ Browse Menu
-            </button>
-            <button
-              onClick={() => {
-                setActiveTab('favorites');
-                setMobileMenuOpen(false);
-              }}
-              className="p-2.5 rounded-xl bg-neutral-800/60 text-left text-neutral-200"
-            >
-              ❤️ Favorites ({user.favoriteItemIds.length})
-            </button>
-            <button
-              onClick={() => {
-                setActiveTab('orders');
-                setMobileMenuOpen(false);
-              }}
-              className="p-2.5 rounded-xl bg-neutral-800/60 text-left text-neutral-200"
-            >
-              📦 Track Orders
-            </button>
-            <button
-              onClick={() => {
-                setActiveTab('profile');
-                setMobileMenuOpen(false);
-              }}
-              className="p-2.5 rounded-xl bg-neutral-800/60 text-left text-neutral-200"
-            >
-              👤 My Account
-            </button>
-            <button
-              onClick={() => {
-                setActiveTab('auth');
-                setMobileMenuOpen(false);
-              }}
-              className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-left text-amber-400 font-bold flex items-center space-x-1.5 col-span-2 justify-center"
-            >
-              <span>🔑 Log In / Regista</span>
-            </button>
-          </div>
-        )}
       </div>
     </header>
   );

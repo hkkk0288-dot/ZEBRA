@@ -9,7 +9,7 @@ import confetti from 'canvas-confetti';
 import { FoodImage } from './FoodImage';
 
 export const FoodDetailModal: React.FC = () => {
-  const { selectedDish, setSelectedDish, addToCart, toggleFavorite, isFavorite, currency, theme } = useApp();
+  const { selectedDish, setSelectedDish, addToCart, toggleFavorite, isFavorite, currency, theme, isLoggedIn } = useApp();
 
   if (!selectedDish) return null;
 
@@ -52,6 +52,12 @@ export const FoodDetailModal: React.FC = () => {
   const currentTotal = unitPrice * quantity;
 
   const handleAddToCart = () => {
+    if (!isLoggedIn) {
+      setSelectedDish(null);
+      addToCart(selectedDish, selectedSize, selectedIngredients, quantity, specialNote);
+      return;
+    }
+
     addToCart(selectedDish, selectedSize, selectedIngredients, quantity, specialNote);
     
     // Quick celebratory micro-confetti
@@ -352,16 +358,24 @@ export const FoodDetailModal: React.FC = () => {
                 </button>
               </div>
 
-              {/* Green Add to Cart button matching screenshot 1 */}
+              {/* Add to Cart button (gated with auth if not logged in) */}
               <button
                 onClick={handleAddToCart}
                 disabled={addedToast}
-                className="flex-1 bg-emerald-500 hover:bg-emerald-600 active:scale-[0.98] text-white font-bold py-3.5 px-5 rounded-full shadow-lg shadow-emerald-500/30 flex items-center justify-center space-x-2 transition-all"
+                className={`flex-1 active:scale-[0.98] font-bold py-3.5 px-5 rounded-full shadow-lg flex items-center justify-center space-x-2 transition-all ${
+                  !isLoggedIn
+                    ? 'bg-amber-500 hover:bg-amber-400 text-neutral-950 shadow-amber-500/25'
+                    : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-500/30'
+                }`}
               >
                 {addedToast ? (
                   <span className="flex items-center space-x-1.5">
                     <Check className="w-5 h-5" />
                     <span>Added to Cart!</span>
+                  </span>
+                ) : !isLoggedIn ? (
+                  <span>
+                    🔑 Ingia ili Uongeze · {formatPrice(currentTotal, currency)}
                   </span>
                 ) : (
                   <span>

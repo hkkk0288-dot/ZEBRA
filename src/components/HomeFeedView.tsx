@@ -91,30 +91,38 @@ export const HomeFeedView: React.FC = () => {
             <div className="flex items-center space-x-3">
               {/* User Avatar */}
               <div
-                onClick={() => setActiveTab('profile')}
-                className="w-10 h-10 rounded-full overflow-hidden border-2 border-emerald-500 cursor-pointer shrink-0"
+                onClick={() => setActiveTab(isLoggedIn ? 'profile' : 'auth')}
+                className={`w-10 h-10 rounded-full overflow-hidden border-2 cursor-pointer shrink-0 flex items-center justify-center ${
+                  isLoggedIn ? 'border-emerald-500' : 'border-amber-500 bg-amber-500/10'
+                }`}
               >
-                <img
-                  src={user.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'}
-                  alt={user.name}
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
-                />
+                {isLoggedIn && user.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt={user.name}
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <span className="text-lg">👤</span>
+                )}
               </div>
               <div>
                 <div className="flex items-center space-x-1.5">
-                  <span className="text-xs text-neutral-400">Hello</span>
+                  <span className="text-xs text-neutral-400">
+                    {isLoggedIn ? 'Hello' : 'Karibu'}
+                  </span>
                   <span className="text-sm">👋</span>
                   <button
                     onClick={() => setActiveTab('auth')}
-                    className="ml-1 text-[10px] text-amber-400 hover:text-amber-300 font-bold bg-amber-500/10 px-1.5 py-0.5 rounded-full border border-amber-500/20"
-                    title="Fungua ukurasa wa Login au Regista"
+                    className="ml-1 text-[10px] text-amber-400 hover:text-amber-300 font-bold bg-amber-500/15 px-2 py-0.5 rounded-full border border-amber-500/30"
+                    title={isLoggedIn ? 'Angalia Akaunti' : 'Fungua ukurasa wa Login au Regista'}
                   >
-                    {isLoggedIn ? 'Akaunti' : 'Login / Regista'}
+                    {isLoggedIn ? 'Akaunti' : 'Ingia / Jisajili'}
                   </button>
                 </div>
                 <h1 className="text-base font-bold font-display text-neutral-900 dark:text-white leading-tight">
-                  {user.name}
+                  {isLoggedIn ? user.name : 'Zebra Customer'}
                 </h1>
                 <button
                   onClick={() => setShowMapModal(true)}

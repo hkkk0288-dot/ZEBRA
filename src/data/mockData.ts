@@ -263,6 +263,17 @@ export const PROMO_OFFERS: PromoOffer[] = [
   }
 ];
 
+export const GUEST_USER: UserProfile = {
+  id: '',
+  name: 'Mgeni (Guest)',
+  email: '',
+  phone: '',
+  role: 'customer',
+  avatar: '',
+  addresses: [],
+  favoriteItemIds: []
+};
+
 export const DEFAULT_USER: UserProfile = {
   id: 'usr-delisas-01',
   name: 'Delisas Agency',

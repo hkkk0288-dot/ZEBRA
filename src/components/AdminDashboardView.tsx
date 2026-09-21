@@ -1,606 +1,246 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { formatPrice } from '../utils/formatters';
+import { AdminSidebar, AdminTab } from './admin/AdminSidebar';
+import { AdminTopBar } from './admin/AdminTopBar';
+import { AdminDashboardOverview } from './admin/AdminDashboardOverview';
+import { AdminLiveTracking } from './admin/AdminLiveTracking';
+import { AdminOrdersView } from './admin/AdminOrdersView';
+import { AdminDriversView } from './admin/AdminDriversView';
+import { AdminMerchantsView } from './admin/AdminMerchantsView';
+import { AdminPayoutsView } from './admin/AdminPayoutsView';
+import { AdminTransactionsView } from './admin/AdminTransactionsView';
+import { AdminVouchersView } from './admin/AdminVouchersView';
+import { AdminUsersView } from './admin/AdminUsersView';
+import { AdminAnalyticsView } from './admin/AdminAnalyticsView';
+import { AdminHelpView } from './admin/AdminHelpView';
+import { AdminSettingsView } from './admin/AdminSettingsView';
 import {
-  ShieldCheck,
-  TrendingUp,
-  ShoppingBag,
-  UtensilsCrossed,
-  Users,
-  Plus,
-  Trash2,
-  CheckCircle,
-  Clock,
-  Bike,
+  AlertTriangle,
   X,
-  Store,
-  Tag,
-  ArrowLeft,
-  Smartphone,
-  Cloud
+  CheckCircle2,
+  Download,
+  FileText
 } from 'lucide-react';
-import { OrderStatus, MenuItem } from '../types';
-import { CATEGORIES } from '../data/mockData';
-import { FoodImage } from './FoodImage';
-import { CloudinaryMediaManager } from './CloudinaryMediaManager';
-import { CloudinaryUploader } from './CloudinaryUploader';
-import { DarEsSalaamMap } from './DarEsSalaamMap';
 
 export const AdminDashboardView: React.FC = () => {
-  const {
-    orders,
-    updateOrderStatus,
-    menuItems,
-    addMenuItem,
-    deleteMenuItem,
-    toggleItemAvailability,
-    appliedPromo,
-    currency,
-    theme,
-    setActiveTab,
-    androidFrame
-  } = useApp();
-
+  const { theme, currency, setActiveTab } = useApp();
   const isDark = theme === 'dark';
-  const [adminTab, setAdminTab] = useState<'orders' | 'menu' | 'cloudinary' | 'restaurants' | 'promos'>('orders');
-  const [orderFilter, setOrderFilter] = useState<'all' | 'active' | 'delivered'>('all');
 
-  // New Dish Modal State
-  const [showAddDishModal, setShowAddDishModal] = useState(false);
-  const [dishName, setDishName] = useState('');
-  const [dishSwahiliName, setDishSwahiliName] = useState('');
-  const [dishCategory, setDishCategory] = useState('pizza');
-  const [dishPrice, setDishPrice] = useState('8.99');
-  const [dishCalories, setDishCalories] = useState('45');
-  const [dishPrepTime, setDishPrepTime] = useState('18');
-  const [dishImageUrl, setDishImageUrl] = useState('https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=700&q=80');
-  const [dishRestaurant, setDishRestaurant] = useState('Zebra Central Kitchen');
+  const [currentTab, setCurrentTab] = useState<AdminTab>('dashboard');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [selectedDateRange, setSelectedDateRange] = useState('November 12, 2026');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showZoneDelayModal, setShowZoneDelayModal] = useState(false);
+  const [showReportSummaryModal, setShowReportSummaryModal] = useState(false);
+  const [exportNotice, setExportNotice] = useState<string | null>(null);
 
-  // Metrics
-  const totalRevenue = orders
-    .filter(o => o.paymentStatus === 'paid' || o.status === 'delivered')
-    .reduce((sum, o) => sum + o.total, 0);
-
-  const activeOrdersCount = orders.filter(
-    o => o.status !== 'delivered' && o.status !== 'cancelled'
-  ).length;
-
-  const filteredOrders = orders.filter(o => {
-    if (orderFilter === 'active') return o.status !== 'delivered' && o.status !== 'cancelled';
-    if (orderFilter === 'delivered') return o.status === 'delivered';
-    return true;
-  });
-
-  const handleCreateDish = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!dishName.trim()) return;
-
-    const priceNum = parseFloat(dishPrice) || 9.99;
-    const newDish: Omit<MenuItem, 'id'> = {
-      name: dishName,
-      swahiliName: dishSwahiliName || undefined,
-      description: 'Freshly handcrafted dish made with locally sourced Tanzanian ingredients.',
-      price: priceNum,
-      priceTZS: Math.round(priceNum * 2600),
-      category: dishCategory,
-      image: dishImageUrl,
-      rating: 5.0,
-      reviewsCount: 'New',
-      calories: parseInt(dishCalories) || 40,
-      prepTimeMinutes: parseInt(dishPrepTime) || 20,
-      restaurantName: dishRestaurant,
-      isAvailable: true,
-      sizes: [
-        { id: 'std', name: 'Regular Size', price: priceNum, label: 'Regular' },
-        { id: 'large', name: 'Large Size', price: priceNum + 3.0, label: 'Large' }
-      ],
-      ingredients: [
-        { id: 'extra-1', name: 'Extra Mozzarella & Herb', weight: '50 gm', price: 1.0, defaultChecked: false },
-        { id: 'extra-2', name: 'Spicy Kachumbari Dip', weight: '40 gm', price: 0.5, defaultChecked: true }
-      ]
-    };
-
-    addMenuItem(newDish);
-    setShowAddDishModal(false);
-    setDishName('');
-    setDishSwahiliName('');
+  // Export action
+  const handleExport = () => {
+    setExportNotice('Exporting CSV of operations and orders...');
+    setTimeout(() => {
+      setExportNotice(null);
+      alert('Orders & Telemetry Report exported successfully! File downloaded.');
+    }, 1200);
   };
 
   return (
-    <div className="flex flex-col min-h-screen pb-32">
-      {/* Admin Top Bar for Phone Frame */}
-      {androidFrame ? (
-        <div
-          className={`sticky top-0 z-20 flex items-center justify-between px-5 py-4 transition-colors ${
-            isDark ? 'bg-[#0f0f11]/90 backdrop-blur-md' : 'bg-white/90 backdrop-blur-md'
-          }`}
-        >
-          <div className="flex items-center space-x-2.5">
-            <button
-              onClick={() => setActiveTab('home')}
-              className="p-1.5 rounded-full hover:bg-neutral-800 text-neutral-300"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <div>
-              <h1 className="text-base font-bold font-display text-neutral-900 dark:text-white flex items-center space-x-1.5">
-                <span>Admin Management</span>
-                <span className="text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full font-bold">
-                  PRO
-                </span>
-              </h1>
-              <p className="text-[11px] text-neutral-400">Zebra Restaurant by AmourCodes</p>
+    <div className="min-h-screen bg-[#f8f9fa] dark:bg-[#0c0c0e] text-neutral-900 dark:text-neutral-100 flex antialiased">
+      {/* Persistent / Responsive Admin Sidebar (Matching Screenshot) */}
+      <AdminSidebar
+        currentTab={currentTab}
+        onSelectTab={tab => setCurrentTab(tab)}
+        onSwitchToStorefront={() => setActiveTab('home')}
+        onOpenZoneAlert={() => setShowZoneDelayModal(true)}
+        isOpenMobile={isMobileMenuOpen}
+        onCloseMobile={() => setIsMobileMenuOpen(false)}
+        ordersBadge={10}
+        driversBadge={8}
+        payoutsBadge={4}
+        transactionsBadge={5}
+        vouchersBadge={12}
+        usersBadge={6}
+      />
+
+      {/* Main Admin Workspace Area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Top Control Bar (Search, Date Picker, Export, Notifications) */}
+        <AdminTopBar
+          currentTab={currentTab}
+          onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
+          selectedDateRange={selectedDateRange}
+          onSelectDateRange={range => setSelectedDateRange(range)}
+          searchQuery={searchQuery}
+          onSearchChange={q => setSearchQuery(q)}
+          onExport={handleExport}
+          onViewReports={() => setShowReportSummaryModal(true)}
+          onOpenSettings={() => setCurrentTab('settings')}
+          notificationCount={3}
+        />
+
+        {/* Dynamic Tab Body */}
+        <main className="flex-1 p-4 sm:p-6 max-w-7xl w-full mx-auto">
+          {exportNotice && (
+            <div className="mb-4 p-3 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-600 dark:text-orange-400 font-bold text-xs flex items-center justify-between animate-fadeIn">
+              <span>{exportNotice}</span>
+              <span className="animate-spin">⏳</span>
             </div>
-          </div>
+          )}
 
-          <button
-            onClick={() => setActiveTab('home')}
-            className="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-full"
-          >
-            Customer View
-          </button>
-        </div>
-      ) : (
-        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-6 pb-2 flex items-center justify-between border-b border-neutral-800/80">
-          <div>
-            <div className="flex items-center space-x-2.5">
-              <h1 className="text-2xl font-bold font-display text-neutral-900 dark:text-white flex items-center space-x-2">
-                <span>Zebra Admin Management Console</span>
-                <span className="text-xs bg-amber-500 text-neutral-950 font-extrabold px-2.5 py-0.5 rounded-full">
-                  LIVE RESTAURANT
-                </span>
-              </h1>
-            </div>
-            <p className="text-xs text-neutral-400 mt-1">
-              Live Orders, Kitchen Dispatch, Menu Control, Tanzanian USSD Payment Logs • Developed by <strong className="text-amber-400">AmourCodes</strong>
-            </p>
-          </div>
-
-          <button
-            onClick={() => setActiveTab('home')}
-            className="text-xs font-bold text-emerald-500 hover:text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 rounded-2xl transition-all"
-          >
-            ← View Customer Storefront
-          </button>
-        </div>
-      )}
-
-      <div className={`w-full ${androidFrame ? 'px-5 space-y-5 mt-2' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6'}`}>
-        {/* KPI Metrics Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
-            <div className="flex items-center justify-between text-emerald-500 mb-1">
-              <span className="text-xs font-bold">Total Sales</span>
-              <TrendingUp className="w-4 h-4" />
-            </div>
-            <p className="text-lg font-black font-display text-white">
-              {formatPrice(totalRevenue, currency)}
-            </p>
-          </div>
-
-          <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20">
-            <div className="flex items-center justify-between text-amber-500 mb-1">
-              <span className="text-xs font-bold">Active Orders</span>
-              <ShoppingBag className="w-4 h-4" />
-            </div>
-            <p className="text-lg font-black font-display text-white">
-              {activeOrdersCount}
-            </p>
-          </div>
-
-          <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/20">
-            <div className="flex items-center justify-between text-blue-500 mb-1">
-              <span className="text-xs font-bold">Dishes</span>
-              <UtensilsCrossed className="w-4 h-4" />
-            </div>
-            <p className="text-lg font-black font-display text-white">
-              {menuItems.length}
-            </p>
-          </div>
-
-          <div className="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/20">
-            <div className="flex items-center justify-between text-purple-500 mb-1">
-              <span className="text-xs font-bold">Customers</span>
-              <Users className="w-4 h-4" />
-            </div>
-            <p className="text-lg font-black font-display text-white">
-              1,420+
-            </p>
-          </div>
-        </div>
-
-        {/* Admin Navigation Pills */}
-        <div className="flex space-x-2 overflow-x-auto no-scrollbar pb-1">
-          {[
-            { id: 'orders', label: 'Orders & Deliveries', icon: ShoppingBag },
-            { id: 'menu', label: 'Menu Catalog', icon: UtensilsCrossed },
-            { id: 'cloudinary', label: 'Cloudinary CDN (cy4pidvh)', icon: Cloud },
-            { id: 'restaurants', label: 'Kitchen Branches', icon: Store },
-            { id: 'promos', label: 'USSD & Promos', icon: Smartphone }
-          ].map(tab => {
-            const isSelected = adminTab === tab.id;
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setAdminTab(tab.id as any)}
-                className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-colors ${
-                  isSelected
-                    ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/30'
-                    : isDark
-                    ? 'bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white'
-                    : 'bg-neutral-100 border border-neutral-200 text-neutral-700'
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* TAB 1: ORDERS MANAGEMENT */}
-        {adminTab === 'orders' && (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-wider">
-                Live Orders ({filteredOrders.length})
-              </h3>
-
-              <div className="flex space-x-1">
-                {(['all', 'active', 'delivered'] as const).map(f => (
-                  <button
-                    key={f}
-                    onClick={() => setOrderFilter(f)}
-                    className={`text-[11px] px-2.5 py-1 rounded-lg capitalize font-medium ${
-                      orderFilter === f
-                        ? 'bg-emerald-500 text-white'
-                        : 'bg-neutral-800 text-neutral-400'
-                    }`}
-                  >
-                    {f}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              {filteredOrders.map(ord => (
-                <div
-                  key={ord.id}
-                  className={`p-4 rounded-3xl border space-y-3 ${
-                    isDark ? 'bg-neutral-900/90 border-neutral-800' : 'bg-white border-neutral-200 shadow-sm'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="font-mono font-bold text-sm text-emerald-500">
-                        {ord.orderNumber}
-                      </span>
-                      <p className="text-[11px] text-neutral-400">
-                        {ord.customer.name} • {ord.customer.phone}
-                      </p>
-                    </div>
-
-                    <div className="text-right">
-                      <span className="text-sm font-bold text-neutral-900 dark:text-white">
-                        {formatPrice(ord.total, currency)}
-                      </span>
-                      <div className="text-[10px] font-semibold text-neutral-400">
-                        {ord.paymentMethod === 'ussd_mpesa' ? 'M-Pesa USSD' : ord.paymentMethod}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Items summary */}
-                  <div className="text-xs text-neutral-300 bg-neutral-800/40 p-2.5 rounded-xl">
-                    <p className="font-medium text-neutral-400 text-[11px]">Delivery to:</p>
-                    <p className="truncate">{ord.customer.address}</p>
-                    <p className="font-medium text-neutral-400 text-[11px] mt-1">Items:</p>
-                    <p className="truncate">
-                      {ord.items.map(i => `${i.quantity}x ${i.menuItem.name}`).join(', ')}
-                    </p>
-                  </div>
-
-                  {/* Status update buttons */}
-                  <div className="flex items-center justify-between pt-1">
-                    <span className="text-xs font-semibold text-neutral-400">Update Status:</span>
-                    <select
-                      value={ord.status}
-                      onChange={e => updateOrderStatus(ord.id, e.target.value as OrderStatus)}
-                      className="bg-neutral-800 text-neutral-200 border border-neutral-700 text-xs font-bold rounded-xl px-2.5 py-1.5 outline-none"
-                    >
-                      <option value="pending">Pending</option>
-                      <option value="preparing">Preparing in Kitchen</option>
-                      <option value="on_the_way">Out for Delivery (Rider)</option>
-                      <option value="delivered">Delivered</option>
-                      <option value="cancelled">Cancelled</option>
-                    </select>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* TAB 2: MENU CATALOG MANAGEMENT */}
-        {adminTab === 'menu' && (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-wider">
-                Restaurant Dishes ({menuItems.length})
-              </h3>
-              <button
-                onClick={() => setShowAddDishModal(true)}
-                className="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold py-1.5 px-3 rounded-xl flex items-center space-x-1"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Add New Dish</span>
-              </button>
-            </div>
-
-            <div className="space-y-2.5">
-              {menuItems.map(dish => (
-                <div
-                  key={dish.id}
-                  className="flex items-center justify-between p-3 rounded-2xl bg-neutral-900/80 border border-neutral-800"
-                >
-                  <div className="flex items-center space-x-3 min-w-0 flex-1 mr-3">
-                    <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 border border-neutral-700">
-                      <FoodImage
-                        src={dish.image}
-                        alt={dish.name}
-                        category={dish.category}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="truncate">
-                      <h4 className="font-bold text-xs text-white truncate">{dish.name}</h4>
-                      <p className="text-[11px] text-emerald-400 font-medium">
-                        {formatPrice(dish.price, currency)} • {dish.category}
-                      </p>
-                      <p className="text-[10px] text-neutral-400">{dish.restaurantName}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-2 shrink-0">
-                    <button
-                      onClick={() => toggleItemAvailability(dish.id)}
-                      className={`text-[10px] font-bold px-2 py-1 rounded-lg ${
-                        dish.isAvailable
-                          ? 'bg-emerald-500/20 text-emerald-400'
-                          : 'bg-rose-500/20 text-rose-400'
-                      }`}
-                    >
-                      {dish.isAvailable ? 'In Stock' : 'Out of Stock'}
-                    </button>
-
-                    <button
-                      onClick={() => deleteMenuItem(dish.id)}
-                      className="p-1.5 text-neutral-400 hover:text-rose-500 transition-colors"
-                      title="Delete dish"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* TAB 3: CLOUDINARY MEDIA MANAGER */}
-        {adminTab === 'cloudinary' && (
-          <CloudinaryMediaManager />
-        )}
-
-        {/* TAB 4: KITCHEN BRANCHES */}
-        {adminTab === 'restaurants' && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-bold text-white flex items-center space-x-2">
-                  <Store className="w-4 h-4 text-emerald-400" />
-                  <span>Ramani ya Matawi ya Zebra (Dar es Salaam)</span>
-                </h3>
-                <p className="text-xs text-neutral-400 mt-0.5">
-                  Matawi 4 ya jikoni na maeneo ya usambazaji wa chakula Dar es Salaam
-                </p>
-              </div>
-              <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
-                4 Kitchen Hubs
-              </span>
-            </div>
-
-            {/* Interactive Live Dar es Salaam Map */}
-            <DarEsSalaamMap
-              customerLocationName="Dar es Salaam Hubs"
-              orderNumber="ADMIN-LIVE"
-              etaMinutes={15}
+          {currentTab === 'dashboard' && (
+            <AdminDashboardOverview
+              onNavigateToTab={tab => setCurrentTab(tab)}
+              currency={currency}
+              isDark={isDark}
             />
+          )}
 
-            <h4 className="text-xs font-bold text-neutral-400 uppercase tracking-wider pt-2">
-              Orodha ya Matawi (Kitchen Locations)
-            </h4>
+          {currentTab === 'tracking' && <AdminLiveTracking isDark={isDark} />}
 
-            {[
-              { name: 'Zebra Masaki Main Kitchen', area: 'Masaki Peninsula, Toure Dr', status: 'Open Now', time: '10:00 AM - 11:30 PM', phone: '+255 712 345 678' },
-              { name: 'Zebra Oysterbay Branch', area: 'Haile Selassie Rd, Oysterbay', status: 'Open Now', time: '10:00 AM - 11:00 PM', phone: '+255 744 883 291' },
-              { name: 'Zebra BBQ & Mishkaki Hub', area: 'Kariakoo Market Square', status: 'Open Now', time: '11:00 AM - 1:00 AM', phone: '+255 682 994 002' },
-              { name: 'Zebra Slipway Ocean Grill', area: 'Msasani Slipway Waterfront', status: 'Open Now', time: '12:00 PM - 12:00 AM', phone: '+255 754 112 334' }
-            ].map((branch, i) => (
-              <div key={i} className="p-4 rounded-3xl bg-neutral-900/80 border border-neutral-800 space-y-1">
-                <div className="flex justify-between items-center">
-                  <h4 className="font-bold text-sm text-white">{branch.name}</h4>
-                  <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">
-                    {branch.status}
-                  </span>
-                </div>
-                <p className="text-xs text-neutral-400">{branch.area}</p>
-                <p className="text-[11px] text-neutral-500">Hours: {branch.time} • Tel: {branch.phone}</p>
-              </div>
-            ))}
-          </div>
-        )}
+          {currentTab === 'orders' && <AdminOrdersView isDark={isDark} />}
 
-        {/* TAB 4: USSD & PROMOS */}
-        {adminTab === 'promos' && (
-          <div className="space-y-4">
-            <div className="p-4 rounded-3xl bg-neutral-900 border border-neutral-800 space-y-2">
-              <h4 className="font-bold text-sm text-white flex items-center space-x-1.5">
-                <Smartphone className="w-4 h-4 text-emerald-500" />
-                <span>USSD Mobile Money Integration Settings</span>
-              </h4>
-              <p className="text-xs text-neutral-400">
-                Lipa Namba (Till): <strong className="text-emerald-400 font-mono">445566</strong>
-                <br />
-                Business Name: <strong className="text-white">ZEBRA RESTAURANT (AMOURCODES)</strong>
-              </p>
-              <div className="text-[11px] text-neutral-400 pt-2 space-y-1">
-                <p>• Vodacom M-Pesa: *150*00*1*445566*AMOUNT#</p>
-                <p>• Tigo Pesa: *150*01*1*445566*AMOUNT#</p>
-                <p>• Airtel Money: *150*60*1*445566*AMOUNT#</p>
-                <p>• HaloPesa: *150*88*1*445566*AMOUNT#</p>
-              </div>
-            </div>
+          {currentTab === 'drivers' && <AdminDriversView isDark={isDark} />}
 
-            <div className="p-4 rounded-3xl bg-neutral-900 border border-neutral-800 space-y-2">
-              <h4 className="font-bold text-sm text-white flex items-center space-x-1.5">
-                <Tag className="w-4 h-4 text-amber-500" />
-                <span>Active Promotional Coupons</span>
-              </h4>
-              <div className="space-y-2 text-xs">
-                <div className="p-2.5 rounded-xl bg-neutral-800 flex justify-between items-center">
-                  <div>
-                    <span className="font-bold text-emerald-400 font-mono">ZEBRA30</span>
-                    <p className="text-[11px] text-neutral-400">30% OFF New Year Festival</p>
-                  </div>
-                  <span className="text-[10px] font-bold text-amber-400">Active</span>
-                </div>
+          {currentTab === 'merchants' && <AdminMerchantsView isDark={isDark} />}
 
-                <div className="p-2.5 rounded-xl bg-neutral-800 flex justify-between items-center">
-                  <div>
-                    <span className="font-bold text-emerald-400 font-mono">AMOUR20</span>
-                    <p className="text-[11px] text-neutral-400">20% OFF AmourCodes Special</p>
-                  </div>
-                  <span className="text-[10px] font-bold text-amber-400">Active</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+          {currentTab === 'payouts' && <AdminPayoutsView currency={currency} />}
+
+          {currentTab === 'transactions' && <AdminTransactionsView currency={currency} />}
+
+          {currentTab === 'vouchers' && <AdminVouchersView currency={currency} />}
+
+          {currentTab === 'users' && <AdminUsersView currency={currency} />}
+
+          {currentTab === 'analytics' && <AdminAnalyticsView currency={currency} />}
+
+          {currentTab === 'help' && <AdminHelpView />}
+
+          {currentTab === 'settings' && <AdminSettingsView />}
+        </main>
       </div>
 
-      {/* Add Dish Modal */}
-      {showAddDishModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="w-full max-w-md bg-[#18181b] border border-neutral-700 rounded-3xl p-5 shadow-2xl text-white">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-base font-display">Add New Dish to Zebra Menu</h3>
-              <button onClick={() => setShowAddDishModal(false)} className="text-neutral-400 hover:text-white">
+      {/* Zone Delay Alert Modal (Triggered by "See zones" in screenshot) */}
+      {showZoneDelayModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+          <div className="w-full max-w-md bg-white dark:bg-[#18181b] rounded-3xl p-6 border border-neutral-200 dark:border-neutral-800 shadow-2xl space-y-4 animate-scaleUp">
+            <div className="flex items-center justify-between pb-2 border-b border-neutral-100 dark:border-neutral-800">
+              <div className="flex items-center space-x-2 text-amber-500">
+                <AlertTriangle className="w-5 h-5" />
+                <h3 className="font-bold text-sm text-neutral-900 dark:text-white">
+                  High Volume Delay Risk: 3 Zones
+                </h3>
+              </div>
+              <button onClick={() => setShowZoneDelayModal(false)} className="text-neutral-400 hover:text-neutral-600">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleCreateDish} className="space-y-3 text-xs">
-              <div>
-                <label className="block text-neutral-400 mb-1">Dish Name (English)</label>
-                <input
-                  type="text"
-                  required
-                  value={dishName}
-                  onChange={e => setDishName(e.target.value)}
-                  placeholder="e.g. Seafood Paella, Peri-Peri Wings"
-                  className="w-full p-2.5 rounded-xl bg-neutral-800 border border-neutral-700 outline-none focus:border-emerald-500"
-                />
+            <div className="space-y-2.5 text-xs">
+              <p className="text-neutral-500">
+                Heavy order concentration detected in the following courier clusters:
+              </p>
+
+              <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 space-y-1">
+                <p className="font-bold text-neutral-900 dark:text-white">1. Kariakoo Market & CBD</p>
+                <p className="text-neutral-600 dark:text-neutral-300">
+                  Afternoon tropical rain causing traffic bottle-neck on Msimbazi St. Average courier delay +18 min.
+                </p>
               </div>
 
-              <div>
-                <label className="block text-neutral-400 mb-1">Swahili Name (Optional)</label>
-                <input
-                  type="text"
-                  value={dishSwahiliName}
-                  onChange={e => setDishSwahiliName(e.target.value)}
-                  placeholder="e.g. Mabawa ya Kuku wa Pilipili"
-                  className="w-full p-2.5 rounded-xl bg-neutral-800 border border-neutral-700 outline-none focus:border-emerald-500"
-                />
+              <div className="p-3 rounded-2xl bg-orange-500/10 border border-orange-500/20 space-y-1">
+                <p className="font-bold text-neutral-900 dark:text-white">2. Masaki Peninsula & Slipway</p>
+                <p className="text-neutral-600 dark:text-neutral-300">
+                  Surge dinner demand: 14 active orders waiting for pickup at Central Kitchen.
+                </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-neutral-400 mb-1">Category</label>
-                  <select
-                    value={dishCategory}
-                    onChange={e => setDishCategory(e.target.value)}
-                    className="w-full p-2.5 rounded-xl bg-neutral-800 border border-neutral-700 outline-none"
-                  >
-                    {CATEGORIES.filter(c => c.id !== 'all').map(c => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                  </select>
+              <div className="p-3 rounded-2xl bg-neutral-100 dark:bg-neutral-800 space-y-1">
+                <p className="font-bold text-neutral-900 dark:text-white">3. Mikocheni B & Old Bagamoyo Rd</p>
+                <p className="text-neutral-600 dark:text-neutral-300">
+                  Road resurfacing reroute between Mikocheni and Mwenge.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2 pt-2">
+              <button
+                onClick={() => {
+                  alert('Surge incentive (+2,000 TZS per delivery) broadcasted to all active Boda-boda riders!');
+                  setShowZoneDelayModal(false);
+                }}
+                className="w-full py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs shadow-md transition-colors"
+              >
+                Activate Surge Incentive (+2,000 TZS / Rider)
+              </button>
+              <button
+                onClick={() => setShowZoneDelayModal(false)}
+                className="w-full py-2 rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 font-semibold text-xs"
+              >
+                Dismiss Alert
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reports Summary Modal */}
+      {showReportSummaryModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+          <div className="w-full max-w-lg bg-white dark:bg-[#18181b] rounded-3xl p-6 border border-neutral-200 dark:border-neutral-800 shadow-2xl space-y-4 animate-scaleUp">
+            <div className="flex items-center justify-between pb-2 border-b border-neutral-100 dark:border-neutral-800">
+              <div className="flex items-center space-x-2">
+                <FileText className="w-5 h-5 text-orange-500" />
+                <h3 className="font-bold text-base text-neutral-900 dark:text-white">
+                  Executive Operations Report ({selectedDateRange})
+                </h3>
+              </div>
+              <button onClick={() => setShowReportSummaryModal(false)} className="text-neutral-400 hover:text-neutral-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 rounded-2xl bg-neutral-50 dark:bg-neutral-800/60">
+                  <span className="text-[11px] text-neutral-400 block">Total Deliveries</span>
+                  <span className="text-lg font-bold font-mono text-neutral-900 dark:text-white">8,412 orders</span>
                 </div>
-                <div>
-                  <label className="block text-neutral-400 mb-1">Price ($ USD)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    required
-                    value={dishPrice}
-                    onChange={e => setDishPrice(e.target.value)}
-                    className="w-full p-2.5 rounded-xl bg-neutral-800 border border-neutral-700 outline-none"
-                  />
+                <div className="p-3 rounded-2xl bg-neutral-50 dark:bg-neutral-800/60">
+                  <span className="text-[11px] text-neutral-400 block">Total Gross Revenue</span>
+                  <span className="text-lg font-bold font-mono text-emerald-600 dark:text-emerald-400">$128,450 USD</span>
+                </div>
+                <div className="p-3 rounded-2xl bg-neutral-50 dark:bg-neutral-800/60">
+                  <span className="text-[11px] text-neutral-400 block">USSD M-Pesa Settlement</span>
+                  <span className="text-lg font-bold font-mono text-neutral-900 dark:text-white">99.4% Success</span>
+                </div>
+                <div className="p-3 rounded-2xl bg-neutral-50 dark:bg-neutral-800/60">
+                  <span className="text-[11px] text-neutral-400 block">Customer Rating</span>
+                  <span className="text-lg font-bold text-amber-500">★ 4.88 / 5.0</span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-neutral-400 mb-1">Calories</label>
-                  <input
-                    type="number"
-                    value={dishCalories}
-                    onChange={e => setDishCalories(e.target.value)}
-                    className="w-full p-2.5 rounded-xl bg-neutral-800 border border-neutral-700 outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-neutral-400 mb-1">Prep Time (min)</label>
-                  <input
-                    type="number"
-                    value={dishPrepTime}
-                    onChange={e => setDishPrepTime(e.target.value)}
-                    className="w-full p-2.5 rounded-xl bg-neutral-800 border border-neutral-700 outline-none"
-                  />
-                </div>
+              <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-neutral-700 dark:text-neutral-300">
+                <p className="font-bold text-emerald-600 dark:text-emerald-400 text-xs">Platform Operational Health: Excellent</p>
+                <p className="text-[11px] mt-0.5">All 4 kitchen hubs online, zero dispatch outages recorded.</p>
               </div>
+            </div>
 
-              <div className="space-y-1.5">
-                <label className="block text-neutral-300 font-semibold text-xs flex items-center justify-between">
-                  <span>Picha ya Sahani (Cloudinary CDN)</span>
-                  <span className="text-[10px] text-emerald-400 font-mono">cy4pidvh</span>
-                </label>
-                <CloudinaryUploader
-                  currentImageUrl={dishImageUrl}
-                  onImageUploaded={(url) => setDishImageUrl(url)}
-                  label="Buruta au chagua picha kupakia moja kwa moja Cloudinary"
-                />
-                <input
-                  type="url"
-                  placeholder="au weka link ya picha hapa moja kwa moja..."
-                  value={dishImageUrl}
-                  onChange={e => setDishImageUrl(e.target.value)}
-                  className="w-full mt-1.5 p-2 rounded-xl bg-neutral-800/80 border border-neutral-700 text-neutral-300 text-[11px] font-mono outline-none focus:border-emerald-500"
-                />
-              </div>
-
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-2xl shadow-lg shadow-emerald-500/30"
-                >
-                  Publish Dish to Catalog
-                </button>
-              </div>
-            </form>
+            <div className="flex space-x-2 pt-2">
+              <button
+                onClick={() => {
+                  window.print();
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow-md transition-colors"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Print / Download Report</span>
+              </button>
+              <button
+                onClick={() => setShowReportSummaryModal(false)}
+                className="px-4 py-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 font-semibold text-xs"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
