@@ -70,17 +70,22 @@ export interface AdminVoucher {
   status: 'active' | 'expired';
 }
 
+import { RolePermissions } from '../../types';
+
 export interface AdminUserRecord {
   id: string;
   name: string;
   email: string;
   phone: string;
-  role: 'Super Admin' | 'Kitchen Manager' | 'Dispatcher' | 'Driver' | 'Customer';
+  role: 'Super Admin' | 'Kitchen Manager' | 'Waiter' | 'Dispatcher' | 'Driver' | 'Customer';
   status: 'active' | 'suspended';
   ordersCount: number;
   totalSpent: number;
   joinedDate: string;
   avatar: string;
+  permissions?: RolePermissions;
+  tempPassword?: string;
+  assignedBranch?: string;
 }
 
 export interface AdminIssue {
@@ -476,6 +481,50 @@ export const INITIAL_USERS: AdminUserRecord[] = [
     totalSpent: 280000,
     joinedDate: 'May 2025',
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80'
+  },
+  {
+    id: 'usr-wtr-5',
+    name: 'Neema Mwamburi',
+    email: 'neema.waiter@zebradsm.com',
+    phone: '+255 754 991 822',
+    role: 'Waiter',
+    status: 'active',
+    ordersCount: 142,
+    totalSpent: 0,
+    joinedDate: 'Feb 2025',
+    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80',
+    assignedBranch: 'Zebra Central Masaki Kitchen',
+    permissions: {
+      canTakeOrders: true,
+      canViewKitchen: true,
+      canManageProducts: false,
+      canDispatchRiders: false,
+      canManageUsers: false,
+      canViewFinancials: false,
+      canManageSettings: false
+    }
+  },
+  {
+    id: 'usr-wtr-6',
+    name: 'Baraka Shaban',
+    email: 'baraka.waiter@zebradsm.com',
+    phone: '+255 718 223 445',
+    role: 'Waiter',
+    status: 'active',
+    ordersCount: 98,
+    totalSpent: 0,
+    joinedDate: 'Mar 2025',
+    avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&q=80',
+    assignedBranch: 'Zebra Oysterbay Pizza & Grill',
+    permissions: {
+      canTakeOrders: true,
+      canViewKitchen: true,
+      canManageProducts: false,
+      canDispatchRiders: false,
+      canManageUsers: false,
+      canViewFinancials: false,
+      canManageSettings: false
+    }
   },
   {
     id: 'usr-cst-5',

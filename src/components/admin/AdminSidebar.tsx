@@ -15,6 +15,7 @@ import {
   ChevronRight,
   AlertTriangle,
   ArrowLeft,
+  UtensilsCrossed,
   X
 } from 'lucide-react';
 
@@ -23,6 +24,7 @@ export type AdminTab =
   | 'tracking'
   | 'orders'
   | 'drivers'
+  | 'products'
   | 'merchants'
   | 'payouts'
   | 'transactions'
@@ -41,6 +43,7 @@ interface AdminSidebarProps {
   onCloseMobile?: () => void;
   ordersBadge?: number;
   driversBadge?: number;
+  productsBadge?: number;
   payoutsBadge?: number;
   transactionsBadge?: number;
   vouchersBadge?: number;
@@ -56,6 +59,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   onCloseMobile,
   ordersBadge = 10,
   driversBadge = 8,
+  productsBadge = 14,
   payoutsBadge = 4,
   transactionsBadge = 5,
   vouchersBadge = 12,
@@ -69,7 +73,8 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
         { id: 'tracking', label: 'Live Tracking', icon: MapPin },
         { id: 'orders', label: 'Orders', icon: ShoppingBag, badge: ordersBadge },
         { id: 'drivers', label: 'Drivers', icon: Bike, badge: driversBadge },
-        { id: 'merchants', label: 'Merchants', icon: Store }
+        { id: 'products', label: 'Products & Dishes', icon: UtensilsCrossed, badge: productsBadge },
+        { id: 'merchants', label: 'Kitchen Branches', icon: Store }
       ]
     },
     {

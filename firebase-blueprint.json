@@ -1,0 +1,113 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile with system role, permissions, credentials metadata, and contact info",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "email": { "type": "string", "format": "email", "maxLength": 120 },
+        "phone": { "type": "string", "maxLength": 30 },
+        "role": {
+          "type": "string",
+          "enum": ["Super Admin", "Kitchen Manager", "Waiter", "Dispatcher", "Driver", "Customer"]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "suspended"]
+        },
+        "permissions": {
+          "type": "object",
+          "description": "Granular capability flags assigned by Admin"
+        },
+        "ordersCount": { "type": "number" },
+        "totalSpent": { "type": "number" },
+        "joinedDate": { "type": "string", "maxLength": 50 },
+        "avatar": { "type": "string", "maxLength": 500 },
+        "assignedBranch": { "type": "string", "maxLength": 100 },
+        "tempPassword": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "name", "email", "role", "status"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "Dish or beverage offered at Zebra Restaurant",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 120 },
+        "swahiliName": { "type": "string", "maxLength": 120 },
+        "description": { "type": "string", "maxLength": 1000 },
+        "price": { "type": "number" },
+        "priceTZS": { "type": "number" },
+        "category": { "type": "string", "maxLength": 50 },
+        "image": { "type": "string", "maxLength": 500 },
+        "rating": { "type": "number" },
+        "calories": { "type": "number" },
+        "prepTimeMinutes": { "type": "number" },
+        "isAvailable": { "type": "boolean" },
+        "restaurantName": { "type": "string", "maxLength": 100 }
+      },
+      "required": ["id", "name", "price", "priceTZS", "category", "isAvailable"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Customer food delivery order",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "orderNumber": { "type": "string", "maxLength": 32 },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "confirmed", "preparing", "on_the_way", "delivered", "cancelled"]
+        },
+        "total": { "type": "number" },
+        "currency": { "type": "string", "enum": ["USD", "TZS"] },
+        "paymentMethod": { "type": "string", "maxLength": 50 },
+        "paymentStatus": { "type": "string", "enum": ["pending", "paid", "failed"] },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["id", "orderNumber", "status", "total", "currency", "paymentMethod"]
+    },
+    "TableOrder": {
+      "title": "TableOrder",
+      "description": "In-house restaurant dining table order placed by Waiter",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "tableNumber": { "type": "string", "maxLength": 20 },
+        "waiterName": { "type": "string", "maxLength": 100 },
+        "waiterId": { "type": "string", "maxLength": 128 },
+        "guestCount": { "type": "number" },
+        "items": { "type": "array" },
+        "totalTZS": { "type": "number" },
+        "status": {
+          "type": "string",
+          "enum": ["ordered", "kitchen_prep", "ready_to_serve", "served", "paid", "closed"]
+        },
+        "notes": { "type": "string", "maxLength": 500 },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["id", "tableNumber", "waiterName", "status", "totalTZS"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User accounts with roles, contact details, and administrative permissions"
+    },
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Menu items and dish catalog"
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Food delivery orders and payment transactions"
+    },
+    "/table_orders/{tableOrderId}": {
+      "schema": "TableOrder",
+      "description": "Dine-in table orders handled by Waiters and Kitchen"
+    }
+  }
+}

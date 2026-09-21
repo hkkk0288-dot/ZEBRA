@@ -6,6 +6,7 @@ import { AdminDashboardOverview } from './admin/AdminDashboardOverview';
 import { AdminLiveTracking } from './admin/AdminLiveTracking';
 import { AdminOrdersView } from './admin/AdminOrdersView';
 import { AdminDriversView } from './admin/AdminDriversView';
+import { AdminProductsView } from './admin/AdminProductsView';
 import { AdminMerchantsView } from './admin/AdminMerchantsView';
 import { AdminPayoutsView } from './admin/AdminPayoutsView';
 import { AdminTransactionsView } from './admin/AdminTransactionsView';
@@ -23,7 +24,7 @@ import {
 } from 'lucide-react';
 
 export const AdminDashboardView: React.FC = () => {
-  const { theme, currency, setActiveTab } = useApp();
+  const { theme, currency, setActiveTab, menuItems } = useApp();
   const isDark = theme === 'dark';
 
   const [currentTab, setCurrentTab] = useState<AdminTab>('dashboard');
@@ -55,6 +56,7 @@ export const AdminDashboardView: React.FC = () => {
         onCloseMobile={() => setIsMobileMenuOpen(false)}
         ordersBadge={10}
         driversBadge={8}
+        productsBadge={menuItems.length}
         payoutsBadge={4}
         transactionsBadge={5}
         vouchersBadge={12}
@@ -63,7 +65,7 @@ export const AdminDashboardView: React.FC = () => {
 
       {/* Main Admin Workspace Area */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Top Control Bar (Search, Date Picker, Export, Notifications) */}
+        {/* Top Control Bar (Search, Date Picker, Export, Notifications, Theme, Add Product) */}
         <AdminTopBar
           currentTab={currentTab}
           onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
@@ -74,6 +76,7 @@ export const AdminDashboardView: React.FC = () => {
           onExport={handleExport}
           onViewReports={() => setShowReportSummaryModal(true)}
           onOpenSettings={() => setCurrentTab('settings')}
+          onNavigateToTab={tab => setCurrentTab(tab)}
           notificationCount={3}
         />
 
@@ -99,6 +102,8 @@ export const AdminDashboardView: React.FC = () => {
           {currentTab === 'orders' && <AdminOrdersView isDark={isDark} />}
 
           {currentTab === 'drivers' && <AdminDriversView isDark={isDark} />}
+
+          {currentTab === 'products' && <AdminProductsView />}
 
           {currentTab === 'merchants' && <AdminMerchantsView isDark={isDark} />}
 

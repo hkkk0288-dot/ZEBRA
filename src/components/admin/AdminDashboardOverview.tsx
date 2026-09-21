@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AdminLeafletMap } from './AdminLeafletMap';
 import {
   TrendingUp,
   TrendingDown,
@@ -19,7 +20,9 @@ import {
   Eye,
   ChevronRight,
   X,
-  Package
+  Package,
+  Plus,
+  UtensilsCrossed
 } from 'lucide-react';
 import {
   MAP_ORDER_PINS,
@@ -66,6 +69,49 @@ export const AdminDashboardOverview: React.FC<AdminDashboardOverviewProps> = ({
 
   return (
     <div className="space-y-5">
+      {/* Admin Quick Action Hub */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-3xl bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-transparent border border-orange-500/20 dark:border-orange-500/15">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 rounded-2xl bg-orange-600 text-white flex items-center justify-center shadow-md shadow-orange-600/30 shrink-0">
+            <UtensilsCrossed className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-neutral-900 dark:text-white">
+              Admin Quick Launchpad
+            </h3>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+              Direct access to product catalog additions, user permission controls, and order dispatch
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => onNavigateToTab('products')}
+            className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs shadow-md shadow-orange-600/25 transition-all active:scale-95 cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add New Product</span>
+          </button>
+
+          <button
+            onClick={() => onNavigateToTab('users')}
+            className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-neutral-900 hover:bg-neutral-50 dark:hover:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200 font-bold text-xs shadow-2xs transition-all cursor-pointer"
+          >
+            <Users className="w-3.5 h-3.5 text-neutral-500" />
+            <span>Manage Users & Staff</span>
+          </button>
+
+          <button
+            onClick={() => onNavigateToTab('tracking')}
+            className="flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-white dark:bg-neutral-900 hover:bg-neutral-50 dark:hover:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 font-semibold text-xs shadow-2xs transition-all cursor-pointer"
+          >
+            <Bike className="w-3.5 h-3.5 text-emerald-500" />
+            <span className="hidden sm:inline">Fleet Radar</span>
+          </button>
+        </div>
+      </div>
+
       {/* 4 Top KPI Cards (Matching Screenshot) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Orders */}
@@ -239,116 +285,15 @@ export const AdminDashboardOverview: React.FC<AdminDashboardOverviewProps> = ({
             </div>
           </div>
 
-          {/* Interactive Visual Map Canvas with SVG Road System */}
-          <div className="relative w-full h-[360px] sm:h-[400px] bg-[#e8e4db] dark:bg-[#1a1c22] overflow-hidden select-none">
-            {/* SVG Roads and Ocean / Waterway (Dar es Salaam Stylized) */}
-            <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-85" preserveAspectRatio="none">
-              {/* Ocean / Indian Ocean Coastline */}
-              <path
-                d="M 0,0 L 220,0 C 240,60 210,120 180,180 C 150,240 190,320 250,400 L 0,400 Z"
-                fill={isDark ? '#141e2b' : '#c9e2f5'}
-              />
-              {/* Secondary inlet / creek */}
-              <path
-                d="M 180,180 C 230,200 290,190 350,220 C 400,245 460,260 520,270 L 520,290 C 450,280 390,265 340,240 C 280,210 220,220 180,180 Z"
-                fill={isDark ? '#141e2b' : '#c9e2f5'}
-              />
-
-              {/* Major Highway Artery */}
-              <path
-                d="M 120,400 Q 280,260 380,150 T 800,20"
-                stroke={isDark ? '#2f3442' : '#ffffff'}
-                strokeWidth="10"
-                fill="none"
-              />
-              <path
-                d="M 120,400 Q 280,260 380,150 T 800,20"
-                stroke={isDark ? '#3d4454' : '#f5e4bd'}
-                strokeWidth="6"
-                fill="none"
-              />
-
-              {/* Secondary Roads Grid */}
-              <line x1="200" y1="50" x2="800" y2="50" stroke={isDark ? '#282c37' : '#ffffff'} strokeWidth="4" />
-              <line x1="180" y1="120" x2="800" y2="120" stroke={isDark ? '#282c37' : '#ffffff'} strokeWidth="4" />
-              <line x1="220" y1="200" x2="800" y2="200" stroke={isDark ? '#282c37' : '#ffffff'} strokeWidth="4" />
-              <line x1="260" y1="280" x2="800" y2="280" stroke={isDark ? '#282c37' : '#ffffff'} strokeWidth="4" />
-              <line x1="280" y1="350" x2="800" y2="350" stroke={isDark ? '#282c37' : '#ffffff'} strokeWidth="4" />
-
-              <line x1="320" y1="0" x2="320" y2="400" stroke={isDark ? '#282c37' : '#ffffff'} strokeWidth="4" />
-              <line x1="450" y1="0" x2="450" y2="400" stroke={isDark ? '#282c37' : '#ffffff'} strokeWidth="4" />
-              <line x1="580" y1="0" x2="580" y2="400" stroke={isDark ? '#282c37' : '#ffffff'} strokeWidth="4" />
-              <line x1="700" y1="0" x2="700" y2="400" stroke={isDark ? '#282c37' : '#ffffff'} strokeWidth="4" />
-
-              {/* Parks / Green spaces */}
-              <rect x="680" y="160" width="80" height="90" rx="12" fill={isDark ? '#1a271c' : '#d2e8cb'} />
-              <rect x="230" y="290" width="70" height="60" rx="10" fill={isDark ? '#1a271c' : '#d2e8cb'} />
-            </svg>
-
-            {/* Interactive Pins Placed Across the Map (Matching Screenshot Layout) */}
-            <div className="absolute inset-0 p-6 pointer-events-auto">
-              {filteredPins.map((pin, i) => {
-                // Fixed visual positions on the stylized map
-                const positions = [
-                  { top: '22%', left: '42%' }, // On the Way
-                  { top: '15%', left: '58%' }, // Canceled
-                  { top: '35%', left: '34%' }, // Delivered
-                  { top: '48%', left: '46%' }, // Delivered
-                  { top: '40%', left: '68%' }, // On the Way
-                  { top: '55%', left: '22%' }, // Canceled
-                  { top: '68%', left: '31%' }, // Delayed
-                  { top: '65%', left: '59%' }  // Preparing
-                ];
-
-                const pos = positions[i % positions.length];
-
-                const getPinBadgeStyle = () => {
-                  switch (pin.status) {
-                    case 'Delivered':
-                      return 'bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border-emerald-400/80';
-                    case 'On the Way':
-                      return 'bg-blue-50 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 border-blue-400/80';
-                    case 'Preparing':
-                      return 'bg-amber-50 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 border-amber-400/80';
-                    case 'Delayed':
-                      return 'bg-orange-50 dark:bg-orange-950/80 text-orange-700 dark:text-orange-300 border-orange-400/80';
-                    case 'Canceled':
-                      return 'bg-rose-50 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border-rose-400/80';
-                    default:
-                      return 'bg-neutral-50 text-neutral-800 border-neutral-300';
-                  }
-                };
-
-                const getPinIcon = () => {
-                  switch (pin.status) {
-                    case 'Delivered':
-                      return '🏢';
-                    case 'On the Way':
-                      return '📦';
-                    case 'Preparing':
-                      return '🍳';
-                    case 'Delayed':
-                      return '⌛';
-                    case 'Canceled':
-                      return '✖';
-                    default:
-                      return '📍';
-                  }
-                };
-
-                return (
-                  <button
-                    key={pin.id}
-                    onClick={() => setSelectedPin(pin)}
-                    style={{ top: pos.top, left: pos.left }}
-                    className={`absolute -translate-x-1/2 -translate-y-1/2 flex items-center space-x-1.5 px-2.5 py-1 rounded-full border-2 text-xs font-bold shadow-md hover:scale-110 active:scale-95 transition-all z-10 cursor-pointer ${getPinBadgeStyle()}`}
-                  >
-                    <span className="text-xs">{getPinIcon()}</span>
-                    <span>{pin.status}</span>
-                  </button>
-                );
-              })}
-            </div>
+          {/* Real Interactive Leaflet Map of Dar es Salaam */}
+          <div className="relative w-full h-[360px] sm:h-[400px] overflow-hidden">
+            <AdminLeafletMap
+              pins={filteredPins}
+              selectedPin={selectedPin}
+              onSelectPin={setSelectedPin}
+              isDark={isDark}
+              className="w-full h-full"
+            />
           </div>
 
           {/* Under-Map Bottom Panel (Matching Screenshot: Status Bar + Recent Orders) */}

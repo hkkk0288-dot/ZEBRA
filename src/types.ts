@@ -96,8 +96,43 @@ export interface Order {
   createdAt: number;
 }
 
-export type NavigationTab = 'home' | 'favorites' | 'cart' | 'orders' | 'profile' | 'admin' | 'auth';
+export type NavigationTab = 'home' | 'favorites' | 'cart' | 'orders' | 'profile' | 'admin' | 'waiter' | 'auth';
 export type AuthMode = 'login' | 'signup';
+
+export type SystemRole = 'Super Admin' | 'Kitchen Manager' | 'Waiter' | 'Dispatcher' | 'Driver' | 'Customer';
+
+export interface RolePermissions {
+  canTakeOrders: boolean; // Chukua Oda za Meza / Waiter POS
+  canViewKitchen: boolean; // Tazama Skrini ya Jikoni (KDS)
+  canManageProducts: boolean; // Ongeza au badili bei za vyakula
+  canDispatchRiders: boolean; // Panga oda kwa madereva
+  canManageUsers: boolean; // Fungua akaunti na badili roles
+  canViewFinancials: boolean; // Tazama mapato na malipo
+  canManageSettings: boolean; // Mipangilio ya mfumo
+}
+
+export interface TableOrderItem {
+  dishId: string;
+  name: string;
+  quantity: number;
+  priceTZS: number;
+  notes?: string;
+}
+
+export interface TableOrder {
+  id: string;
+  orderNumber: string;
+  tableNumber: string; // e.g. "Table 04", "VIP Lounge 1"
+  waiterName: string;
+  waiterId: string;
+  guestCount: number;
+  items: TableOrderItem[];
+  totalTZS: number;
+  status: 'ordered' | 'kitchen_prep' | 'ready_to_serve' | 'served' | 'paid' | 'closed';
+  notes?: string;
+  createdAt: number;
+}
+
 
 export type PendingAction =
   | {
@@ -118,6 +153,9 @@ export interface UserProfile {
   email: string;
   phone: string;
   role: 'customer' | 'admin';
+  systemRole?: SystemRole;
+  permissions?: RolePermissions;
+  assignedBranch?: string;
   avatar?: string;
   birthday?: string;
   locationCoordinates?: {

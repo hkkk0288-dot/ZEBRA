@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AdminLeafletMap } from './AdminLeafletMap';
 import {
   Bike,
   Navigation,
@@ -81,72 +82,15 @@ export const AdminLiveTracking: React.FC<AdminLiveTrackingProps> = ({ isDark }) 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Radar Map View */}
         <div className="lg:col-span-7 rounded-3xl bg-white dark:bg-[#151518] border border-neutral-200/80 dark:border-neutral-800 shadow-2xs overflow-hidden flex flex-col">
-          <div className="relative w-full h-[450px] bg-[#e6e2d8] dark:bg-[#181a20] overflow-hidden select-none">
-            {/* SVG Roads & Waterway */}
-            <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-80" preserveAspectRatio="none">
-              <path
-                d="M 0,0 L 260,0 C 290,90 240,160 210,240 C 180,310 240,380 320,450 L 0,450 Z"
-                fill={isDark ? '#141e2b' : '#c9e2f5'}
-              />
-              <path
-                d="M 160,450 Q 320,300 420,180 T 800,40"
-                stroke={isDark ? '#2e3340' : '#ffffff'}
-                strokeWidth="12"
-                fill="none"
-              />
-              <path
-                d="M 160,450 Q 320,300 420,180 T 800,40"
-                stroke={isDark ? '#3d4454' : '#f5e4bd'}
-                strokeWidth="8"
-                fill="none"
-              />
-              <line x1="240" y1="80" x2="800" y2="80" stroke={isDark ? '#272b35' : '#ffffff'} strokeWidth="5" />
-              <line x1="280" y1="180" x2="800" y2="180" stroke={isDark ? '#272b35' : '#ffffff'} strokeWidth="5" />
-              <line x1="320" y1="280" x2="800" y2="280" stroke={isDark ? '#272b35' : '#ffffff'} strokeWidth="5" />
-              <line x1="360" y1="380" x2="800" y2="380" stroke={isDark ? '#272b35' : '#ffffff'} strokeWidth="5" />
-            </svg>
-
-            {/* Drivers markers */}
-            {filteredDrivers.map((driver, idx) => {
-              const isSelected = selectedDriver?.id === driver.id;
-              // Visual position offsets
-              const offsets = [
-                { top: '25%', left: '48%' },
-                { top: '45%', left: '38%' },
-                { top: '65%', left: '55%' },
-                { top: '35%', left: '70%' },
-                { top: '75%', left: '42%' },
-                { top: '50%', left: '60%' }
-              ];
-              const pos = offsets[idx % offsets.length];
-
-              return (
-                <div
-                  key={driver.id}
-                  onClick={() => setSelectedDriver(driver)}
-                  style={{ top: pos.top, left: pos.left }}
-                  className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer z-10 transition-transform hover:scale-110"
-                >
-                  <div
-                    className={`relative p-2 rounded-2xl flex items-center space-x-1.5 shadow-xl transition-all ${
-                      isSelected
-                        ? 'bg-orange-600 text-white ring-4 ring-orange-500/30 scale-110'
-                        : driver.status === 'busy'
-                        ? 'bg-blue-600 text-white'
-                        : driver.status === 'active'
-                        ? 'bg-emerald-600 text-white'
-                        : 'bg-neutral-600 text-white opacity-70'
-                    }`}
-                  >
-                    <Bike className="w-4 h-4" />
-                    <span className="text-[11px] font-bold whitespace-nowrap">{driver.name.split(' ')[0]}</span>
-                    {driver.currentSpeed > 0 && (
-                      <span className="text-[9px] bg-black/30 px-1 rounded-sm">{driver.currentSpeed} km/h</span>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+          {/* Real Interactive Leaflet Fleet Radar */}
+          <div className="relative w-full h-[450px] overflow-hidden">
+            <AdminLeafletMap
+              drivers={filteredDrivers}
+              selectedDriver={selectedDriver}
+              onSelectDriver={setSelectedDriver}
+              isDark={isDark}
+              className="w-full h-full"
+            />
           </div>
 
           {/* Selected Driver Inspector Footer */}
