@@ -17,7 +17,8 @@ import { OrderTrackingView } from './components/OrderTrackingView';
 import { FavoritesView } from './components/FavoritesView';
 import { ProfileView } from './components/ProfileView';
 import { AdminDashboardView } from './components/AdminDashboardView';
-import { Smartphone, Monitor, ShieldCheck, User } from 'lucide-react';
+import { AuthView } from './components/AuthView';
+import { Smartphone, Monitor, ShieldCheck, User, LogIn } from 'lucide-react';
 
 const MainContent: React.FC = () => {
   const { activeTab, setActiveTab, theme, androidFrame, setAndroidFrame } = useApp();
@@ -36,6 +37,8 @@ const MainContent: React.FC = () => {
         return <FavoritesView />;
       case 'profile':
         return <ProfileView />;
+      case 'auth':
+        return <AuthView />;
       case 'admin':
         return <AdminDashboardView />;
       default:
@@ -64,7 +67,20 @@ const MainContent: React.FC = () => {
             </span>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            {/* Direct access to Login / Regista page (Requested) */}
+            <button
+              onClick={() => setActiveTab(activeTab === 'auth' ? 'home' : 'auth')}
+              className={`flex items-center space-x-1 px-3 py-1 rounded-full text-[11px] font-bold transition-all ${
+                activeTab === 'auth'
+                  ? 'bg-amber-400 text-neutral-950 shadow-sm shadow-amber-400/40'
+                  : 'bg-neutral-800 text-amber-400 hover:bg-neutral-700'
+              }`}
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>{activeTab === 'auth' ? 'Rudi Home' : 'Login / Regista'}</span>
+            </button>
+
             <button
               onClick={() => setActiveTab(activeTab === 'admin' ? 'home' : 'admin')}
               className={`flex items-center space-x-1 px-3 py-1 rounded-full text-[11px] font-bold transition-colors ${

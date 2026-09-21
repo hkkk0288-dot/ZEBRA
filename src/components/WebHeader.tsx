@@ -13,7 +13,8 @@ import {
   MapPin,
   PhoneCall,
   Menu,
-  X
+  X,
+  LogIn
 } from 'lucide-react';
 import { formatPrice } from '../utils/formatters';
 
@@ -188,6 +189,19 @@ export const WebHeader: React.FC = () => {
               <span>Account</span>
             </button>
 
+            {/* Login / Regista (Requested by user) */}
+            <button
+              onClick={() => setActiveTab('auth')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
+                activeTab === 'auth'
+                  ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-neutral-950 shadow-md shadow-amber-500/30'
+                  : 'bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20'
+              }`}
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Log In / Regista</span>
+            </button>
+
             <button
               onClick={() => setActiveTab('admin')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors flex items-center space-x-1 ${
@@ -329,6 +343,15 @@ export const WebHeader: React.FC = () => {
               className="p-2.5 rounded-xl bg-neutral-800/60 text-left text-neutral-200"
             >
               👤 My Account
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab('auth');
+                setMobileMenuOpen(false);
+              }}
+              className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-left text-amber-400 font-bold flex items-center space-x-1.5"
+            >
+              <span>🔑 Log In / Regista</span>
             </button>
             <button
               onClick={() => {

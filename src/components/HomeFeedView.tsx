@@ -23,6 +23,7 @@ import {
 import { MenuItem } from '../types';
 import { motion } from 'motion/react';
 import { FoodImage } from './FoodImage';
+import { DarEsSalaamMap } from './DarEsSalaamMap';
 
 export const HomeFeedView: React.FC = () => {
   const {
@@ -42,12 +43,14 @@ export const HomeFeedView: React.FC = () => {
     toggleTheme,
     setActiveTab,
     applyPromoCode,
-    androidFrame
+    androidFrame,
+    isLoggedIn
   } = useApp();
 
   const isDark = theme === 'dark';
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [showMapModal, setShowMapModal] = useState(false);
 
   // Filter items
   const filteredItems = menuItems.filter(item => {
@@ -102,14 +105,25 @@ export const HomeFeedView: React.FC = () => {
                 <div className="flex items-center space-x-1.5">
                   <span className="text-xs text-neutral-400">Hello</span>
                   <span className="text-sm">👋</span>
+                  <button
+                    onClick={() => setActiveTab('auth')}
+                    className="ml-1 text-[10px] text-amber-400 hover:text-amber-300 font-bold bg-amber-500/10 px-1.5 py-0.5 rounded-full border border-amber-500/20"
+                    title="Fungua ukurasa wa Login au Regista"
+                  >
+                    {isLoggedIn ? 'Akaunti' : 'Login / Regista'}
+                  </button>
                 </div>
                 <h1 className="text-base font-bold font-display text-neutral-900 dark:text-white leading-tight">
                   {user.name}
                 </h1>
-                <div className="flex items-center space-x-1 text-[11px] text-neutral-500 dark:text-neutral-400">
+                <button
+                  onClick={() => setShowMapModal(true)}
+                  className="flex items-center space-x-1 text-[11px] text-neutral-500 dark:text-neutral-400 hover:text-emerald-400 cursor-pointer transition-colors"
+                  title="Fungua Ramani ya Dar es Salaam"
+                >
                   <MapPin className="w-3 h-3 text-amber-500" />
-                  <span className="truncate max-w-[140px]">Dar es Salaam, Masaki</span>
-                </div>
+                  <span className="truncate max-w-[140px] font-medium border-b border-dotted border-neutral-500">Dar es Salaam (Ramani)</span>
+                </button>
               </div>
             </div>
 
@@ -238,7 +252,15 @@ export const HomeFeedView: React.FC = () => {
                 className="bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm py-2.5 px-5 rounded-full backdrop-blur-sm transition-all flex items-center space-x-1.5"
               >
                 <Smartphone className="w-4 h-4 text-amber-400" />
-                <span>USSD Pay: *150*00# (Till: 445566)</span>
+                <span>USSD Pay: *150*00#</span>
+              </button>
+
+              <button
+                onClick={() => setShowMapModal(true)}
+                className="bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-bold text-xs sm:text-sm py-2.5 px-5 rounded-full backdrop-blur-sm transition-all flex items-center space-x-1.5"
+              >
+                <MapPin className="w-4 h-4 text-emerald-400" />
+                <span>Ramani ya Dar es Salaam</span>
               </button>
             </div>
           </div>
@@ -570,6 +592,69 @@ export const HomeFeedView: React.FC = () => {
             >
               Close
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Dar es Salaam Interactive Map Modal */}
+      {showMapModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-6">
+          <div
+            className={`w-full max-w-4xl rounded-3xl border shadow-2xl overflow-hidden flex flex-col max-h-[92vh] ${
+              isDark ? 'bg-[#121214] border-neutral-800 text-white' : 'bg-white border-neutral-200 text-neutral-900'
+            }`}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-800 shrink-0">
+              <div className="flex items-center space-x-2.5">
+                <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  <MapPin className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base font-display">
+                    Ramani ya Dar es Salaam (Zebra Delivery & Branches)
+                  </h3>
+                  <p className="text-xs text-neutral-400">
+                    Matawi ya Zebra Masaki, Oysterbay, Kariakoo, Slipway na ufuatiliaji wa bodaboda
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowMapModal(false)}
+                className="p-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body: Map */}
+            <div className="p-4 sm:p-5 overflow-y-auto space-y-4">
+              <DarEsSalaamMap
+                customerLocationName="Upanga / Kariakoo / Masaki"
+                orderNumber="DAR-MAP"
+                etaMinutes={15}
+                riderProgress={60}
+              />
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+                <div className="p-3 rounded-2xl bg-neutral-900/80 border border-neutral-800">
+                  <span className="font-bold text-amber-400 block">🍕 Masaki Kitchen</span>
+                  <span className="text-[11px] text-neutral-400">Toure Dr, Masaki</span>
+                </div>
+                <div className="p-3 rounded-2xl bg-neutral-900/80 border border-neutral-800">
+                  <span className="font-bold text-amber-400 block">🥩 Kariakoo Hub</span>
+                  <span className="text-[11px] text-neutral-400">China Plaza & Market</span>
+                </div>
+                <div className="p-3 rounded-2xl bg-neutral-900/80 border border-neutral-800">
+                  <span className="font-bold text-emerald-400 block">🍔 Oysterbay Bistro</span>
+                  <span className="text-[11px] text-neutral-400">Haile Selassie Rd</span>
+                </div>
+                <div className="p-3 rounded-2xl bg-neutral-900/80 border border-neutral-800">
+                  <span className="font-bold text-purple-400 block">🐟 Slipway Ocean</span>
+                  <span className="text-[11px] text-neutral-400">Msasani Waterfront</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

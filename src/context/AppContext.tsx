@@ -8,7 +8,9 @@ import {
   PaymentProvider,
   PromoOffer,
   SizeOption,
-  UserProfile
+  UserProfile,
+  NavigationTab,
+  AuthMode
 } from '../types';
 import {
   DEFAULT_USER,
@@ -76,8 +78,15 @@ interface AppContextType {
   }) => Promise<Order>;
   updateOrderStatus: (orderId: string, status: OrderStatus) => void;
 
-  activeTab: 'home' | 'favorites' | 'cart' | 'orders' | 'profile' | 'admin';
-  setActiveTab: (tab: 'home' | 'favorites' | 'cart' | 'orders' | 'profile' | 'admin') => void;
+  activeTab: NavigationTab;
+  setActiveTab: (tab: NavigationTab) => void;
+  authMode: AuthMode;
+  setAuthMode: (mode: AuthMode) => void;
+  isLoggedIn: boolean;
+  login: (email: string, password?: string, name?: string) => Promise<boolean>;
+  signup: (name: string, email: string, password?: string) => Promise<boolean>;
+  logout: () => void;
+  loginWithSocial: (provider: 'google' | 'facebook') => Promise<void>;
 
   ussdModalOrder: Order | null;
   setUssdModalOrder: (order: Order | null) => void;
@@ -131,7 +140,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   // Navigation
-  const [activeTab, setActiveTab] = useState<'home' | 'favorites' | 'cart' | 'orders' | 'profile' | 'admin'>('home');
+  const [activeTab, setActiveTab] = useState<NavigationTab>('home');
+  const [authMode, setAuthMode] = useState<AuthMode>('login');
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
+    const saved = localStorage.getItem('zebra_logged_in');
+    return saved === 'true';
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
@@ -246,6 +260,70 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: `guest-${Date.now()}`,
       name: 'Mgeni (Guest User)'
     });
+    setIsLoggedIn(false);
+  };
+
+  const login = async (email: string, _password?: string, name?: string): Promise<boolean> => {
+    const displayName = name || (email.includes('@') ? email.split('@')[0].replace('.', ' ') : 'David Johnson');
+    const formattedName = displayName
+      .split(' ')
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+    
+    const updatedUser: UserProfile = {
+      ...user,
+      id: `usr-${Date.now()}`,
+      name: formattedName,
+      email: email,
+      role: email.toLowerCase().includes('admin') ? 'admin' : 'customer'
+    };
+    setUser(updatedUser);
+    setIsLoggedIn(true);
+    localStorage.setItem('zebra_logged_in', 'true');
+    localStorage.setItem('zebra_user', JSON.stringify(updatedUser));
+    return true;
+  };
+
+  const signup = async (name: string, email: string, _password?: string): Promise<boolean> => {
+    const newUser: UserProfile = {
+      ...user,
+      id: `usr-${Date.now()}`,
+      name: name || 'David Johnson',
+      email: email,
+      role: 'customer'
+    };
+    setUser(newUser);
+    setIsLoggedIn(true);
+    localStorage.setItem('zebra_logged_in', 'true');
+    localStorage.setItem('zebra_user', JSON.stringify(newUser));
+    return true;
+  };
+
+  const logout = () => {
+    setIsLoggedIn(false);
+    localStorage.removeItem('zebra_logged_in');
+    setUser({
+      ...DEFAULT_USER,
+      id: `guest-${Date.now()}`,
+      name: 'Guest User',
+      email: 'guest@zebradsm.com'
+    });
+  };
+
+  const loginWithSocial = async (provider: 'google' | 'facebook'): Promise<void> => {
+    const socialUser: UserProfile = {
+      ...user,
+      id: `usr-${provider}-${Date.now()}`,
+      name: 'David Johnson',
+      email: provider === 'google' ? 'davidjonson@gmail.com' : 'davidjonson@facebook.com',
+      avatar: provider === 'google'
+        ? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80'
+        : 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=200&q=80'
+    };
+    setUser(socialUser);
+    setIsLoggedIn(true);
+    localStorage.setItem('zebra_logged_in', 'true');
+    localStorage.setItem('zebra_user', JSON.stringify(socialUser));
   };
 
   const toggleFavorite = (itemId: string) => {
@@ -526,6 +604,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateOrderStatus,
         activeTab,
         setActiveTab,
+        authMode,
+        setAuthMode,
+        isLoggedIn,
+        login,
+        signup,
+        logout,
+        loginWithSocial,
         ussdModalOrder,
         setUssdModalOrder,
         completeUssdPayment,

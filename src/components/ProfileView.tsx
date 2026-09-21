@@ -14,9 +14,13 @@ import {
   Edit2,
   Plus,
   Check,
-  ReceiptText
+  ReceiptText,
+  Cloud,
+  ExternalLink,
+  LogIn
 } from 'lucide-react';
 import { formatPrice } from '../utils/formatters';
+import { CloudinaryUploader } from './CloudinaryUploader';
 
 export const ProfileView: React.FC = () => {
   const {
@@ -30,7 +34,10 @@ export const ProfileView: React.FC = () => {
     androidFrame,
     setAndroidFrame,
     setActiveTab,
-    setActiveOrder
+    setActiveOrder,
+    isLoggedIn,
+    logout,
+    setAuthMode
   } = useApp();
 
   const isDark = theme === 'dark';
@@ -39,6 +46,7 @@ export const ProfileView: React.FC = () => {
   const [nameInput, setNameInput] = useState(user.name);
   const [phoneInput, setPhoneInput] = useState(user.phone);
   const [emailInput, setEmailInput] = useState(user.email);
+  const [avatarInput, setAvatarInput] = useState(user.avatar || '');
 
   const [showAddAddress, setShowAddAddress] = useState(false);
   const [newAddressLabel, setNewAddressLabel] = useState('Home');
@@ -48,7 +56,8 @@ export const ProfileView: React.FC = () => {
     updateUser({
       name: nameInput,
       phone: phoneInput,
-      email: emailInput
+      email: emailInput,
+      avatar: avatarInput || user.avatar
     });
     setIsEditingProfile(false);
   };
@@ -213,6 +222,19 @@ export const ProfileView: React.FC = () => {
                     />
                   </div>
 
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-semibold text-neutral-300 flex items-center justify-between">
+                      <span>Profile Avatar (Cloudinary CDN)</span>
+                      <span className="text-[10px] text-emerald-400 font-mono">cy4pidvh</span>
+                    </label>
+                    <CloudinaryUploader
+                      currentImageUrl={avatarInput}
+                      onImageUploaded={(url) => setAvatarInput(url)}
+                      label="Pakia picha ya profile moja kwa moja Cloudinary"
+                      folder="zebra_restaurant/avatars"
+                    />
+                  </div>
+
                   <div className="flex items-center space-x-2 pt-1">
                     <button
                       onClick={handleSaveProfile}
@@ -228,6 +250,69 @@ export const ProfileView: React.FC = () => {
                       Cancel
                     </button>
                   </div>
+                </div>
+              )}
+            </div>
+
+            {/* Authentication & Security (Login / Regista) Card */}
+            <div
+              className={`p-5 rounded-3xl border space-y-3.5 ${
+                isDark
+                  ? 'bg-[#121215] border-amber-500/20'
+                  : 'bg-white border-amber-300/80 shadow-sm'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-400">
+                    <LogIn className="w-4 h-4" />
+                  </div>
+                  <h3 className="text-xs font-bold text-neutral-900 dark:text-white uppercase tracking-wider">
+                    Ukurasa wa Login & Regista
+                  </h3>
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400">
+                  {isLoggedIn ? 'Umeingia (Active)' : 'Mgeni'}
+                </span>
+              </div>
+
+              <p className="text-xs text-neutral-400">
+                Tazama na utumie kurasa zilizoundwa kulingana na picha ya mfano (Screenshot 1 & 2):
+              </p>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                <button
+                  onClick={() => {
+                    setAuthMode('login');
+                    setActiveTab('auth');
+                  }}
+                  className="py-2.5 px-3 rounded-2xl bg-[#1a1a1e] hover:bg-neutral-800 border border-neutral-700 text-xs font-bold text-white flex items-center justify-center space-x-1.5 transition-all shadow-sm active:scale-95"
+                >
+                  <span>🔑 Ukurasa wa Log In</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setAuthMode('signup');
+                    setActiveTab('auth');
+                  }}
+                  className="py-2.5 px-3 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-400 text-xs font-bold text-neutral-950 flex items-center justify-center space-x-1.5 transition-all shadow-md shadow-amber-500/20 active:scale-95"
+                >
+                  <span>📝 Ukurasa wa Regista</span>
+                </button>
+              </div>
+
+              {isLoggedIn && (
+                <div className="pt-1 flex items-center justify-between border-t border-neutral-800/60">
+                  <span className="text-[11px] text-neutral-400">
+                    Akaunti: <strong className="text-white">{user.email}</strong>
+                  </span>
+                  <button
+                    onClick={logout}
+                    className="text-[11px] font-bold text-red-400 hover:text-red-300 transition-colors"
+                  >
+                    Toka (Log Out)
+                  </button>
                 </div>
               )}
             </div>
@@ -411,6 +496,43 @@ export const ProfileView: React.FC = () => {
                   >
                     {androidFrame ? 'ON' : 'OFF'}
                   </button>
+                </div>
+
+                {/* Cloudinary CDN Media Integration Status */}
+                <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-800/40 border border-neutral-800">
+                  <div className="flex items-center space-x-2.5">
+                    <div className="p-1.5 rounded-xl bg-[#4863ff]/20 text-[#4863ff]">
+                      <Cloud className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-semibold text-neutral-200 block">
+                        Cloudinary CDN Connected
+                      </span>
+                      <span className="text-[10px] text-emerald-400 font-mono">
+                        Cloud: cy4pidvh (Active)
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-1.5">
+                    <button
+                      onClick={() => {
+                        updateUser({ role: 'admin' });
+                        setActiveTab('admin');
+                      }}
+                      className="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1.5 rounded-xl transition-colors"
+                    >
+                      Media Hub
+                    </button>
+                    <a
+                      href="https://console.cloudinary.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-1.5 rounded-xl text-neutral-400 hover:text-white hover:bg-neutral-700 transition-colors"
+                      title="Fungua Console ya Cloudinary (cy4pidvh)"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>

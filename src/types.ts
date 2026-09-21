@@ -96,6 +96,9 @@ export interface Order {
   createdAt: number;
 }
 
+export type NavigationTab = 'home' | 'favorites' | 'cart' | 'orders' | 'profile' | 'admin' | 'auth';
+export type AuthMode = 'login' | 'signup';
+
 export interface UserProfile {
   id: string;
   name: string;

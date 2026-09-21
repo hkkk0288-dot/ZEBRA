@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { OrderStatus } from '../types';
 import confetti from 'canvas-confetti';
+import { DarEsSalaamMap } from './DarEsSalaamMap';
 
 export const OrderTrackingView: React.FC = () => {
   const {
@@ -187,81 +188,14 @@ export const OrderTrackingView: React.FC = () => {
           
           {/* Left Column: Map & Courier Info */}
           <div className={androidFrame ? 'space-y-4' : 'lg:col-span-7 space-y-5'}>
-            {/* Interactive Delivery Map Simulation */}
-            <div className="relative w-full h-64 sm:h-72 rounded-3xl overflow-hidden border border-neutral-800 shadow-xl bg-neutral-900">
-              {/* Stylized SVG Map Graphics */}
-              <svg className="w-full h-full object-cover" viewBox="0 0 400 220">
-                {/* Background Grid & Roads */}
-                <rect width="400" height="220" fill={isDark ? '#14161b' : '#e5e7eb'} />
-                
-                {/* Road vectors */}
-                <path
-                  d="M 20,40 Q 120,60 200,40 T 380,50"
-                  fill="none"
-                  stroke={isDark ? '#262933' : '#cbd5e1'}
-                  strokeWidth="16"
-                />
-                <path
-                  d="M 50,200 Q 160,140 220,160 T 360,180"
-                  fill="none"
-                  stroke={isDark ? '#262933' : '#cbd5e1'}
-                  strokeWidth="16"
-                />
-                <path
-                  d="M 40,30 C 80,110 120,130 180,100 S 280,140 340,180"
-                  fill="none"
-                  stroke={isDark ? '#2c313d' : '#cbd5e1'}
-                  strokeWidth="20"
-                  strokeLinecap="round"
-                />
-
-                {/* Active Delivery Route Line (Glowing Emerald) */}
-                <path
-                  d="M 60,60 C 120,120 180,90 260,130 S 320,160 340,170"
-                  fill="none"
-                  stroke="#10b981"
-                  strokeWidth="4"
-                  strokeDasharray="6 4"
-                  strokeLinecap="round"
-                />
-
-                {/* Restaurant Pin Origin */}
-                <g transform="translate(60, 60)">
-                  <circle r="16" fill="#f59e0b" opacity="0.25" />
-                  <circle r="10" fill="#f59e0b" />
-                  <text x="0" y="4" textAnchor="middle" fontSize="10" fill="#fff">🍕</text>
-                </g>
-
-                {/* Customer Home Pin */}
-                <g transform="translate(340, 170)">
-                  <circle r="18" fill="#10b981" opacity="0.25" />
-                  <circle r="11" fill="#10b981" />
-                  <text x="0" y="4" textAnchor="middle" fontSize="11" fill="#fff">📍</text>
-                </g>
-
-                {/* Animated Courier Bike along the route */}
-                <g transform={`translate(${60 + (280 * courierProgress) / 100}, ${60 + (110 * courierProgress) / 100})`}>
-                  <circle r="16" fill="#10b981" opacity="0.4" className="animate-ping" />
-                  <circle r="13" fill="#10b981" />
-                  <text x="0" y="4" textAnchor="middle" fontSize="10" fill="#fff">🛵</text>
-                </g>
-              </svg>
-
-              {/* ETA Overlay Box */}
-              <div className="absolute top-4 left-4 bg-black/80 backdrop-blur-md border border-white/10 rounded-2xl p-3 text-white shadow-xl">
-                <p className="text-[10px] text-neutral-400 uppercase tracking-wider font-semibold">
-                  Estimated Arrival
-                </p>
-                <div className="flex items-baseline space-x-1.5 mt-0.5">
-                  <span className="text-xl font-black font-display text-emerald-400">
-                    {order.status === 'delivered' ? 'Delivered' : '18 - 25'}
-                  </span>
-                  <span className="text-xs text-neutral-300 font-medium">
-                    {order.status === 'delivered' ? '✓' : 'mins'}
-                  </span>
-                </div>
-              </div>
-            </div>
+            {/* Live Dar es Salaam Interactive GPS Delivery Map */}
+            <DarEsSalaamMap
+              riderProgress={courierProgress}
+              customerLocationName={order.customer?.address || 'Upanga East, Dar es Salaam'}
+              orderNumber={order.orderNumber}
+              etaMinutes={order.rider?.currentEtaMinutes || 18}
+              compact={androidFrame}
+            />
 
             {/* Rider Contact Card */}
             {order.rider && (

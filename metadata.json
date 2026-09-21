@@ -1,6 +1,6 @@
 {
   "name": "Zebra Restaurant",
-  "description": "Premium Android food delivery app with USSD mobile payments, real-time tracking, dual themes, and admin control.",
+  "description": "Zebra Restaurant food delivery app with USSD mobile payments, real-time tracking, Cloudinary media CDN, and admin control.",
   "requestFramePermissions": ["geolocation"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

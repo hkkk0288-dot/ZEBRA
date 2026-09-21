@@ -16,11 +16,15 @@ import {
   Store,
   Tag,
   ArrowLeft,
-  Smartphone
+  Smartphone,
+  Cloud
 } from 'lucide-react';
 import { OrderStatus, MenuItem } from '../types';
 import { CATEGORIES } from '../data/mockData';
 import { FoodImage } from './FoodImage';
+import { CloudinaryMediaManager } from './CloudinaryMediaManager';
+import { CloudinaryUploader } from './CloudinaryUploader';
+import { DarEsSalaamMap } from './DarEsSalaamMap';
 
 export const AdminDashboardView: React.FC = () => {
   const {
@@ -38,7 +42,7 @@ export const AdminDashboardView: React.FC = () => {
   } = useApp();
 
   const isDark = theme === 'dark';
-  const [adminTab, setAdminTab] = useState<'orders' | 'menu' | 'restaurants' | 'promos'>('orders');
+  const [adminTab, setAdminTab] = useState<'orders' | 'menu' | 'cloudinary' | 'restaurants' | 'promos'>('orders');
   const [orderFilter, setOrderFilter] = useState<'all' | 'active' | 'delivered'>('all');
 
   // New Dish Modal State
@@ -210,6 +214,7 @@ export const AdminDashboardView: React.FC = () => {
           {[
             { id: 'orders', label: 'Orders & Deliveries', icon: ShoppingBag },
             { id: 'menu', label: 'Menu Catalog', icon: UtensilsCrossed },
+            { id: 'cloudinary', label: 'Cloudinary CDN (cy4pidvh)', icon: Cloud },
             { id: 'restaurants', label: 'Kitchen Branches', icon: Store },
             { id: 'promos', label: 'USSD & Promos', icon: Smartphone }
           ].map(tab => {
@@ -384,12 +389,39 @@ export const AdminDashboardView: React.FC = () => {
           </div>
         )}
 
-        {/* TAB 3: KITCHEN BRANCHES */}
+        {/* TAB 3: CLOUDINARY MEDIA MANAGER */}
+        {adminTab === 'cloudinary' && (
+          <CloudinaryMediaManager />
+        )}
+
+        {/* TAB 4: KITCHEN BRANCHES */}
         {adminTab === 'restaurants' && (
-          <div className="space-y-3">
-            <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-wider">
-              Zebra Kitchen Hubs (Dar es Salaam)
-            </h3>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-white flex items-center space-x-2">
+                  <Store className="w-4 h-4 text-emerald-400" />
+                  <span>Ramani ya Matawi ya Zebra (Dar es Salaam)</span>
+                </h3>
+                <p className="text-xs text-neutral-400 mt-0.5">
+                  Matawi 4 ya jikoni na maeneo ya usambazaji wa chakula Dar es Salaam
+                </p>
+              </div>
+              <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+                4 Kitchen Hubs
+              </span>
+            </div>
+
+            {/* Interactive Live Dar es Salaam Map */}
+            <DarEsSalaamMap
+              customerLocationName="Dar es Salaam Hubs"
+              orderNumber="ADMIN-LIVE"
+              etaMinutes={15}
+            />
+
+            <h4 className="text-xs font-bold text-neutral-400 uppercase tracking-wider pt-2">
+              Orodha ya Matawi (Kitchen Locations)
+            </h4>
 
             {[
               { name: 'Zebra Masaki Main Kitchen', area: 'Masaki Peninsula, Toure Dr', status: 'Open Now', time: '10:00 AM - 11:30 PM', phone: '+255 712 345 678' },
@@ -541,13 +573,22 @@ export const AdminDashboardView: React.FC = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-neutral-400 mb-1">Photo URL</label>
+              <div className="space-y-1.5">
+                <label className="block text-neutral-300 font-semibold text-xs flex items-center justify-between">
+                  <span>Picha ya Sahani (Cloudinary CDN)</span>
+                  <span className="text-[10px] text-emerald-400 font-mono">cy4pidvh</span>
+                </label>
+                <CloudinaryUploader
+                  currentImageUrl={dishImageUrl}
+                  onImageUploaded={(url) => setDishImageUrl(url)}
+                  label="Buruta au chagua picha kupakia moja kwa moja Cloudinary"
+                />
                 <input
                   type="url"
+                  placeholder="au weka link ya picha hapa moja kwa moja..."
                   value={dishImageUrl}
                   onChange={e => setDishImageUrl(e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-neutral-800 border border-neutral-700 outline-none"
+                  className="w-full mt-1.5 p-2 rounded-xl bg-neutral-800/80 border border-neutral-700 text-neutral-300 text-[11px] font-mono outline-none focus:border-emerald-500"
                 />
               </div>
 
