@@ -143,20 +143,22 @@ const MainContent: React.FC = () => {
   // Full Website View ("websat view iwe fulu nayakupendeza")
   return (
     <div
-      className={`min-h-screen flex flex-col transition-colors duration-300 ${
+      className={`min-h-screen flex flex-col overflow-x-hidden w-full max-w-full transition-colors duration-300 ${
         isDark ? 'bg-[#09090b] text-white' : 'bg-[#fafafa] text-neutral-900'
       }`}
     >
       {/* Full Website Header */}
       <WebHeader />
 
-      {/* Main View Container (Full width responsive container) */}
-      <main className="flex-1 w-full relative">
+      {/* Main View Container (Full width responsive container with bottom padding for mobile floating nav) */}
+      <main className="flex-1 w-full relative pb-24 sm:pb-28 lg:pb-8">
         {renderActiveView()}
       </main>
 
       {/* Full Website Footer */}
-      <WebFooter />
+      <div className="pb-16 lg:pb-0">
+        <WebFooter />
+      </div>
 
       {/* Floating Bottom Nav for Mobile Screens only */}
       <div className="lg:hidden">

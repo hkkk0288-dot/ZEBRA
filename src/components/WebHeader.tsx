@@ -49,26 +49,22 @@ export const WebHeader: React.FC = () => {
       }`}
     >
       {/* Top Notification Bar for Delivery and USSD */}
-      <div className="bg-emerald-600 text-white text-[11px] py-1.5 px-4 font-medium flex items-center justify-between">
+      <div className="bg-emerald-600 text-white text-[10px] sm:text-[11px] py-1 px-3 sm:px-4 font-medium overflow-hidden">
         <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <span className="bg-emerald-700 text-white px-2 py-0.5 rounded-full font-bold text-[10px]">
+          <div className="flex items-center space-x-1.5 truncate">
+            <span className="bg-emerald-700 text-white px-1.5 py-0.5 rounded-full font-bold text-[9px] shrink-0">
               FAST DELIVERY
             </span>
-            <span className="hidden sm:inline">
-              Serving Masaki, Oysterbay, Slipway & across Dar es Salaam • Avg ETA: ~20-30 mins
-            </span>
-            <span className="sm:hidden">
-              Dar es Salaam • Masaki, Oysterbay, Slipway
+            <span className="truncate">
+              Masaki, Slipway & across Dar • 20-30m
             </span>
           </div>
 
-          <div className="flex items-center space-x-3 text-[11px]">
-            <span className="hidden md:inline font-mono">
-              Lipa Namba: <strong className="text-amber-200">445566</strong> (*150*00#)
+          <div className="flex items-center space-x-2 shrink-0 ml-2">
+            <span className="hidden sm:inline font-mono">
+              Lipa Namba: <strong className="text-amber-200">445566</strong>
             </span>
-            <span className="opacity-80">|</span>
-            <span className="font-semibold text-amber-200">
+            <span className="font-semibold text-amber-200 text-[10px]">
               Dev: AmourCodes
             </span>
           </div>
@@ -76,28 +72,28 @@ export const WebHeader: React.FC = () => {
       </div>
 
       {/* Main Navigation Bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
-        <div className="flex items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3.5">
+        <div className="flex items-center justify-between gap-2 sm:gap-4">
           {/* Logo & Brand */}
           <div
             onClick={() => setActiveTab('home')}
-            className="flex items-center space-x-3 cursor-pointer shrink-0"
+            className="flex items-center space-x-2 sm:space-x-3 cursor-pointer min-w-0"
           >
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 to-amber-500 flex items-center justify-center text-xl shadow-md shadow-emerald-500/20">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-emerald-500 to-amber-500 flex items-center justify-center text-lg sm:text-xl shadow-md shadow-emerald-500/20 shrink-0">
               🦓
             </div>
-            <div>
-              <div className="flex items-center space-x-1.5">
-                <span className="font-display font-extrabold text-lg sm:text-xl tracking-tight text-neutral-900 dark:text-white">
+            <div className="min-w-0">
+              <div className="flex items-center space-x-1 sm:space-x-1.5 truncate">
+                <span className="font-display font-extrabold text-sm sm:text-lg lg:text-xl tracking-tight text-neutral-900 dark:text-white truncate">
                   Zebra Restaurant
                 </span>
-                <span className="text-[10px] font-bold bg-amber-500/20 text-amber-500 px-1.5 py-0.5 rounded">
+                <span className="text-[9px] sm:text-[10px] font-bold bg-amber-500/20 text-amber-500 px-1 sm:px-1.5 py-0.5 rounded shrink-0">
                   DAR
                 </span>
               </div>
-              <p className="text-[11px] text-neutral-500 dark:text-neutral-400 flex items-center space-x-1">
-                <MapPin className="w-3 h-3 text-emerald-500" />
-                <span>Masaki Peninsula & Oysterbay</span>
+              <p className="text-[10px] sm:text-[11px] text-neutral-500 dark:text-neutral-400 flex items-center space-x-1 truncate">
+                <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-emerald-500 shrink-0" />
+                <span className="truncate">Masaki & Slipway</span>
               </p>
             </div>
           </div>
@@ -185,7 +181,7 @@ export const WebHeader: React.FC = () => {
               <span>Account</span>
             </button>
 
-            {/* Login / Regista (Requested by user) */}
+            {/* Login / Regista */}
             <button
               onClick={() => setActiveTab('auth')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
@@ -199,17 +195,17 @@ export const WebHeader: React.FC = () => {
             </button>
           </div>
 
-          {/* Quick Actions (Currency, Theme, Cart) */}
-          <div className="flex items-center space-x-2">
+          {/* Quick Actions (Currency, Theme, Cart, Menu) */}
+          <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
             {/* Currency Switcher */}
             <button
               onClick={() => setCurrency(currency === 'USD' ? 'TZS' : 'USD')}
-              className={`text-xs font-bold px-2.5 py-1.5 rounded-xl border transition-colors ${
+              className={`text-[10px] sm:text-xs font-bold px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg sm:rounded-xl border transition-colors ${
                 isDark
                   ? 'bg-neutral-800 border-neutral-700 text-neutral-200 hover:bg-neutral-700'
                   : 'bg-neutral-100 border-neutral-300 text-neutral-800 hover:bg-neutral-200'
               }`}
-              title="Switch currency between USD and Tanzanian Shillings"
+              title="Switch currency"
             >
               {currency === 'USD' ? '$ USD' : 'TZS'}
             </button>
@@ -217,25 +213,26 @@ export const WebHeader: React.FC = () => {
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className={`p-2 rounded-xl border transition-colors ${
+              className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl border transition-colors ${
                 isDark
                   ? 'bg-neutral-800 border-neutral-700 text-amber-400 hover:bg-neutral-700'
                   : 'bg-neutral-100 border-neutral-300 text-amber-600 hover:bg-neutral-200'
               }`}
               title="Toggle Dark / Light Mode"
             >
-              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              {isDark ? <Sun className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Moon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
             </button>
 
-            {/* Cart Button */}
+            {/* Cart Button - ALWAYS VISIBLE */}
             <button
               onClick={() => setActiveTab('cart')}
-              className="flex items-center space-x-2 bg-emerald-500 hover:bg-emerald-600 text-white px-3.5 py-2 rounded-2xl shadow-md shadow-emerald-500/30 transition-transform active:scale-95"
+              className="flex items-center space-x-1.5 bg-emerald-500 hover:bg-emerald-600 text-white p-1.5 sm:px-3.5 sm:py-2 rounded-lg sm:rounded-2xl shadow-md shadow-emerald-500/30 transition-transform active:scale-95 shrink-0"
+              title="View Cart"
             >
               <div className="relative">
                 <ShoppingBag className="w-4 h-4" />
                 {cartCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-neutral-900 text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center border border-white">
+                  <span className="absolute -top-2 -right-2 bg-neutral-900 text-white text-[9px] sm:text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center border border-white">
                     {cartCount}
                   </span>
                 )}
@@ -248,23 +245,24 @@ export const WebHeader: React.FC = () => {
             {/* Mobile Menu Hamburger */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-xl text-neutral-400 hover:text-white hover:bg-neutral-800"
+              className="lg:hidden p-1.5 sm:p-2 rounded-lg sm:rounded-xl text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors shrink-0"
+              title="Open Navigation Menu"
             >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {mobileMenuOpen ? <X className="w-4 h-4 sm:w-5 sm:h-5" /> : <Menu className="w-4 h-4 sm:w-5 sm:h-5" />}
             </button>
           </div>
         </div>
 
         {/* Mobile Search Bar if viewport is small */}
-        <div className="md:hidden mt-3">
+        <div className="md:hidden mt-2.5">
           <div className="relative w-full">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
             <input
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search dishes or Swahili food..."
-              className={`w-full pl-10 pr-4 py-2 rounded-2xl text-xs outline-none border ${
+              placeholder="Tafuta pizza, burger, mishkaki, biryani..."
+              className={`w-full pl-10 pr-4 py-2 rounded-xl sm:rounded-2xl text-xs outline-none border ${
                 isDark
                   ? 'bg-neutral-900 border-neutral-700 text-white placeholder-neutral-500'
                   : 'bg-neutral-100 border-neutral-300 text-neutral-900 placeholder-neutral-400'

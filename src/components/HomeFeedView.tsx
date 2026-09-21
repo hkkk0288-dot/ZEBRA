@@ -212,62 +212,62 @@ export const HomeFeedView: React.FC = () => {
       )}
 
       {/* Main Content Container - Full Width on Web, Compact on Mobile */}
-      <div className={`w-full ${androidFrame ? 'px-5 space-y-6 mt-1' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 mt-4'}`}>
+      <div className={`w-full max-w-full overflow-hidden ${androidFrame ? 'px-4 space-y-5 mt-1' : 'max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-6 sm:space-y-8 mt-3 sm:mt-4'}`}>
         
         {/* Full Website Hero & Promo Banner */}
-        <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-emerald-950 via-neutral-900 to-amber-950 border border-emerald-500/30 p-6 sm:p-8 shadow-2xl text-white">
+        <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden bg-gradient-to-r from-emerald-950 via-neutral-900 to-amber-950 border border-emerald-500/30 p-4 sm:p-7 shadow-xl text-white">
           <div className="relative z-10 max-w-xl">
-            <div className="inline-flex items-center space-x-2 bg-emerald-500/20 border border-emerald-500/40 px-3 py-1 rounded-full text-xs font-bold text-emerald-400 mb-2">
-              <Sparkles className="w-3.5 h-3.5" />
+            <div className="inline-flex items-center space-x-1.5 bg-emerald-500/20 border border-emerald-500/40 px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold text-emerald-400 mb-1.5">
+              <Sparkles className="w-3 h-3" />
               <span>Festive Offer • Zebra Restaurant</span>
             </div>
 
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black font-display tracking-tight text-white mt-1">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-black font-display tracking-tight text-white leading-tight">
               30% OFF <span className="text-amber-400">Everything</span>
             </h2>
 
-            <p className="text-xs sm:text-sm text-neutral-300 mt-2 font-medium leading-relaxed">
-              Authentic wood-fired pizzas, gourmet smash burgers, and fresh Swahili mishkaki & biryani. 
-              Delivered hot across Dar es Salaam (Masaki, Oysterbay, Slipway & City).
+            <p className="text-xs sm:text-sm text-neutral-300 mt-1.5 sm:mt-2 font-medium leading-relaxed line-clamp-2 sm:line-clamp-none">
+              Authentic wood-fired pizzas, gourmet smash burgers, and fresh Swahili mishkaki & biryani delivered hot across Dar es Salaam.
             </p>
 
-            <div className="flex flex-wrap items-center gap-3 mt-4">
-              <div className="px-3.5 py-1.5 rounded-xl bg-black/60 border border-emerald-500/30 text-xs font-mono font-bold text-amber-300">
-                Promo Code: <span className="text-white">ZEBRA30</span>
-              </div>
-
+            {/* Banner Quick Actions - Fits cleanly on mobile */}
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-3 mt-3 sm:mt-4">
               <button
                 onClick={() => {
                   applyPromoCode('ZEBRA30');
                   setActiveTab('cart');
                 }}
-                className="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold text-xs sm:text-sm py-2.5 px-6 rounded-full shadow-lg shadow-emerald-500/40 transition-all flex items-center space-x-2"
+                className="col-span-2 sm:col-span-1 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold text-xs sm:text-sm py-2.5 px-5 rounded-xl sm:rounded-full shadow-lg shadow-emerald-500/40 transition-all flex items-center justify-center space-x-2"
               >
                 <span>Claim 30% Off</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
 
+              <div className="px-3 py-2 rounded-xl bg-black/60 border border-emerald-500/30 text-[11px] sm:text-xs font-mono font-bold text-amber-300 flex items-center justify-center">
+                Code: <span className="text-white ml-1 font-black">ZEBRA30</span>
+              </div>
+
               <button
-                onClick={() => setActiveTab('orders')}
-                className="bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm py-2.5 px-5 rounded-full backdrop-blur-sm transition-all flex items-center space-x-1.5"
+                onClick={() => setShowNotificationModal(true)}
+                className="bg-white/10 hover:bg-white/20 text-white font-semibold text-[11px] sm:text-xs py-2 px-3 rounded-xl backdrop-blur-sm transition-all flex items-center justify-center space-x-1"
               >
-                <Smartphone className="w-4 h-4 text-amber-400" />
-                <span>USSD Pay: *150*00#</span>
+                <Smartphone className="w-3.5 h-3.5 text-amber-400" />
+                <span>*150*00#</span>
               </button>
 
               <button
                 onClick={() => setShowMapModal(true)}
-                className="bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-bold text-xs sm:text-sm py-2.5 px-5 rounded-full backdrop-blur-sm transition-all flex items-center space-x-1.5"
+                className="col-span-2 sm:col-span-1 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-bold text-[11px] sm:text-xs py-2 px-3.5 rounded-xl backdrop-blur-sm transition-all flex items-center justify-center space-x-1.5"
               >
-                <MapPin className="w-4 h-4 text-emerald-400" />
+                <MapPin className="w-3.5 h-3.5 text-emerald-400" />
                 <span>Ramani ya Dar es Salaam</span>
               </button>
             </div>
           </div>
 
           {/* Decorative culinary background graphics */}
-          <div className="absolute right-0 top-0 bottom-0 w-1/3 opacity-20 sm:opacity-40 pointer-events-none hidden sm:flex items-center justify-end pr-8">
-            <span className="text-9xl filter drop-shadow-2xl select-none">🍕</span>
+          <div className="absolute right-2 top-2 bottom-2 w-1/3 opacity-20 sm:opacity-40 pointer-events-none hidden sm:flex items-center justify-end pr-6">
+            <span className="text-8xl filter drop-shadow-2xl select-none">🍕</span>
           </div>
         </div>
 
@@ -338,19 +338,13 @@ export const HomeFeedView: React.FC = () => {
             </div>
           </div>
 
-          {/* Responsive Food Grid */}
-          <div
-            className={`grid gap-4 md:gap-6 ${
-              androidFrame
-                ? 'grid-cols-2'
-                : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
-            }`}
-          >
+          {/* Responsive Food Grid - 2 columns on mobile, up to 4 on desktop */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
             {bestSellers.map(dish => (
               <div
                 key={dish.id}
                 onClick={() => setSelectedDish(dish)}
-                className={`group relative rounded-3xl p-4 border transition-all duration-200 cursor-pointer flex flex-col justify-between ${
+                className={`group relative rounded-2xl sm:rounded-3xl p-2.5 sm:p-4 border transition-all duration-200 cursor-pointer flex flex-col justify-between ${
                   isDark
                     ? 'bg-neutral-900/90 border-neutral-800 hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/5'
                     : 'bg-white border-neutral-200 shadow-sm hover:shadow-lg hover:border-emerald-400'
@@ -362,7 +356,7 @@ export const HomeFeedView: React.FC = () => {
                     e.stopPropagation();
                     toggleFavorite(dish.id);
                   }}
-                  className={`absolute top-4 right-4 p-2 rounded-full z-10 transition-colors ${
+                  className={`absolute top-2.5 right-2.5 sm:top-3 sm:right-3 p-1.5 sm:p-2 rounded-full z-10 transition-colors ${
                     isFavorite(dish.id)
                       ? 'bg-rose-500 text-white shadow-md'
                       : isDark
@@ -372,14 +366,14 @@ export const HomeFeedView: React.FC = () => {
                   title="Save to Favorites"
                 >
                   <Heart
-                    className={`w-4 h-4 ${isFavorite(dish.id) ? 'fill-white' : ''}`}
+                    className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isFavorite(dish.id) ? 'fill-white' : ''}`}
                   />
                 </button>
 
                 {/* Best Seller Ribbon */}
                 {dish.isBestSeller && (
-                  <div className="absolute top-4 left-4 z-10">
-                    <span className="bg-amber-500 text-neutral-900 text-[10px] font-black uppercase px-2 py-0.5 rounded-full shadow">
+                  <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-10">
+                    <span className="bg-amber-500 text-neutral-900 text-[9px] sm:text-[10px] font-black uppercase px-1.5 py-0.5 rounded-full shadow">
                       Popular
                     </span>
                   </div>
@@ -387,7 +381,7 @@ export const HomeFeedView: React.FC = () => {
 
                 <div>
                   {/* Dish Image */}
-                  <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-neutral-950 mb-3.5">
+                  <div className="relative w-full aspect-square rounded-xl sm:rounded-2xl overflow-hidden bg-neutral-950 mb-2 sm:mb-3">
                     <FoodImage
                       src={dish.image}
                       alt={dish.name}
@@ -397,53 +391,53 @@ export const HomeFeedView: React.FC = () => {
                   </div>
 
                   {/* Title and Swahili Translation */}
-                  <h3 className="font-bold text-sm leading-snug text-neutral-900 dark:text-neutral-100 line-clamp-1 group-hover:text-emerald-500 transition-colors">
+                  <h3 className="font-bold text-xs sm:text-sm leading-snug text-neutral-900 dark:text-neutral-100 line-clamp-1 group-hover:text-emerald-500 transition-colors">
                     {dish.name}
                   </h3>
 
                   {dish.swahiliName && (
-                    <p className="text-xs text-amber-500 font-medium truncate mt-0.5">
+                    <p className="text-[10px] sm:text-xs text-amber-500 font-medium truncate mt-0.5">
                       {dish.swahiliName}
                     </p>
                   )}
 
                   {/* Pricing */}
-                  <div className="flex items-baseline space-x-2 mt-2">
-                    <span className="text-base font-extrabold text-emerald-600 dark:text-emerald-400">
+                  <div className="flex items-baseline space-x-1.5 mt-1 sm:mt-1.5">
+                    <span className="text-xs sm:text-base font-extrabold text-emerald-600 dark:text-emerald-400">
                       {formatPrice(dish.price, currency)}
                     </span>
                     {currency === 'USD' && (
-                      <span className="text-[11px] text-neutral-400 font-mono">
+                      <span className="text-[9px] sm:text-[11px] text-neutral-400 font-mono hidden xs:inline">
                         ≈ {formatPrice(dish.price, 'TZS')}
                       </span>
                     )}
                   </div>
 
-                  {/* Badges: Calories, Time, Rating */}
-                  <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-neutral-800/40 dark:border-neutral-800/80 text-[11px] text-neutral-500 dark:text-neutral-400">
-                    <div className="flex items-center space-x-1">
-                      <Flame className="w-3.5 h-3.5 text-amber-500" />
-                      <span>{dish.calories} cal</span>
+                  {/* Badges: Rating & Time */}
+                  <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-neutral-800/40 dark:border-neutral-800/80 text-[10px] sm:text-[11px] text-neutral-500 dark:text-neutral-400">
+                    <div className="flex items-center space-x-1 font-bold text-amber-500">
+                      <span>★ {dish.rating}</span>
                     </div>
 
                     <div className="flex items-center space-x-1">
-                      <Clock className="w-3.5 h-3.5 text-neutral-400" />
+                      <Clock className="w-3 h-3 text-neutral-400" />
                       <span>{dish.prepTimeMinutes}m</span>
                     </div>
 
-                    <div className="flex items-center space-x-1 font-bold text-amber-500">
-                      <span>★ {dish.rating}</span>
+                    <div className="hidden sm:flex items-center space-x-1">
+                      <Flame className="w-3.5 h-3.5 text-amber-500" />
+                      <span>{dish.calories} cal</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Quick Add Button */}
-                <div className="mt-3 pt-2">
+                <div className="mt-2 pt-1">
                   <button
                     onClick={e => handleQuickAdd(e, dish)}
-                    className="w-full py-2.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow-sm shadow-emerald-500/30 transition-all"
+                    className="w-full py-1.5 sm:py-2.5 px-2 rounded-lg sm:rounded-xl bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold text-[11px] sm:text-xs flex items-center justify-center space-x-1 shadow-sm shadow-emerald-500/30 transition-all"
                   >
-                    <Plus className="w-4 h-4 stroke-[3]" />
+                    <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[3]" />
                     <span>Quick Add</span>
                   </button>
                 </div>
@@ -455,9 +449,9 @@ export const HomeFeedView: React.FC = () => {
         {/* Full Menu & Swahili Specialties Section */}
         {otherItems.length > 0 && (
           <div>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
               <div>
-                <h2 className="text-xl font-bold font-display text-neutral-900 dark:text-white tracking-tight">
+                <h2 className="text-lg sm:text-xl font-bold font-display text-neutral-900 dark:text-white tracking-tight">
                   Zebra Signature & Swahili Dishes
                 </h2>
                 <p className="text-xs text-neutral-500 dark:text-neutral-400">
@@ -466,25 +460,19 @@ export const HomeFeedView: React.FC = () => {
               </div>
             </div>
 
-            <div
-              className={`grid gap-4 md:gap-6 ${
-                androidFrame
-                  ? 'grid-cols-1'
-                  : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
-              }`}
-            >
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4 md:gap-6">
               {otherItems.map(dish => (
                 <div
                   key={dish.id}
                   onClick={() => setSelectedDish(dish)}
-                  className={`flex items-center justify-between p-4 rounded-3xl border transition-all cursor-pointer ${
+                  className={`flex items-center justify-between p-3 sm:p-4 rounded-2xl sm:rounded-3xl border transition-all cursor-pointer ${
                     isDark
                       ? 'bg-neutral-900/90 border-neutral-800 hover:border-neutral-700'
                       : 'bg-white border-neutral-200 shadow-sm hover:shadow-md'
                   }`}
                 >
-                  <div className="flex items-center space-x-3.5 min-w-0 flex-1 mr-3">
-                    <div className="w-20 h-20 rounded-2xl overflow-hidden bg-neutral-900 shrink-0 border border-neutral-700/40">
+                  <div className="flex items-center space-x-3 min-w-0 flex-1 mr-2.5">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl overflow-hidden bg-neutral-900 shrink-0 border border-neutral-700/40">
                       <FoodImage
                         src={dish.image}
                         alt={dish.name}
@@ -493,35 +481,35 @@ export const HomeFeedView: React.FC = () => {
                       />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="font-bold text-sm text-neutral-900 dark:text-white truncate">
+                      <h3 className="font-bold text-xs sm:text-sm text-neutral-900 dark:text-white truncate">
                         {dish.name}
                       </h3>
                       {dish.swahiliName && (
-                        <p className="text-xs text-amber-500 font-medium truncate">
+                        <p className="text-[10px] sm:text-xs text-amber-500 font-medium truncate">
                           {dish.swahiliName}
                         </p>
                       )}
-                      <p className="text-xs text-neutral-400 truncate mt-0.5">
+                      <p className="text-[11px] text-neutral-400 truncate mt-0.5">
                         {dish.restaurantName}
                       </p>
-                      <div className="flex items-center space-x-2 mt-1.5 text-xs">
-                        <span className="font-black text-emerald-500">
+                      <div className="flex items-center space-x-1.5 sm:space-x-2 mt-1 text-xs">
+                        <span className="font-black text-emerald-500 text-xs sm:text-sm">
                           {formatPrice(dish.price, currency)}
                         </span>
                         <span className="text-neutral-500">•</span>
-                        <span className="text-neutral-400 text-[11px]">⏱ {dish.prepTimeMinutes}m</span>
+                        <span className="text-neutral-400 text-[10px] sm:text-[11px]">⏱ {dish.prepTimeMinutes}m</span>
                         <span className="text-neutral-500">•</span>
-                        <span className="text-amber-400 font-bold text-[11px]">★ {dish.rating}</span>
+                        <span className="text-amber-400 font-bold text-[10px] sm:text-[11px]">★ {dish.rating}</span>
                       </div>
                     </div>
                   </div>
 
                   <button
                     onClick={e => handleQuickAdd(e, dish)}
-                    className="w-10 h-10 rounded-2xl bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white flex items-center justify-center shadow-md shadow-emerald-500/30 transition-all shrink-0"
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white flex items-center justify-center shadow-md shadow-emerald-500/30 transition-all shrink-0"
                     title="Add to Cart"
                   >
-                    <Plus className="w-5 h-5 stroke-[2.5]" />
+                    <Plus className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
                   </button>
                 </div>
               ))}
