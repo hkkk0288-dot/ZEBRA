@@ -49,18 +49,18 @@ export const WebHeader: React.FC = () => {
       }`}
     >
       {/* Top Notification Bar for Delivery and USSD */}
-      <div className="bg-emerald-600 text-white text-[10px] sm:text-[11px] py-1 px-3 sm:px-4 font-medium overflow-hidden">
+      <div className="bg-emerald-600 text-white text-[10px] sm:text-[11px] py-1 px-3 sm:px-4 font-medium">
         <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
-          <div className="flex items-center space-x-1.5 truncate">
+          <div className="flex items-center space-x-1.5">
             <span className="bg-emerald-700 text-white px-1.5 py-0.5 rounded-full font-bold text-[9px] shrink-0">
               FAST DELIVERY
             </span>
-            <span className="truncate">
-              Masaki, Slipway & across Dar • 20-30m
+            <span className="text-[10px] sm:text-[11px] font-semibold text-emerald-50">
+              Masaki • Slipway • Dar
             </span>
           </div>
 
-          <div className="flex items-center space-x-2 shrink-0 ml-2">
+          <div className="flex items-center space-x-2 shrink-0">
             <span className="hidden sm:inline font-mono">
               Lipa Namba: <strong className="text-amber-200">445566</strong>
             </span>
@@ -72,28 +72,28 @@ export const WebHeader: React.FC = () => {
       </div>
 
       {/* Main Navigation Bar */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3.5">
-        <div className="flex items-center justify-between gap-2 sm:gap-4">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-3.5">
+        <div className="flex items-center justify-between gap-1.5 sm:gap-4">
           {/* Logo & Brand */}
           <div
             onClick={() => setActiveTab('home')}
-            className="flex items-center space-x-2 sm:space-x-3 cursor-pointer min-w-0"
+            className="flex items-center space-x-2 sm:space-x-3 cursor-pointer shrink-0"
           >
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-emerald-500 to-amber-500 flex items-center justify-center text-lg sm:text-xl shadow-md shadow-emerald-500/20 shrink-0">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-emerald-500 to-amber-500 flex items-center justify-center text-base sm:text-xl shadow-md shadow-emerald-500/20 shrink-0">
               🦓
             </div>
-            <div className="min-w-0">
-              <div className="flex items-center space-x-1 sm:space-x-1.5 truncate">
-                <span className="font-display font-extrabold text-sm sm:text-lg lg:text-xl tracking-tight text-neutral-900 dark:text-white truncate">
+            <div>
+              <div className="flex items-center space-x-1 sm:space-x-1.5">
+                <span className="font-display font-extrabold text-sm sm:text-lg lg:text-xl tracking-tight text-neutral-900 dark:text-white whitespace-nowrap">
                   Zebra Restaurant
                 </span>
-                <span className="text-[9px] sm:text-[10px] font-bold bg-amber-500/20 text-amber-500 px-1 sm:px-1.5 py-0.5 rounded shrink-0">
+                <span className="text-[8px] sm:text-[10px] font-bold bg-amber-500/20 text-amber-500 px-1 py-0.5 rounded shrink-0">
                   DAR
                 </span>
               </div>
-              <p className="text-[10px] sm:text-[11px] text-neutral-500 dark:text-neutral-400 flex items-center space-x-1 truncate">
+              <p className="text-[9px] sm:text-[11px] text-neutral-500 dark:text-neutral-400 flex items-center space-x-1">
                 <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-emerald-500 shrink-0" />
-                <span className="truncate">Masaki & Slipway</span>
+                <span className="whitespace-nowrap">Masaki & Slipway</span>
               </p>
             </div>
           </div>

@@ -152,48 +152,50 @@ export const OrderTrackingView: React.FC = () => {
       )}
 
       {/* Main Tracking Content */}
-      <div className={`w-full ${androidFrame ? 'px-5 space-y-5' : 'max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6'}`}>
+      <div className={`w-full ${androidFrame ? 'px-4 space-y-4' : 'max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6'}`}>
         
-        {/* Full Web Breadcrumb & Status simulation button */}
-        {!androidFrame && (
-          <div className="flex items-center justify-between border-b border-neutral-800/80 pb-4 mb-6">
-            <div>
-              <div className="flex items-center space-x-3">
-                <h1 className="text-2xl font-bold font-display text-neutral-900 dark:text-white tracking-tight">
-                  Track Order Live
-                </h1>
-                <span className="px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 font-mono text-xs font-bold border border-emerald-500/30">
-                  {order.orderNumber}
-                </span>
-              </div>
-              <p className="text-xs text-neutral-400 mt-1">
-                Estimated Delivery: <strong className="text-white">{order.rider?.currentEtaMinutes ? `${order.rider.currentEtaMinutes} mins` : '15-25 mins'}</strong> • Destination: <strong className="text-white">{order.customer?.address || 'Dar es Salaam'}</strong>
-              </p>
+        {/* Clean Breadcrumb & Order Status Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-neutral-800/80 pb-3 sm:pb-4 mb-4 sm:mb-6">
+          <div>
+            <div className="flex items-center space-x-2">
+              <h1 className="text-xl sm:text-2xl font-black font-display text-neutral-900 dark:text-white tracking-tight">
+                Track Order Live
+              </h1>
+              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-mono text-xs font-bold border border-emerald-500/30">
+                {order.orderNumber}
+              </span>
             </div>
-
-            <div className="flex items-center space-x-3">
-              <button
-                onClick={handleSimulateNextStatus}
-                className="px-4 py-2 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold flex items-center space-x-1.5 shadow-md shadow-emerald-500/20 transition-all"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-                <span>Simulate Next Step ({steps[currentStepIdx]?.label})</span>
-              </button>
-            </div>
+            <p className="text-xs text-neutral-400 mt-1 flex flex-wrap items-center gap-1 sm:gap-2">
+              <span>Inafika: <strong className="text-emerald-400 font-bold">{order.rider?.currentEtaMinutes ? `${order.rider.currentEtaMinutes} mins` : '15-20 mins'}</strong></span>
+              <span className="text-neutral-600">•</span>
+              <span className="text-neutral-300 truncate max-w-xs">{order.customer?.address || 'Plot 44, Toure Drive, Masaki Peninsula'}</span>
+            </p>
           </div>
-        )}
+
+          {/* Clean, discreet status stepper button (Not a giant intrusive banner) */}
+          <div className="flex items-center self-start sm:self-auto">
+            <button
+              onClick={handleSimulateNextStatus}
+              className="px-3 py-1.5 rounded-xl bg-neutral-800/90 hover:bg-neutral-700 text-neutral-300 hover:text-white text-xs font-semibold flex items-center space-x-1.5 border border-neutral-700/70 transition-all active:scale-95 shadow-sm"
+              title="Jaribu hatua inayofuata ya oda"
+            >
+              <RefreshCw className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Hatua: {steps[currentStepIdx]?.label}</span>
+            </button>
+          </div>
+        </div>
 
         {/* 2-Column Responsive Layout */}
-        <div className={androidFrame ? 'space-y-5' : 'lg:grid lg:grid-cols-12 lg:gap-8 items-start'}>
+        <div className={androidFrame ? 'space-y-4' : 'lg:grid lg:grid-cols-12 lg:gap-8 items-start'}>
           
           {/* Left Column: Map & Courier Info */}
-          <div className={androidFrame ? 'space-y-4' : 'lg:col-span-7 space-y-5'}>
+          <div className={androidFrame ? 'space-y-4' : 'lg:col-span-7 space-y-4 sm:space-y-5'}>
             {/* Live Dar es Salaam Interactive GPS Delivery Map */}
             <DarEsSalaamMap
               riderProgress={courierProgress}
-              customerLocationName={order.customer?.address || 'Upanga East, Dar es Salaam'}
+              customerLocationName={order.customer?.address || 'Plot 44, Toure Drive, Masaki Peninsula'}
               orderNumber={order.orderNumber}
-              etaMinutes={order.rider?.currentEtaMinutes || 18}
+              etaMinutes={order.rider?.currentEtaMinutes || 8}
               compact={androidFrame}
             />
 
