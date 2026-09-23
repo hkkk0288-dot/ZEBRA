@@ -14,7 +14,8 @@ import {
   PendingAction,
   SystemRole,
   RolePermissions,
-  SlideBanner
+  SlideBanner,
+  Category
 } from '../types';
 import {
   DEFAULT_USER,
@@ -22,7 +23,8 @@ import {
   INITIAL_MENU_ITEMS,
   PROMO_OFFERS,
   USSD_NETWORKS,
-  INITIAL_SLIDE_BANNERS
+  INITIAL_SLIDE_BANNERS,
+  CATEGORIES
 } from '../data/mockData';
 import {
   fetchBannersFromFirestore,
@@ -56,6 +58,10 @@ interface AppContextType {
   updateMenuItem: (id: string, updates: Partial<MenuItem>) => void;
   deleteMenuItem: (id: string) => void;
   toggleItemAvailability: (id: string) => void;
+
+  categories: Category[];
+  addCategory: (cat: Omit<Category, 'id'>) => void;
+  deleteCategory: (id: string) => void;
 
   selectedDish: MenuItem | null;
   setSelectedDish: (item: MenuItem | null) => void;
@@ -171,6 +177,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const saved = localStorage.getItem('zebra_menu');
     return saved ? JSON.parse(saved) : INITIAL_MENU_ITEMS;
   });
+
+  // Dynamic Categories state
+  const [categories, setCategories] = useState<Category[]>(() => {
+    const saved = localStorage.getItem('zebra_categories');
+    return saved ? JSON.parse(saved) : CATEGORIES;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('zebra_categories', JSON.stringify(categories));
+  }, [categories]);
+
+  const addCategory = (cat: Omit<Category, 'id'>) => {
+    const generatedId = cat.name.toLowerCase().trim().replace(/[^a-z0-9]/g, '_') || `cat_${Date.now()}`;
+    const newCategory: Category = {
+      ...cat,
+      id: generatedId
+    };
+    setCategories(prev => {
+      // Avoid duplicate id
+      if (prev.some(c => c.id === generatedId)) {
+        return prev.map(c => c.id === generatedId ? newCategory : c);
+      }
+      return [...prev, newCategory];
+    });
+  };
+
+  const deleteCategory = (id: string) => {
+    // Keep 'all' category protected
+    if (id === 'all') return;
+    setCategories(prev => prev.filter(c => c.id !== id));
+  };
 
   // Selected dish for detail modal (Screenshot 1 view)
   const [selectedDish, setSelectedDish] = useState<MenuItem | null>(null);
@@ -805,6 +842,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateMenuItem,
         deleteMenuItem,
         toggleItemAvailability,
+        categories,
+        addCategory,
+        deleteCategory,
         selectedDish,
         setSelectedDish,
         cart,

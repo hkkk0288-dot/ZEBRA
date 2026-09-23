@@ -22,6 +22,7 @@ export interface MenuItem {
   priceTZS: number; // in Tanzanian Shillings
   category: string;
   image: string;
+  images?: string[];
   rating: number;
   reviewsCount: string;
   calories: number;

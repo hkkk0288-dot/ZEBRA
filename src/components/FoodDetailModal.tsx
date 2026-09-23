@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Heart, Share2, Star, Trash2, Plus, Minus, Check } from 'lucide-react';
+import { ArrowLeft, Heart, Share2, Star, Trash2, Plus, Minus, Check, ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { IngredientOption, SizeOption } from '../types';
 import { formatPrice } from '../utils/formatters';
@@ -24,6 +24,12 @@ export const FoodDetailModal: React.FC = () => {
   };
 
   const [selectedSize, setSelectedSize] = useState<SizeOption>(defaultSize);
+
+  // Multi-image gallery state
+  const dishImages = selectedDish.images && selectedDish.images.length > 0
+    ? selectedDish.images
+    : [selectedDish.image];
+  const [activeImgIndex, setActiveImgIndex] = useState<number>(0);
 
   // Ingredients state
   const [selectedIngredients, setSelectedIngredients] = useState<IngredientOption[]>(
@@ -149,16 +155,53 @@ export const FoodDetailModal: React.FC = () => {
 
           {/* Scrollable Dish Details Content */}
           <div className="flex-1 overflow-y-auto no-scrollbar px-6 pb-28">
-            {/* Dish Circular Food Photo Presentation */}
-            <div className="relative flex items-center justify-center my-4">
-              <div className="relative w-56 h-56 rounded-full overflow-hidden shadow-2xl border-4 border-amber-500/20 bg-neutral-900">
+            {/* Dish Food Photo Presentation & Multi-Image Gallery */}
+            <div className="relative flex flex-col items-center justify-center my-3">
+              <div className="relative w-56 h-56 rounded-full overflow-hidden shadow-2xl border-4 border-amber-500/20 bg-neutral-900 group">
                 <FoodImage
-                  src={selectedDish.image}
+                  src={dishImages[activeImgIndex] || selectedDish.image}
                   alt={selectedDish.name}
                   category={selectedDish.category}
                   className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500"
                 />
+
+                {/* Left/Right Next & Prev arrows if multiple images exist */}
+                {dishImages.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => setActiveImgIndex(prev => (prev === 0 ? dishImages.length - 1 : prev - 1))}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-xs transition-opacity"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setActiveImgIndex(prev => (prev === dishImages.length - 1 ? 0 : prev + 1))}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-xs transition-opacity"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </>
+                )}
               </div>
+
+              {/* Multi-image thumbnail selector */}
+              {dishImages.length > 1 && (
+                <div className="flex items-center space-x-2 mt-3 z-10">
+                  {dishImages.map((img, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setActiveImgIndex(idx)}
+                      className={`w-9 h-9 rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${
+                        activeImgIndex === idx
+                          ? 'border-orange-500 ring-2 ring-orange-500/40 scale-110'
+                          : 'border-neutral-700/60 opacity-60 hover:opacity-100'
+                      }`}
+                    >
+                      <img src={img} alt={`Thumb ${idx}`} className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {/* Decorative culinary glow */}
               <div className="absolute -z-10 w-64 h-64 bg-amber-500/10 rounded-full blur-2xl"></div>

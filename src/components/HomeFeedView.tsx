@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { CATEGORIES } from '../data/mockData';
 import { formatPrice } from '../utils/formatters';
 import {
   Search,
@@ -30,6 +29,7 @@ export const HomeFeedView: React.FC = () => {
   const {
     user,
     menuItems,
+    categories,
     selectedCategory,
     setSelectedCategory,
     searchQuery,
@@ -80,7 +80,7 @@ export const HomeFeedView: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen pb-24">
+    <div className="flex flex-col min-h-screen pb-36 sm:pb-32">
       {/* Mobile Top App Bar (Only shown in Mobile Phone Frame view) */}
       {androidFrame && (
         <div
@@ -221,7 +221,7 @@ export const HomeFeedView: React.FC = () => {
       )}
 
       {/* Main Content Container - Full Width on Web, Compact on Mobile */}
-      <div className={`w-full max-w-full overflow-hidden ${androidFrame ? 'px-4 space-y-5 mt-1' : 'max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-6 sm:space-y-8 mt-3 sm:mt-4'}`}>
+      <div className={`w-full max-w-full overflow-hidden ${androidFrame ? 'px-4 space-y-3.5 mt-1' : 'max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-3.5 sm:space-y-4 mt-1.5 sm:mt-2'}`}>
         
         {/* Interactive Sliding Hero Banners (Admin Configurable) */}
         <SlideBannerCarousel
@@ -229,45 +229,40 @@ export const HomeFeedView: React.FC = () => {
           onOpenUssdModal={() => setShowNotificationModal(true)}
         />
 
-        {/* Categories Bar */}
+        {/* Categories Bar - Sleek, Compact & Modern */}
         <div>
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <h2 className="text-xl font-bold font-display text-neutral-900 dark:text-white tracking-tight">
-                Explore Categories
-              </h2>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                Choose your favorite craving
-              </p>
-            </div>
+          <div className="flex items-center justify-between mb-1.5 px-0.5">
+            <span className="text-xs font-bold text-neutral-400 dark:text-neutral-400 tracking-wide uppercase">
+              Categories
+            </span>
             {selectedCategory !== 'all' && (
               <button
                 onClick={() => setSelectedCategory('all')}
-                className="text-xs font-bold text-emerald-500 hover:underline"
+                className="text-xs font-bold text-emerald-500 hover:text-emerald-400 cursor-pointer"
               >
-                View All Categories
+                Show All ({menuItems.length})
               </button>
             )}
           </div>
 
-          {/* Categories Pill Selector */}
-          <div className="flex items-center space-x-3 overflow-x-auto no-scrollbar py-2">
-            {CATEGORIES.map(cat => {
+          {/* Compact modern category pills */}
+          <div className="flex items-center space-x-1.5 sm:space-x-2 overflow-x-auto no-scrollbar py-0.5">
+            {categories.map(cat => {
               const isSelected = selectedCategory === cat.id;
               return (
                 <button
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`flex items-center space-x-2 px-4 py-2.5 rounded-2xl border transition-all duration-200 shrink-0 ${
+                  className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs transition-all duration-200 shrink-0 cursor-pointer ${
                     isSelected
-                      ? 'border-emerald-500 bg-emerald-500 text-white shadow-md shadow-emerald-500/30 font-bold scale-105'
+                      ? 'bg-emerald-500 text-white font-bold shadow-sm shadow-emerald-500/30 scale-102 ring-1 ring-emerald-400'
                       : isDark
-                      ? 'border-neutral-800 bg-neutral-900/80 hover:border-neutral-700 text-neutral-300'
-                      : 'border-neutral-200 bg-white hover:border-neutral-300 text-neutral-700 shadow-sm'
+                      ? 'bg-neutral-900/80 text-neutral-300 border border-neutral-800/90 hover:border-neutral-700 hover:text-white'
+                      : 'bg-white text-neutral-700 border border-neutral-200 shadow-2xs hover:border-neutral-300'
                   }`}
                 >
-                  <span className="text-xl select-none">{cat.icon}</span>
-                  <span className="text-xs font-semibold whitespace-nowrap">
+                  <span className="text-sm select-none">{cat.icon}</span>
+                  <span className="whitespace-nowrap font-medium text-[11px] sm:text-xs">
                     {cat.name}
                   </span>
                 </button>
@@ -278,15 +273,15 @@ export const HomeFeedView: React.FC = () => {
 
         {/* Best Sellers Section */}
         <div>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-2 sm:mb-2.5">
             <div>
-              <div className="flex items-center space-x-2">
-                <Flame className="w-5 h-5 text-amber-500" />
-                <h2 className="text-xl font-bold font-display text-neutral-900 dark:text-white tracking-tight">
+              <div className="flex items-center space-x-1.5 sm:space-x-2">
+                <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />
+                <h2 className="text-lg sm:text-xl font-bold font-display text-neutral-900 dark:text-white tracking-tight">
                   Best Sellers & Chef Specials
                 </h2>
               </div>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
+              <p className="text-[11px] sm:text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
                 Most ordered dishes in Masaki, Oysterbay & Dar es Salaam
               </p>
             </div>
@@ -296,111 +291,120 @@ export const HomeFeedView: React.FC = () => {
             </div>
           </div>
 
-          {/* Responsive Food Grid - 2 columns on mobile, up to 4 on desktop */}
+          {/* Responsive Modern Food Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
-            {bestSellers.map(dish => (
-              <div
-                key={dish.id}
-                onClick={() => setSelectedDish(dish)}
-                className={`group relative rounded-2xl sm:rounded-3xl p-2.5 sm:p-4 border transition-all duration-200 cursor-pointer flex flex-col justify-between ${
-                  isDark
-                    ? 'bg-neutral-900/90 border-neutral-800 hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/5'
-                    : 'bg-white border-neutral-200 shadow-sm hover:shadow-lg hover:border-emerald-400'
-                }`}
-              >
-                {/* Favorite heart overlay */}
-                <button
-                  onClick={e => {
-                    e.stopPropagation();
-                    toggleFavorite(dish.id);
-                  }}
-                  className={`absolute top-2.5 right-2.5 sm:top-3 sm:right-3 p-1.5 sm:p-2 rounded-full z-10 transition-colors ${
-                    isFavorite(dish.id)
-                      ? 'bg-rose-500 text-white shadow-md'
-                      : isDark
-                      ? 'bg-black/60 text-white hover:bg-black/80'
-                      : 'bg-white/90 text-neutral-700 hover:bg-white shadow'
+            {bestSellers.map(dish => {
+              const imgCount = dish.images?.length || 1;
+              return (
+                <div
+                  key={dish.id}
+                  onClick={() => setSelectedDish(dish)}
+                  className={`group relative rounded-2xl sm:rounded-3xl p-2.5 sm:p-3.5 border transition-all duration-200 cursor-pointer flex flex-col justify-between ${
+                    isDark
+                      ? 'bg-[#151518]/90 backdrop-blur-xs border-neutral-800/90 hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/5'
+                      : 'bg-white border-neutral-200 shadow-sm hover:shadow-lg hover:border-emerald-400'
                   }`}
-                  title="Save to Favorites"
                 >
-                  <Heart
-                    className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isFavorite(dish.id) ? 'fill-white' : ''}`}
-                  />
-                </button>
-
-                {/* Best Seller Ribbon */}
-                {dish.isBestSeller && (
-                  <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-10">
-                    <span className="bg-amber-500 text-neutral-900 text-[9px] sm:text-[10px] font-black uppercase px-1.5 py-0.5 rounded-full shadow">
-                      Popular
-                    </span>
-                  </div>
-                )}
-
-                <div>
-                  {/* Dish Image */}
-                  <div className="relative w-full aspect-square rounded-xl sm:rounded-2xl overflow-hidden bg-neutral-950 mb-2 sm:mb-3">
-                    <FoodImage
-                      src={dish.image}
-                      alt={dish.name}
-                      category={dish.category}
-                      className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
+                  {/* Favorite heart overlay */}
+                  <button
+                    onClick={e => {
+                      e.stopPropagation();
+                      toggleFavorite(dish.id);
+                    }}
+                    className={`absolute top-2.5 right-2.5 sm:top-3 sm:right-3 p-1.5 sm:p-2 rounded-full z-10 transition-colors ${
+                      isFavorite(dish.id)
+                        ? 'bg-rose-500 text-white shadow-md'
+                        : isDark
+                        ? 'bg-black/60 text-white hover:bg-black/80'
+                        : 'bg-white/90 text-neutral-700 hover:bg-white shadow'
+                    }`}
+                    title="Save to Favorites"
+                  >
+                    <Heart
+                      className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isFavorite(dish.id) ? 'fill-white' : ''}`}
                     />
-                  </div>
+                  </button>
 
-                  {/* Title and Swahili Translation */}
-                  <h3 className="font-bold text-xs sm:text-sm leading-snug text-neutral-900 dark:text-neutral-100 line-clamp-1 group-hover:text-emerald-500 transition-colors">
-                    {dish.name}
-                  </h3>
-
-                  {dish.swahiliName && (
-                    <p className="text-[10px] sm:text-xs text-amber-500 font-medium truncate mt-0.5">
-                      {dish.swahiliName}
-                    </p>
-                  )}
-
-                  {/* Pricing */}
-                  <div className="flex items-baseline space-x-1.5 mt-1 sm:mt-1.5">
-                    <span className="text-xs sm:text-base font-extrabold text-emerald-600 dark:text-emerald-400">
-                      {formatPrice(dish.price, currency)}
-                    </span>
-                    {currency === 'USD' && (
-                      <span className="text-[9px] sm:text-[11px] text-neutral-400 font-mono hidden xs:inline">
-                        ≈ {formatPrice(dish.price, 'TZS')}
+                  {/* Badges: Popular + Multi-Photo Indicator */}
+                  <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-10 flex items-center space-x-1">
+                    {dish.isBestSeller && (
+                      <span className="bg-amber-500 text-neutral-950 text-[9px] sm:text-[10px] font-black uppercase px-1.5 py-0.5 rounded-md shadow-xs">
+                        Popular
+                      </span>
+                    )}
+                    {imgCount > 1 && (
+                      <span className="bg-black/70 backdrop-blur-xs text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md shadow-xs flex items-center space-x-0.5">
+                        <span>📷</span>
+                        <span>{imgCount}</span>
                       </span>
                     )}
                   </div>
 
-                  {/* Badges: Rating & Time */}
-                  <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-neutral-800/40 dark:border-neutral-800/80 text-[10px] sm:text-[11px] text-neutral-500 dark:text-neutral-400">
-                    <div className="flex items-center space-x-1 font-bold text-amber-500">
-                      <span>★ {dish.rating}</span>
+                  <div>
+                    {/* Dish Image */}
+                    <div className="relative w-full aspect-square rounded-xl sm:rounded-2xl overflow-hidden bg-neutral-950 mb-2 sm:mb-2.5">
+                      <FoodImage
+                        src={dish.image}
+                        alt={dish.name}
+                        category={dish.category}
+                        className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
+                      />
                     </div>
 
-                    <div className="flex items-center space-x-1">
-                      <Clock className="w-3 h-3 text-neutral-400" />
-                      <span>{dish.prepTimeMinutes}m</span>
+                    {/* Title and Swahili Translation */}
+                    <h3 className="font-bold text-xs sm:text-sm leading-snug text-neutral-900 dark:text-neutral-100 line-clamp-1 group-hover:text-emerald-500 transition-colors">
+                      {dish.name}
+                    </h3>
+
+                    {dish.swahiliName && (
+                      <p className="text-[10px] sm:text-xs text-amber-500 font-medium truncate mt-0.5">
+                        {dish.swahiliName}
+                      </p>
+                    )}
+
+                    {/* Pricing */}
+                    <div className="flex items-baseline space-x-1.5 mt-1 sm:mt-1.5">
+                      <span className="text-xs sm:text-base font-extrabold text-emerald-600 dark:text-emerald-400">
+                        {formatPrice(dish.price, currency)}
+                      </span>
+                      {currency === 'USD' && (
+                        <span className="text-[9px] sm:text-[11px] text-neutral-400 font-mono hidden xs:inline">
+                          ≈ {formatPrice(dish.price, 'TZS')}
+                        </span>
+                      )}
                     </div>
 
-                    <div className="hidden sm:flex items-center space-x-1">
-                      <Flame className="w-3.5 h-3.5 text-amber-500" />
-                      <span>{dish.calories} cal</span>
+                    {/* Badges: Rating & Time */}
+                    <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-neutral-800/40 dark:border-neutral-800/80 text-[10px] sm:text-[11px] text-neutral-500 dark:text-neutral-400">
+                      <div className="flex items-center space-x-1 font-bold text-amber-500">
+                        <span>★ {dish.rating}</span>
+                      </div>
+
+                      <div className="flex items-center space-x-1">
+                        <Clock className="w-3 h-3 text-neutral-400" />
+                        <span>{dish.prepTimeMinutes}m</span>
+                      </div>
+
+                      <div className="hidden sm:flex items-center space-x-1">
+                        <Flame className="w-3.5 h-3.5 text-amber-500" />
+                        <span>{dish.calories} cal</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Quick Add Button */}
-                <div className="mt-2 pt-1">
-                  <button
-                    onClick={e => handleQuickAdd(e, dish)}
-                    className="w-full py-1.5 sm:py-2.5 px-2 rounded-lg sm:rounded-xl bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold text-[11px] sm:text-xs flex items-center justify-center space-x-1 shadow-sm shadow-emerald-500/30 transition-all"
-                  >
-                    <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[3]" />
-                    <span>Quick Add</span>
-                  </button>
+                  {/* Quick Add Button */}
+                  <div className="mt-2 pt-1">
+                    <button
+                      onClick={e => handleQuickAdd(e, dish)}
+                      className="w-full py-1.5 sm:py-2 px-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold text-[11px] sm:text-xs flex items-center justify-center space-x-1 shadow-xs transition-all cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[3]" />
+                      <span>Quick Add</span>
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -419,58 +423,66 @@ export const HomeFeedView: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4 md:gap-6">
-              {otherItems.map(dish => (
-                <div
-                  key={dish.id}
-                  onClick={() => setSelectedDish(dish)}
-                  className={`flex items-center justify-between p-3 sm:p-4 rounded-2xl sm:rounded-3xl border transition-all cursor-pointer ${
-                    isDark
-                      ? 'bg-neutral-900/90 border-neutral-800 hover:border-neutral-700'
-                      : 'bg-white border-neutral-200 shadow-sm hover:shadow-md'
-                  }`}
-                >
-                  <div className="flex items-center space-x-3 min-w-0 flex-1 mr-2.5">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl overflow-hidden bg-neutral-900 shrink-0 border border-neutral-700/40">
-                      <FoodImage
-                        src={dish.image}
-                        alt={dish.name}
-                        category={dish.category}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-bold text-xs sm:text-sm text-neutral-900 dark:text-white truncate">
-                        {dish.name}
-                      </h3>
-                      {dish.swahiliName && (
-                        <p className="text-[10px] sm:text-xs text-amber-500 font-medium truncate">
-                          {dish.swahiliName}
+              {otherItems.map(dish => {
+                const imgCount = dish.images?.length || 1;
+                return (
+                  <div
+                    key={dish.id}
+                    onClick={() => setSelectedDish(dish)}
+                    className={`flex items-center justify-between p-3 sm:p-3.5 rounded-2xl sm:rounded-3xl border transition-all cursor-pointer ${
+                      isDark
+                        ? 'bg-[#151518]/90 backdrop-blur-xs border-neutral-800/90 hover:border-emerald-500/40 shadow-2xs'
+                        : 'bg-white border-neutral-200 shadow-sm hover:shadow-md'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-3 min-w-0 flex-1 mr-2.5">
+                      <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl overflow-hidden bg-neutral-900 shrink-0 border border-neutral-800">
+                        <FoodImage
+                          src={dish.image}
+                          alt={dish.name}
+                          category={dish.category}
+                          className="w-full h-full object-cover"
+                        />
+                        {imgCount > 1 && (
+                          <div className="absolute bottom-1 right-1 bg-black/70 backdrop-blur-xs text-white text-[8px] font-bold px-1 rounded">
+                            {imgCount}📷
+                          </div>
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-bold text-xs sm:text-sm text-neutral-900 dark:text-white truncate">
+                          {dish.name}
+                        </h3>
+                        {dish.swahiliName && (
+                          <p className="text-[10px] sm:text-xs text-amber-500 font-medium truncate">
+                            {dish.swahiliName}
+                          </p>
+                        )}
+                        <p className="text-[11px] text-neutral-400 truncate mt-0.5">
+                          {dish.restaurantName}
                         </p>
-                      )}
-                      <p className="text-[11px] text-neutral-400 truncate mt-0.5">
-                        {dish.restaurantName}
-                      </p>
-                      <div className="flex items-center space-x-1.5 sm:space-x-2 mt-1 text-xs">
-                        <span className="font-black text-emerald-500 text-xs sm:text-sm">
-                          {formatPrice(dish.price, currency)}
-                        </span>
-                        <span className="text-neutral-500">•</span>
-                        <span className="text-neutral-400 text-[10px] sm:text-[11px]">⏱ {dish.prepTimeMinutes}m</span>
-                        <span className="text-neutral-500">•</span>
-                        <span className="text-amber-400 font-bold text-[10px] sm:text-[11px]">★ {dish.rating}</span>
+                        <div className="flex items-center space-x-1.5 sm:space-x-2 mt-1 text-xs">
+                          <span className="font-black text-emerald-500 text-xs sm:text-sm">
+                            {formatPrice(dish.price, currency)}
+                          </span>
+                          <span className="text-neutral-500">•</span>
+                          <span className="text-neutral-400 text-[10px] sm:text-[11px]">⏱ {dish.prepTimeMinutes}m</span>
+                          <span className="text-neutral-500">•</span>
+                          <span className="text-amber-400 font-bold text-[10px] sm:text-[11px]">★ {dish.rating}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <button
-                    onClick={e => handleQuickAdd(e, dish)}
-                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white flex items-center justify-center shadow-md shadow-emerald-500/30 transition-all shrink-0"
-                    title="Add to Cart"
-                  >
-                    <Plus className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
-                  </button>
-                </div>
-              ))}
+                    <button
+                      onClick={e => handleQuickAdd(e, dish)}
+                      className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white flex items-center justify-center shadow-md shadow-emerald-500/20 transition-all shrink-0 cursor-pointer"
+                      title="Add to Cart"
+                    >
+                      <Plus className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

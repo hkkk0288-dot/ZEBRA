@@ -137,8 +137,7 @@ export const SlideBannerCarousel: React.FC<SlideBannerCarouselProps> = ({
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: direction === 'right' ? -50 : 50 }}
           transition={{ duration: 0.45, ease: 'easeInOut' }}
-          className={`relative w-full overflow-hidden p-4 sm:p-7 md:p-8 text-white bg-gradient-to-r ${currentBanner.bgGradient || 'from-emerald-950 via-neutral-900 to-amber-950'} border border-white/10`}
-          style={{ minHeight: '230px' }}
+          className={`relative w-full overflow-hidden p-3.5 sm:p-5 md:p-6 text-white bg-gradient-to-r ${currentBanner.bgGradient || 'from-emerald-950 via-neutral-900 to-amber-950'} border border-white/10 min-h-[145px] sm:min-h-[195px]`}
         >
           {/* Subtle Background Food Image Overlay if present */}
           {currentBanner.imageUrl && (
@@ -161,7 +160,7 @@ export const SlideBannerCarousel: React.FC<SlideBannerCarouselProps> = ({
                 e.stopPropagation();
                 setActiveTab('admin');
               }}
-              className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-black/50 hover:bg-black/80 backdrop-blur-md border border-white/20 text-[10px] sm:text-xs text-amber-300 font-bold transition-all shadow-md active:scale-95"
+              className="absolute top-2.5 right-2.5 sm:top-4 sm:right-4 z-20 flex items-center space-x-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-black/50 hover:bg-black/80 backdrop-blur-md border border-white/20 text-[9px] sm:text-xs text-amber-300 font-bold transition-all shadow-md active:scale-95"
               title="Badili Mabango / Admin Banners Manager"
             >
               <Settings2 className="w-3 h-3 text-amber-400" />
@@ -173,13 +172,13 @@ export const SlideBannerCarousel: React.FC<SlideBannerCarouselProps> = ({
           {/* Banner Main Content */}
           <div className="relative z-10 max-w-xl">
             {/* Tag Badge */}
-            <div className="inline-flex items-center space-x-1.5 bg-black/40 border border-white/20 px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold text-emerald-300 mb-1.5 backdrop-blur-md">
-              <Sparkles className="w-3 h-3 text-amber-400" />
+            <div className="inline-flex items-center space-x-1.5 bg-black/40 border border-white/20 px-2 sm:px-2.5 py-0.5 rounded-full text-[9px] sm:text-xs font-bold text-emerald-300 mb-1 sm:mb-1.5 backdrop-blur-md">
+              <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-400" />
               <span>{currentBanner.tag}</span>
             </div>
 
             {/* Title & Highlight */}
-            <h2 className="text-2xl sm:text-4xl md:text-5xl font-black font-display tracking-tight text-white leading-tight">
+            <h2 className="text-xl sm:text-3xl md:text-5xl font-black font-display tracking-tight text-white leading-tight">
               <span>{currentBanner.title} </span>
               {currentBanner.titleHighlight && (
                 <span className="text-amber-400 drop-shadow-sm">
@@ -188,28 +187,28 @@ export const SlideBannerCarousel: React.FC<SlideBannerCarouselProps> = ({
               )}
             </h2>
 
-            {/* Description */}
-            <p className="text-xs sm:text-sm text-neutral-300 mt-1.5 sm:mt-2 font-medium leading-relaxed line-clamp-2 sm:line-clamp-none max-w-lg">
+            {/* Description - 1 clean line on mobile, full on desktop */}
+            <p className="text-[11px] sm:text-sm text-neutral-300 mt-1 sm:mt-1.5 font-medium leading-relaxed line-clamp-1 sm:line-clamp-none max-w-lg">
               {currentBanner.description}
             </p>
 
-            {/* Banner Quick Actions (Matches Screenshot Layout) */}
-            <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-3 mt-3 sm:mt-4">
+            {/* Banner Quick Actions: On Mobile only single sleek CTA, on Desktop includes Code/USSD/Map */}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-2 sm:mt-3.5">
               {/* Claim / CTA button */}
               <button
                 onClick={() => handleClaim(currentBanner)}
-                className="col-span-2 sm:col-span-1 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold text-xs sm:text-sm py-2.5 px-5 rounded-xl sm:rounded-full shadow-lg shadow-emerald-500/40 transition-all flex items-center justify-center space-x-2 cursor-pointer"
+                className="w-auto inline-flex items-center space-x-1.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold text-xs sm:text-sm py-1.5 sm:py-2.5 px-3.5 sm:px-5 rounded-full shadow-lg shadow-emerald-500/40 transition-all cursor-pointer"
               >
                 <span>{currentBanner.ctaText || 'Claim Offer'}</span>
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </button>
 
-              {/* Promo Code Badge with Copy button */}
+              {/* Promo Code Badge - Hidden on mobile, shown on desktop */}
               {currentBanner.promoCode && (
                 <button
                   type="button"
                   onClick={() => handleCopyCode(currentBanner.promoCode!)}
-                  className="px-3 py-2 rounded-xl bg-black/60 hover:bg-black/80 border border-emerald-500/30 text-[11px] sm:text-xs font-mono font-bold text-amber-300 flex items-center justify-center space-x-1.5 transition-colors cursor-pointer"
+                  className="hidden sm:inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-black/60 hover:bg-black/80 border border-emerald-500/30 text-xs font-mono font-bold text-amber-300 transition-colors cursor-pointer"
                   title="Click to copy coupon code"
                 >
                   <span>Code:</span>
@@ -222,21 +221,21 @@ export const SlideBannerCarousel: React.FC<SlideBannerCarouselProps> = ({
                 </button>
               )}
 
-              {/* USSD Dial Modal Trigger */}
+              {/* USSD Dial Modal Trigger - Hidden on mobile, shown on desktop */}
               <button
                 type="button"
                 onClick={onOpenUssdModal}
-                className="bg-white/10 hover:bg-white/20 text-white font-semibold text-[11px] sm:text-xs py-2 px-3 rounded-xl backdrop-blur-sm transition-all flex items-center justify-center space-x-1 cursor-pointer"
+                className="hidden sm:inline-flex items-center space-x-1 bg-white/10 hover:bg-white/20 text-white font-semibold text-xs py-2 px-3 rounded-xl backdrop-blur-sm transition-all cursor-pointer"
               >
                 <Smartphone className="w-3.5 h-3.5 text-amber-400" />
                 <span>{currentBanner.ussdNumber || '*150*00#'}</span>
               </button>
 
-              {/* Dar es Salaam Map Trigger */}
+              {/* Dar es Salaam Map Trigger - Hidden on mobile, shown on desktop */}
               <button
                 type="button"
                 onClick={onOpenMapModal}
-                className="col-span-2 sm:col-span-1 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-bold text-[11px] sm:text-xs py-2 px-3.5 rounded-xl backdrop-blur-sm transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
+                className="hidden sm:inline-flex items-center space-x-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-bold text-xs py-2 px-3.5 rounded-xl backdrop-blur-sm transition-all cursor-pointer"
               >
                 <MapPin className="w-3.5 h-3.5 text-emerald-400" />
                 <span>Ramani ya Dar es Salaam</span>
@@ -253,20 +252,20 @@ export const SlideBannerCarousel: React.FC<SlideBannerCarouselProps> = ({
         </motion.div>
       </AnimatePresence>
 
-      {/* Left / Right Carousel Navigation Buttons */}
+      {/* Left / Right Carousel Navigation Buttons - Hidden on touch mobile to prevent covering text, shown on desktop */}
       {activeBanners.length > 1 && (
         <>
           <button
             onClick={handlePrev}
             aria-label="Previous Slide"
-            className="absolute left-2.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center backdrop-blur-md border border-white/20 opacity-80 sm:opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+            className="hidden sm:flex absolute left-2.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/40 hover:bg-black/70 text-white items-center justify-center backdrop-blur-md border border-white/20 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
           <button
             onClick={handleNext}
             aria-label="Next Slide"
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center backdrop-blur-md border border-white/20 opacity-80 sm:opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+            className="hidden sm:flex absolute right-2.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/40 hover:bg-black/70 text-white items-center justify-center backdrop-blur-md border border-white/20 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
           >
             <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
@@ -275,7 +274,7 @@ export const SlideBannerCarousel: React.FC<SlideBannerCarouselProps> = ({
 
       {/* Carousel Pagination Dots */}
       {activeBanners.length > 1 && (
-        <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 z-20 flex items-center space-x-1.5 bg-black/40 px-2.5 py-1 rounded-full backdrop-blur-md border border-white/10">
+        <div className="absolute bottom-2 sm:bottom-2.5 left-1/2 -translate-x-1/2 z-20 flex items-center space-x-1.5 bg-black/40 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full backdrop-blur-md border border-white/10">
           {activeBanners.map((b, idx) => (
             <button
               key={b.id}
