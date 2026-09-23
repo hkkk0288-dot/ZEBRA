@@ -26,7 +26,7 @@ interface AdminOrdersViewProps {
 }
 
 export const AdminOrdersView: React.FC<AdminOrdersViewProps> = ({ isDark }) => {
-  const { orders, updateOrderStatus, currency } = useApp();
+  const { orders, updateOrderStatus, currency, openThermalReceipt } = useApp();
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [search, setSearch] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -187,6 +187,15 @@ export const AdminOrdersView: React.FC<AdminOrdersViewProps> = ({ isDark }) => {
                     <td className="py-3.5 px-4 text-right">
                       <div className="flex items-center justify-end space-x-1.5">
                         <button
+                          type="button"
+                          onClick={() => openThermalReceipt(null, ord)}
+                          className="p-1.5 rounded-lg border border-neutral-200 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-300"
+                          title="Print Thermal POS Receipt (80mm/58mm)"
+                        >
+                          <Printer className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => setSelectedOrder(ord)}
                           className="p-1.5 rounded-lg border border-neutral-200 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-300"
                           title="View Details / Receipt"

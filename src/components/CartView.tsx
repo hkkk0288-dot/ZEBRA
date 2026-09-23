@@ -34,7 +34,12 @@ export const CartView: React.FC = () => {
     setAuthMode,
     activeTable,
     setActiveTable,
-    setShowCustomerTableModal
+    setShowCustomerTableModal,
+    loyaltyPoints,
+    redeemLoyaltyDiscount,
+    setRedeemLoyaltyDiscount,
+    loyaltyDiscountAmount,
+    openSplitBill
   } = useApp();
 
   const isDark = theme === 'dark';
@@ -56,7 +61,7 @@ export const CartView: React.FC = () => {
 
   // Effective delivery fee based on dining mode
   const effectiveDeliveryFee = diningMode === 'dine_in' ? 0 : deliveryFee;
-  const effectiveTotal = Math.max(0, subtotal + effectiveDeliveryFee - discountAmount);
+  const effectiveTotal = Math.max(0, subtotal + effectiveDeliveryFee - discountAmount - loyaltyDiscountAmount);
 
   const handleCheckout = async () => {
     if (cart.length === 0) return;
@@ -461,6 +466,82 @@ export const CartView: React.FC = () => {
               <p className="text-xs text-rose-400 pl-2 font-medium">{promoError}</p>
             )}
 
+            {/* Zebra Loyalty Points & Cashback Redemption */}
+            <div
+              className={`p-4 rounded-3xl border transition-all ${
+                isDark ? 'bg-neutral-900/80 border-neutral-800' : 'bg-white border-neutral-200 shadow-sm'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-500 flex items-center justify-center font-black text-sm">
+                    💎
+                  </div>
+                  <div>
+                    <div className="flex items-center space-x-1.5">
+                      <span className="text-xs font-bold text-neutral-900 dark:text-white">
+                        Zebra Rewards Club
+                      </span>
+                      <span className="text-[10px] bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold px-1.5 py-0.5 rounded-full">
+                        {user.loyaltyTier || 'Gold'} Member
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-neutral-500">
+                      Una pointi <strong>{loyaltyPoints}</strong> (Thamani: {formatPrice((loyaltyPoints / 100) * 1000, 'TZS')})
+                    </p>
+                  </div>
+                </div>
+
+                <label className="flex items-center space-x-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={redeemLoyaltyDiscount}
+                    onChange={e => setRedeemLoyaltyDiscount(e.target.checked)}
+                    disabled={loyaltyPoints < 100}
+                    className="w-4 h-4 rounded text-emerald-500 focus:ring-emerald-400 focus:ring-offset-0 cursor-pointer"
+                  />
+                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                    Tumia Pointi
+                  </span>
+                </label>
+              </div>
+
+              {redeemLoyaltyDiscount && (
+                <div className="mt-2.5 p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-[11px] font-medium flex items-center justify-between">
+                  <span>Punguzo la Pointi Linalotumika:</span>
+                  <span className="font-bold font-mono">-{formatPrice(loyaltyDiscountAmount, currency)}</span>
+                </div>
+              )}
+
+              <div className="mt-2 pt-2 border-t border-neutral-100 dark:border-neutral-800 text-[10px] text-neutral-400 flex items-center justify-between">
+                <span>Pointi zitakazoongezwa kwa oda hii:</span>
+                <span className="font-bold text-emerald-500">+{Math.max(10, Math.floor(subtotal * 2600 / 1000) * 10)} Pts</span>
+              </div>
+            </div>
+
+            {/* Split Bill Trigger if Dine-In */}
+            {diningMode === 'dine_in' && (
+              <div className="p-3.5 rounded-3xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between">
+                <div className="flex items-center space-x-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500 text-neutral-950 flex items-center justify-center font-bold text-xs">
+                    👥
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-neutral-900 dark:text-white">Mmeketi wengi mezani?</p>
+                    <p className="text-[11px] text-neutral-500">Gawana bili kwa viwango sawa na lipeni tofauti</p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => openSplitBill()}
+                  className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-neutral-950 font-bold text-xs shadow-xs transition-colors cursor-pointer"
+                >
+                  Gawana Bili
+                </button>
+              </div>
+            )}
+
             {/* Payment Method Selector */}
             <div
               className={`p-5 rounded-3xl border space-y-3.5 ${
@@ -652,6 +733,13 @@ export const CartView: React.FC = () => {
                 <div className="flex justify-between text-xs text-emerald-500 font-bold">
                   <span>Discount ({appliedPromo?.code})</span>
                   <span>-{formatPrice(discountAmount, currency)}</span>
+                </div>
+              )}
+
+              {loyaltyDiscountAmount > 0 && (
+                <div className="flex justify-between text-xs text-amber-500 font-bold">
+                  <span>Punguzo la Pointi (Loyalty)</span>
+                  <span>-{formatPrice(loyaltyDiscountAmount, currency)}</span>
                 </div>
               )}
 

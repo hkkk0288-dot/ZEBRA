@@ -47,7 +47,8 @@ export const HomeFeedView: React.FC = () => {
     androidFrame,
     isLoggedIn,
     activeTable,
-    setShowCustomerTableModal
+    setShowCustomerTableModal,
+    setShowReservationModal
   } = useApp();
 
   const isDark = theme === 'dark';
@@ -284,12 +285,21 @@ export const HomeFeedView: React.FC = () => {
               </div>
             </div>
 
-            <button
-              onClick={() => setShowCustomerTableModal(true)}
-              className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-neutral-950 font-bold text-xs shrink-0 transition-colors cursor-pointer shadow-xs"
-            >
-              Chagua Meza
-            </button>
+            <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowReservationModal(true)}
+                className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 font-bold text-xs transition-colors cursor-pointer"
+              >
+                Weka Nafasi
+              </button>
+              <button
+                onClick={() => setShowCustomerTableModal(true)}
+                className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-neutral-950 font-bold text-xs transition-colors cursor-pointer shadow-xs"
+              >
+                Chagua Meza
+              </button>
+            </div>
           </div>
         )}
 

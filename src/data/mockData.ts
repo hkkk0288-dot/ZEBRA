@@ -1,4 +1,4 @@
-import { Category, MenuItem, PromoOffer, UserProfile, SlideBanner, RestaurantTable, TableOrder } from '../types';
+import { Category, MenuItem, PromoOffer, UserProfile, SlideBanner, RestaurantTable, TableOrder, TableReservation } from '../types';
 
 export const CATEGORIES: Category[] = [
   { id: 'all', name: 'All Dishes', swahiliName: 'Vyakula Vyote', icon: '🍽️' },
@@ -297,7 +297,9 @@ export const DEFAULT_USER: UserProfile = {
       isDefault: false
     }
   ],
-  favoriteItemIds: ['item-1', 'item-4', 'item-8']
+  favoriteItemIds: ['item-1', 'item-4', 'item-8'],
+  loyaltyPoints: 450,
+  loyaltyTier: 'Gold'
 };
 
 export const USSD_NETWORKS = [
@@ -450,6 +452,41 @@ export const INITIAL_TABLE_ORDERS: TableOrder[] = [
     status: 'kitchen_prep',
     notes: 'Haraka kidogo wateja wana kikao saa nane',
     createdAt: Date.now() - 15 * 60 * 1000
+  }
+];
+
+export const INITIAL_RESERVATIONS: TableReservation[] = [
+  {
+    id: 'res-101',
+    reservationCode: 'RES-ZB-8821',
+    customerName: 'Juma Khamis Mussa',
+    customerPhone: '+255 773 892 110',
+    customerEmail: 'juma.khamis@gmail.com',
+    date: new Date().toISOString().split('T')[0],
+    timeSlot: '19:30',
+    guestCount: 4,
+    section: 'Garden Terrace',
+    tablePreference: 'Table 03',
+    occasion: 'Birthday Dinner',
+    specialRequests: 'Meza iwe na maua madogo na viti vya starehe',
+    status: 'confirmed',
+    createdAt: Date.now() - 3600000 * 2
+  },
+  {
+    id: 'res-102',
+    reservationCode: 'RES-ZB-9014',
+    customerName: 'Delisas Agency Team',
+    customerPhone: '+255 712 345 678',
+    customerEmail: 'delisas@amourcodes.com',
+    date: new Date().toISOString().split('T')[0],
+    timeSlot: '20:15',
+    guestCount: 6,
+    section: 'VIP Lounge',
+    tablePreference: 'VIP Lounge 1',
+    occasion: 'Business Meeting',
+    specialRequests: 'Wageni watahitaji projector na vinywaji baridi kwanza',
+    status: 'confirmed',
+    createdAt: Date.now() - 3600000 * 5
   }
 ];
 

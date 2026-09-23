@@ -15,7 +15,9 @@ import {
   ExternalLink,
   ChevronRight,
   ShieldCheck,
-  LogIn
+  LogIn,
+  Printer,
+  Users
 } from 'lucide-react';
 import { OrderStatus } from '../types';
 import confetti from 'canvas-confetti';
@@ -34,7 +36,9 @@ export const OrderTrackingView: React.FC = () => {
     addToCart,
     androidFrame,
     isLoggedIn,
-    setAuthMode
+    setAuthMode,
+    openThermalReceipt,
+    openSplitBill
   } = useApp();
 
   const isDark = theme === 'dark';
@@ -201,8 +205,30 @@ export const OrderTrackingView: React.FC = () => {
             </p>
           </div>
 
-          {/* Clean, discreet status stepper button (Not a giant intrusive banner) */}
-          <div className="flex items-center self-start sm:self-auto">
+          {/* Action buttons: Thermal Receipt & Split Bill */}
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            <button
+              type="button"
+              onClick={() => openThermalReceipt(null, order)}
+              className="px-3 py-1.5 rounded-xl bg-neutral-800/90 hover:bg-neutral-700 text-neutral-300 hover:text-white text-xs font-semibold flex items-center space-x-1.5 border border-neutral-700/70 transition-all active:scale-95 shadow-sm cursor-pointer"
+              title="Chapisha Risiti ya POS (Thermal Receipt)"
+            >
+              <Printer className="w-3.5 h-3.5 text-neutral-400" />
+              <span>Risiti ya POS</span>
+            </button>
+
+            {order.orderType === 'dine_in' && (
+              <button
+                type="button"
+                onClick={() => openSplitBill(null, order)}
+                className="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 text-xs font-semibold flex items-center space-x-1.5 border border-amber-500/40 transition-all active:scale-95 shadow-sm cursor-pointer"
+                title="Gawana Bili Mezani"
+              >
+                <Users className="w-3.5 h-3.5 text-amber-400" />
+                <span>Gawana Bili</span>
+              </button>
+            )}
+
             <button
               onClick={handleSimulateNextStatus}
               className="px-3 py-1.5 rounded-xl bg-neutral-800/90 hover:bg-neutral-700 text-neutral-300 hover:text-white text-xs font-semibold flex items-center space-x-1.5 border border-neutral-700/70 transition-all active:scale-95 shadow-sm"

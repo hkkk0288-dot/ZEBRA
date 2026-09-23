@@ -21,7 +21,8 @@ import {
   Sparkles,
   Layers,
   ChefHat,
-  QrCode
+  QrCode,
+  Users
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { MenuItem, TableOrder, TableOrderItem, RestaurantTable } from '../../types';
@@ -31,6 +32,10 @@ import {
   updateTableOrderStatusInFirestore,
   subscribeToTableOrders
 } from '../../services/firebaseDbService';
+import {
+  playKitchenOrderBell,
+  playPaymentSuccessChime
+} from '../../utils/soundEffects';
 
 const DEFAULT_TABLES: RestaurantTable[] = [
   { id: 'tbl-1', name: 'Table 01', section: 'Indoor', capacity: 4, status: 'occupied', currentOrderId: 'tord-101' },
@@ -107,7 +112,9 @@ export const WaiterView: React.FC = () => {
     setTableOrders: setOrders,
     waiterCalls,
     dismissWaiterCall,
-    setActiveQrTable
+    setActiveQrTable,
+    openThermalReceipt,
+    openSplitBill
   } = useApp();
 
   const [activeTabFilter, setActiveTabFilter] = useState<'tables' | 'orders' | 'kitchen'>('tables');
@@ -224,6 +231,7 @@ export const WaiterView: React.FC = () => {
     );
 
     // Persist to Cloud Firestore
+    playKitchenOrderBell();
     await saveTableOrderToFirestore(newOrder);
 
     showToast(`✅ Oda ya ${targetTable} imepelekwa Jikoni na kuwekwa kwenye Cloud!`);
@@ -239,6 +247,7 @@ export const WaiterView: React.FC = () => {
     await updateTableOrderStatusInFirestore(orderId, nextStatus);
 
     if (nextStatus === 'closed' || nextStatus === 'paid') {
+      playPaymentSuccessChime();
       const targetOrder = orders.find(o => o.id === orderId);
       if (targetOrder) {
         setTables(prev =>
@@ -304,7 +313,10 @@ export const WaiterView: React.FC = () => {
           )}
 
           <button
-            onClick={() => showToast('🔔 Kengele ya Jikoni imepigwa! Wapishi wamejulishwa mara moja.')}
+            onClick={() => {
+              playKitchenOrderBell();
+              showToast('🔔 Kengele ya Jikoni imepigwa! Wapishi wamejulishwa mara moja.');
+            }}
             className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 font-bold text-xs transition-colors cursor-pointer"
           >
             <Bell className="w-4 h-4 text-amber-500" />
@@ -558,6 +570,28 @@ export const WaiterView: React.FC = () => {
                     TZS {order.totalTZS.toLocaleString()}
                   </p>
                 </div>
+
+                {/* Thermal Receipt Print button */}
+                <button
+                  type="button"
+                  onClick={() => openThermalReceipt(order)}
+                  className="px-3 py-2 rounded-xl bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 font-bold text-xs transition-all cursor-pointer flex items-center space-x-1"
+                  title="Chapisha Risiti ya POS (KOT / Bili)"
+                >
+                  <Printer className="w-3.5 h-3.5 text-neutral-600 dark:text-neutral-400" />
+                  <span>Risiti</span>
+                </button>
+
+                {/* Split Bill Button */}
+                <button
+                  type="button"
+                  onClick={() => openSplitBill(order)}
+                  className="px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 font-bold text-xs transition-all cursor-pointer flex items-center space-x-1"
+                  title="Gawana Bili ya Meza"
+                >
+                  <Users className="w-3.5 h-3.5" />
+                  <span>Gawana</span>
+                </button>
 
                 {order.status === 'ready_to_serve' && (
                   <button

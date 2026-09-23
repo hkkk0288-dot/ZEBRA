@@ -13,7 +13,9 @@ import {
   LogIn,
   UtensilsCrossed,
   ShieldCheck,
-  QrCode
+  QrCode,
+  Calendar,
+  Award
 } from 'lucide-react';
 import { formatPrice } from '../utils/formatters';
 
@@ -33,7 +35,9 @@ export const WebHeader: React.FC = () => {
     searchQuery,
     setSearchQuery,
     activeTable,
-    setShowCustomerTableModal
+    setShowCustomerTableModal,
+    setShowReservationModal,
+    loyaltyPoints
   } = useApp();
 
   const isDark = theme === 'dark';
@@ -259,6 +263,28 @@ export const WebHeader: React.FC = () => {
                 <QrCode className="w-3.5 h-3.5 text-emerald-500" />
                 <span>Mezani</span>
               </button>
+            )}
+
+            {/* Table Reservation Button */}
+            <button
+              onClick={() => setShowReservationModal(true)}
+              className="hidden md:flex items-center space-x-1 px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/30 text-xs font-bold transition-all cursor-pointer"
+              title="Weka nafasi ya meza mapema"
+            >
+              <Calendar className="w-3.5 h-3.5 text-amber-500" />
+              <span>Weka Meza</span>
+            </button>
+
+            {/* Loyalty points pill if logged in */}
+            {isLoggedIn && (
+              <div
+                onClick={() => setActiveTab('profile')}
+                className="hidden xl:flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 text-xs font-bold cursor-pointer hover:bg-emerald-500/20 transition-all"
+                title="Zebra VIP Points & Rewards"
+              >
+                <span>💎</span>
+                <span>{loyaltyPoints} pts</span>
+              </div>
             )}
 
             {/* Currency Switcher */}

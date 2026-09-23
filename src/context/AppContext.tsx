@@ -18,7 +18,8 @@ import {
   Category,
   RestaurantTable,
   TableOrder,
-  WaiterCall
+  WaiterCall,
+  TableReservation
 } from '../types';
 import {
   DEFAULT_USER,
@@ -29,7 +30,8 @@ import {
   INITIAL_SLIDE_BANNERS,
   CATEGORIES,
   DEFAULT_RESTAURANT_TABLES,
-  INITIAL_TABLE_ORDERS
+  INITIAL_TABLE_ORDERS,
+  INITIAL_RESERVATIONS
 } from '../data/mockData';
 import {
   fetchBannersFromFirestore,
@@ -42,6 +44,11 @@ import {
 } from '../services/firebaseDbService';
 import { generateOrderNumber, generateUssdRef } from '../utils/formatters';
 import { mongikeService } from '../services/mongikeService';
+import {
+  playKitchenOrderBell,
+  playWaiterCallChime,
+  playPaymentSuccessChime
+} from '../utils/soundEffects';
 
 interface AppContextType {
   theme: 'dark' | 'light';
@@ -127,6 +134,33 @@ interface AppContextType {
   setShowCustomerTableModal: (open: boolean) => void;
   activeQrTable: RestaurantTable | null;
   setActiveQrTable: (t: RestaurantTable | null) => void;
+
+  // Table Reservations
+  reservations: TableReservation[];
+  setReservations: React.Dispatch<React.SetStateAction<TableReservation[]>>;
+  addReservation: (res: TableReservation) => void;
+  showReservationModal: boolean;
+  setShowReservationModal: (open: boolean) => void;
+
+  // Thermal Receipt / KOT Modal
+  showThermalReceiptModal: boolean;
+  setShowThermalReceiptModal: (open: boolean) => void;
+  receiptTableOrder: TableOrder | null;
+  receiptOnlineOrder: Order | null;
+  openThermalReceipt: (tableOrder?: TableOrder | null, onlineOrder?: Order | null) => void;
+
+  // Split Bill Modal
+  showSplitBillModal: boolean;
+  setShowSplitBillModal: (open: boolean) => void;
+  splitBillTableOrder: TableOrder | null;
+  splitBillOnlineOrder: Order | null;
+  openSplitBill: (tableOrder?: TableOrder | null, onlineOrder?: Order | null) => void;
+
+  // Loyalty Rewards
+  loyaltyPoints: number;
+  redeemLoyaltyDiscount: boolean;
+  setRedeemLoyaltyDiscount: (redeem: boolean) => void;
+  loyaltyDiscountAmount: number;
 
   activeTab: NavigationTab;
   setActiveTab: (tab: NavigationTab) => void;
@@ -432,6 +466,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Waiter call requests (bell notifications from table customers)
   const [waiterCalls, setWaiterCalls] = useState<WaiterCall[]>([]);
   const callWaiterForTable = (tableNumber: string, reason: string = 'Mhudumu anahitajika') => {
+    playWaiterCallChime();
     const newCall: WaiterCall = {
       id: `wcall-${Date.now()}`,
       tableNumber,
@@ -448,6 +483,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Modals for Table QR tent card and Customer table selection
   const [showCustomerTableModal, setShowCustomerTableModal] = useState(false);
   const [activeQrTable, setActiveQrTable] = useState<RestaurantTable | null>(null);
+
+  // Table Reservations
+  const [reservations, setReservations] = useState<TableReservation[]>(() => {
+    const saved = localStorage.getItem('zebra_reservations');
+    return saved ? JSON.parse(saved) : INITIAL_RESERVATIONS;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('zebra_reservations', JSON.stringify(reservations));
+  }, [reservations]);
+
+  const addReservation = (res: TableReservation) => {
+    setReservations(prev => [res, ...prev]);
+  };
+  const [showReservationModal, setShowReservationModal] = useState(false);
+
+  // Thermal Receipt / KOT modal
+  const [showThermalReceiptModal, setShowThermalReceiptModal] = useState(false);
+  const [receiptTableOrder, setReceiptTableOrder] = useState<TableOrder | null>(null);
+  const [receiptOnlineOrder, setReceiptOnlineOrder] = useState<Order | null>(null);
+  const openThermalReceipt = (tOrder?: TableOrder | null, oOrder?: Order | null) => {
+    setReceiptTableOrder(tOrder || null);
+    setReceiptOnlineOrder(oOrder || null);
+    setShowThermalReceiptModal(true);
+  };
+
+  // Split Bill modal
+  const [showSplitBillModal, setShowSplitBillModal] = useState(false);
+  const [splitBillTableOrder, setSplitBillTableOrder] = useState<TableOrder | null>(null);
+  const [splitBillOnlineOrder, setSplitBillOnlineOrder] = useState<Order | null>(null);
+  const openSplitBill = (tOrder?: TableOrder | null, oOrder?: Order | null) => {
+    setSplitBillTableOrder(tOrder || null);
+    setSplitBillOnlineOrder(oOrder || null);
+    setShowSplitBillModal(true);
+  };
+
+  // Loyalty Rewards
+  const [redeemLoyaltyDiscount, setRedeemLoyaltyDiscount] = useState(false);
 
   // Persistence effects
   useEffect(() => {
@@ -699,7 +772,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const subtotal = cart.reduce((sum, item) => sum + item.totalPrice, 0);
   const deliveryFee = cart.length === 0 ? 0 : subtotal > 35 ? 0 : 5.00;
   const discountAmount = appliedPromo ? (subtotal * appliedPromo.discountPercent) / 100 : 0;
-  const totalAmount = Math.max(0, subtotal + deliveryFee - discountAmount);
+
+  // Loyalty calculations: 100 points = 1,000 TZS (~$0.3846)
+  const loyaltyPoints = user?.loyaltyPoints || 450;
+  const maxRedeemableUSD = Math.max(0, (subtotal - discountAmount) * 0.5);
+  const potentialLoyaltyUSD = (loyaltyPoints / 100) * (1000 / 2600);
+  const loyaltyDiscountAmount = redeemLoyaltyDiscount ? Math.min(potentialLoyaltyUSD, maxRedeemableUSD) : 0;
+
+  const totalAmount = Math.max(0, subtotal + deliveryFee - discountAmount - loyaltyDiscountAmount);
 
   const executeAddToCart = (
     item: MenuItem,
@@ -835,13 +915,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const isDineIn = details.orderType === 'dine_in' || !!activeTable;
     const assignedTable = activeTable?.name || details.tableNumber;
     const effectiveDeliveryFee = isDineIn ? 0 : deliveryFee;
-    const effectiveTotal = Math.max(0, subtotal + effectiveDeliveryFee - discountAmount);
+    const effectiveTotal = Math.max(0, subtotal + effectiveDeliveryFee - discountAmount - loyaltyDiscountAmount);
 
     const isMongike = details.paymentMethod === 'mongike_mobile_money';
     const isUssd = details.paymentMethod.startsWith('ussd_') || isMongike;
     const netConfig = USSD_NETWORKS.find(n => n.id === details.paymentMethod);
     const refCode = generateUssdRef();
     const amountTZS = Math.round(effectiveTotal * 2600);
+
+    // Kitchen Order Chime
+    playKitchenOrderBell();
+
+    // Loyalty points rewards (10 points per 1,000 TZS spent)
+    const pointsEarned = Math.max(10, Math.floor(amountTZS / 1000) * 10);
+    const pointsSpent = redeemLoyaltyDiscount ? Math.min(loyaltyPoints, Math.round(loyaltyDiscountAmount * 2600 / 10)) : 0;
+    const updatedPoints = Math.max(0, (user.loyaltyPoints || 450) - pointsSpent + pointsEarned);
+    const newTier = updatedPoints > 1500 ? 'Platinum' : updatedPoints > 500 ? 'Gold' : 'Silver';
+    updateUser({ loyaltyPoints: updatedPoints, loyaltyTier: newTier });
 
     const newOrder: Order = {
       id: `ord-${Date.now()}`,
@@ -859,6 +949,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       currency,
       paymentMethod: details.paymentMethod,
       paymentStatus: isUssd ? 'pending' : 'paid',
+      loyaltyPointsEarned: pointsEarned,
+      loyaltyPointsRedeemed: pointsSpent,
+      loyaltyDiscountTZS: Math.round(loyaltyDiscountAmount * 2600),
       customer: {
         name: user.name,
         phone: details.phoneNumber || user.phone,
@@ -970,6 +1063,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setOrders(prev => [newOrder, ...prev]);
     setActiveOrder(newOrder);
+    setRedeemLoyaltyDiscount(false);
     clearCart();
 
     if (isUssd) {
@@ -1107,6 +1201,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setShowCustomerTableModal,
         activeQrTable,
         setActiveQrTable,
+        reservations,
+        setReservations,
+        addReservation,
+        showReservationModal,
+        setShowReservationModal,
+        showThermalReceiptModal,
+        setShowThermalReceiptModal,
+        receiptTableOrder,
+        receiptOnlineOrder,
+        openThermalReceipt,
+        showSplitBillModal,
+        setShowSplitBillModal,
+        splitBillTableOrder,
+        splitBillOnlineOrder,
+        openSplitBill,
+        loyaltyPoints,
+        redeemLoyaltyDiscount,
+        setRedeemLoyaltyDiscount,
+        loyaltyDiscountAmount,
         activeTab,
         setActiveTab,
         authMode,

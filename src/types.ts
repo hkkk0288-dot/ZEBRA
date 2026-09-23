@@ -114,11 +114,43 @@ export interface Order {
     rating: number;
     currentEtaMinutes: number;
   };
+  loyaltyPointsEarned?: number;
+  loyaltyPointsRedeemed?: number;
+  loyaltyDiscountTZS?: number;
   createdAt: number;
 }
 
-export type NavigationTab = 'home' | 'favorites' | 'cart' | 'orders' | 'profile' | 'admin' | 'waiter' | 'auth';
+export type NavigationTab = 'home' | 'favorites' | 'cart' | 'orders' | 'profile' | 'admin' | 'waiter' | 'reservations' | 'auth';
 export type AuthMode = 'login' | 'signup';
+
+export interface BillSplitShare {
+  id: string;
+  guestName: string;
+  guestPhone?: string;
+  amountTZS: number;
+  dishNames?: string[];
+  status: 'pending' | 'paid';
+  paidVia?: string;
+  paidAt?: string;
+}
+
+export interface TableReservation {
+  id: string;
+  reservationCode: string;
+  customerName: string;
+  customerPhone: string;
+  customerEmail?: string;
+  date: string; // YYYY-MM-DD
+  timeSlot: string; // e.g. "19:00"
+  guestCount: number;
+  section: 'Indoor' | 'Garden Terrace' | 'VIP Lounge';
+  tablePreference?: string;
+  occasion?: string;
+  specialRequests?: string;
+  preOrderItems?: Array<{ dishId: string; name: string; quantity: number; priceTZS: number }>;
+  status: 'pending' | 'confirmed' | 'seated' | 'cancelled';
+  createdAt: number;
+}
 
 export type SystemRole = 'Super Admin' | 'Kitchen Manager' | 'Waiter' | 'Dispatcher' | 'Driver' | 'Customer';
 
@@ -208,6 +240,8 @@ export interface UserProfile {
     isDefault: boolean;
   }>;
   favoriteItemIds: string[];
+  loyaltyPoints?: number;
+  loyaltyTier?: 'Silver' | 'Gold' | 'Platinum';
 }
 
 export interface PromoOffer {
