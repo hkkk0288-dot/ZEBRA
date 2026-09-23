@@ -16,6 +16,7 @@ import {
 import jsQR from 'jsqr';
 import { RestaurantTable } from '../types';
 import { playScanSuccessSound } from '../utils/soundEffects';
+import { useApp } from '../context/AppContext';
 
 interface CustomerTableModalProps {
   tables: RestaurantTable[];
@@ -34,6 +35,7 @@ export const CustomerTableModal: React.FC<CustomerTableModalProps> = ({
   onClose,
   onCallWaiter
 }) => {
+  const { setActiveQrTable } = useApp();
   const [modalMode, setModalMode] = useState<'camera' | 'manual'>('camera');
   const [selectedSection, setSelectedSection] = useState<'All' | 'Indoor' | 'Garden Terrace' | 'VIP Lounge'>('All');
   const [callNotice, setCallNotice] = useState<string | null>(null);
@@ -397,8 +399,23 @@ export const CustomerTableModal: React.FC<CustomerTableModalProps> = ({
                         <span className="font-bold text-xs text-neutral-900 dark:text-white">
                           {t.name}
                         </span>
-                        <div className="w-5 h-5 rounded-full bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center text-[10px] text-neutral-600 dark:text-neutral-300">
-                          {t.capacity}👥
+                        <div className="flex items-center space-x-1">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              stopCamera();
+                              onClose();
+                              setActiveQrTable(t);
+                            }}
+                            className="p-1 rounded-md text-amber-500 hover:bg-amber-500/20 transition-colors"
+                            title="Editi, Pakua au Printi Flyer ya QR ya Meza hii"
+                          >
+                            <QrCode className="w-3.5 h-3.5" />
+                          </button>
+                          <div className="w-5 h-5 rounded-full bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center text-[10px] text-neutral-600 dark:text-neutral-300">
+                            {t.capacity}👥
+                          </div>
                         </div>
                       </div>
 
