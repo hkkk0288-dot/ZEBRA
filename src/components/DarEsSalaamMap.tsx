@@ -7,7 +7,10 @@ import {
   Clock,
   LocateFixed,
   MapPin,
-  Bike
+  Bike,
+  Plus,
+  Minus,
+  Globe2
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
@@ -72,27 +75,26 @@ export const DarEsSalaamMap: React.FC<DarEsSalaamMapProps> = ({
     if (!mapContainerRef.current) return;
     if (mapInstanceRef.current) return;
 
-    // Centered on Dar es Salaam
+    // Centered on Dar es Salaam & East Africa, allowing zoom out to full world map
     const map = L.map(mapContainerRef.current, {
       center: [-6.7980, 39.2770],
       zoom: 13,
-      minZoom: 11,
+      minZoom: 2,
       maxZoom: 18,
       zoomControl: false,
       attributionControl: false
     });
 
-    // Clean, high-resolution tiles WITHOUT "API KEY REQUIRED" watermark
-    // Dark: ESRI Dark Gray Canvas (Clean, sleek, free, official)
-    // Light: OpenStreetMap Standard
+    // Clean, high-resolution tiles matching standard global OpenStreetMap
+    // Supports clean ocean, country borders, street names and clear geographic labels
     const tileUrl = isDark
-      ? 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}'
-      : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+      ? 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
+      : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 
     L.tileLayer(tileUrl, {
-      subdomains: 'abc',
+      subdomains: isDark ? 'abcd' : 'abc',
       maxZoom: 19,
-      opacity: isDark ? 0.92 : 1
+      attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
     // Route Polyline (Sleek glowing Emerald)
@@ -240,9 +242,38 @@ export const DarEsSalaamMap: React.FC<DarEsSalaamMapProps> = ({
         {/* Map Control Buttons */}
         <div className="pointer-events-auto flex items-center space-x-1.5">
           <button
+            onClick={() => mapInstanceRef.current?.zoomIn()}
+            className="p-2 rounded-full bg-neutral-900/90 backdrop-blur-md border border-neutral-700/70 text-neutral-300 hover:text-white shadow-lg transition-transform active:scale-95"
+            title="Kuza (Zoom In)"
+          >
+            <Plus className="w-3.5 h-3.5" />
+          </button>
+
+          <button
+            onClick={() => mapInstanceRef.current?.zoomOut()}
+            className="p-2 rounded-full bg-neutral-900/90 backdrop-blur-md border border-neutral-700/70 text-neutral-300 hover:text-white shadow-lg transition-transform active:scale-95"
+            title="Punguza (Zoom Out)"
+          >
+            <Minus className="w-3.5 h-3.5" />
+          </button>
+
+          <button
+            onClick={() => {
+              const map = mapInstanceRef.current;
+              if (map) {
+                map.flyTo([0, 20], 3, { duration: 1.5 });
+              }
+            }}
+            className="p-2 rounded-full bg-neutral-900/90 backdrop-blur-md border border-neutral-700/70 text-neutral-300 hover:text-white shadow-lg transition-transform active:scale-95"
+            title="Ramani Kamili ya Dunia (Global World Map)"
+          >
+            <Globe2 className="w-3.5 h-3.5 text-blue-400" />
+          </button>
+
+          <button
             onClick={handleRecenter}
             className="p-2 rounded-full bg-neutral-900/90 backdrop-blur-md border border-neutral-700/70 text-neutral-300 hover:text-white shadow-lg transition-transform active:scale-95"
-            title="Lenga kwa Dereva (Re-center)"
+            title="Lenga kwa Dereva / Dar es Salaam (Re-center)"
           >
             <LocateFixed className="w-3.5 h-3.5 text-emerald-400" />
           </button>

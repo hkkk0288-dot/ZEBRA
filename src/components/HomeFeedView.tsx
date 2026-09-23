@@ -24,6 +24,7 @@ import { motion } from 'motion/react';
 import { FoodImage } from './FoodImage';
 import { DarEsSalaamMap } from './DarEsSalaamMap';
 import { SlideBannerCarousel } from './SlideBannerCarousel';
+import { GlobalMapModal } from './GlobalMapModal';
 
 export const HomeFeedView: React.FC = () => {
   const {
@@ -628,68 +629,12 @@ export const HomeFeedView: React.FC = () => {
         </div>
       )}
 
-      {/* Dar es Salaam Interactive Map Modal */}
-      {showMapModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-6">
-          <div
-            className={`w-full max-w-4xl rounded-3xl border shadow-2xl overflow-hidden flex flex-col max-h-[92vh] ${
-              isDark ? 'bg-[#121214] border-neutral-800 text-white' : 'bg-white border-neutral-200 text-neutral-900'
-            }`}
-          >
-            {/* Modal Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-800 shrink-0">
-              <div className="flex items-center space-x-2.5">
-                <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                  <MapPin className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-base font-display">
-                    Ramani ya Dar es Salaam (Zebra Delivery & Branches)
-                  </h3>
-                  <p className="text-xs text-neutral-400">
-                    Matawi ya Zebra Masaki, Oysterbay, Kariakoo, Slipway na ufuatiliaji wa bodaboda
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowMapModal(false)}
-                className="p-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Modal Body: Map */}
-            <div className="p-4 sm:p-5 overflow-y-auto space-y-4">
-              <DarEsSalaamMap
-                customerLocationName="Upanga / Kariakoo / Masaki"
-                orderNumber="DAR-MAP"
-                etaMinutes={15}
-                riderProgress={60}
-              />
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
-                <div className="p-3 rounded-2xl bg-neutral-900/80 border border-neutral-800">
-                  <span className="font-bold text-amber-400 block">🍕 Masaki Kitchen</span>
-                  <span className="text-[11px] text-neutral-400">Toure Dr, Masaki</span>
-                </div>
-                <div className="p-3 rounded-2xl bg-neutral-900/80 border border-neutral-800">
-                  <span className="font-bold text-amber-400 block">🥩 Kariakoo Hub</span>
-                  <span className="text-[11px] text-neutral-400">China Plaza & Market</span>
-                </div>
-                <div className="p-3 rounded-2xl bg-neutral-900/80 border border-neutral-800">
-                  <span className="font-bold text-emerald-400 block">🍔 Oysterbay Bistro</span>
-                  <span className="text-[11px] text-neutral-400">Haile Selassie Rd</span>
-                </div>
-                <div className="p-3 rounded-2xl bg-neutral-900/80 border border-neutral-800">
-                  <span className="font-bold text-purple-400 block">🐟 Slipway Ocean</span>
-                  <span className="text-[11px] text-neutral-400">Msasani Waterfront</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Global & Dar es Salaam Map Modal */}
+      <GlobalMapModal
+        isOpen={showMapModal}
+        onClose={() => setShowMapModal(false)}
+        isDark={isDark}
+      />
     </div>
   );
 };

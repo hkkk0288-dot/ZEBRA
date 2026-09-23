@@ -9,9 +9,21 @@ import confetti from 'canvas-confetti';
 import { FoodImage } from './FoodImage';
 
 export const FoodDetailModal: React.FC = () => {
-  const { selectedDish, setSelectedDish, addToCart, toggleFavorite, isFavorite, currency, theme, isLoggedIn } = useApp();
+  const { selectedDish } = useApp();
 
-  if (!selectedDish) return null;
+  return (
+    <AnimatePresence>
+      {selectedDish && <FoodDetailModalContent selectedDish={selectedDish} />}
+    </AnimatePresence>
+  );
+};
+
+interface FoodDetailModalContentProps {
+  selectedDish: NonNullable<ReturnType<typeof useApp>['selectedDish']>;
+}
+
+const FoodDetailModalContent: React.FC<FoodDetailModalContentProps> = ({ selectedDish }) => {
+  const { setSelectedDish, addToCart, toggleFavorite, isFavorite, currency, theme, isLoggedIn } = useApp();
 
   const isDark = theme === 'dark';
 
@@ -99,13 +111,12 @@ export const FoodDetailModal: React.FC = () => {
   };
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md overflow-hidden p-0 sm:p-4"
-      >
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md overflow-hidden p-0 sm:p-4"
+    >
         <motion.div
           initial={{ y: '100%' }}
           animate={{ y: 0 }}
@@ -430,6 +441,5 @@ export const FoodDetailModal: React.FC = () => {
           </div>
         </motion.div>
       </motion.div>
-    </AnimatePresence>
   );
 };

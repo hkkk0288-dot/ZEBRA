@@ -21,6 +21,7 @@ import { WaiterView } from './components/waiter/WaiterView';
 import { AuthView } from './components/AuthView';
 import { TableQrModal } from './components/TableQrModal';
 import { CustomerTableModal } from './components/CustomerTableModal';
+import { GlobalMapModal } from './components/GlobalMapModal';
 import { Smartphone, Monitor, ShieldCheck, User, LogIn } from 'lucide-react';
 
 const MainContent: React.FC = () => {
@@ -38,7 +39,9 @@ const MainContent: React.FC = () => {
     setActiveQrTable,
     showCustomerTableModal,
     setShowCustomerTableModal,
-    callWaiterForTable
+    callWaiterForTable,
+    showGlobalMapModal,
+    setShowGlobalMapModal
   } = useApp();
 
   const isDark = theme === 'dark';
@@ -241,6 +244,13 @@ const MainContent: React.FC = () => {
           }}
         />
       )}
+
+      {/* Global & Dar es Salaam Map Modal */}
+      <GlobalMapModal
+        isOpen={showGlobalMapModal}
+        onClose={() => setShowGlobalMapModal(false)}
+        isDark={isDark}
+      />
     </div>
   );
 };

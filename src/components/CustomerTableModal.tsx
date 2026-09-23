@@ -380,14 +380,24 @@ export const CustomerTableModal: React.FC<CustomerTableModalProps> = ({
                 {filteredTables.map(t => {
                   const isSelected = activeTable?.id === t.id;
                   return (
-                    <button
+                    <div
                       key={t.id}
-                      type="button"
                       onClick={() => {
                         stopCamera();
                         playScanSuccessSound();
                         onSelectTable(t);
                         onClose();
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          stopCamera();
+                          playScanSuccessSound();
+                          onSelectTable(t);
+                          onClose();
+                        }
                       }}
                       className={`p-3 rounded-2xl border text-left transition-all relative group cursor-pointer ${
                         isSelected
@@ -408,7 +418,7 @@ export const CustomerTableModal: React.FC<CustomerTableModalProps> = ({
                               onClose();
                               setActiveQrTable(t);
                             }}
-                            className="p-1 rounded-md text-amber-500 hover:bg-amber-500/20 transition-colors"
+                            className="p-1 rounded-md text-amber-500 hover:bg-amber-500/20 transition-colors cursor-pointer"
                             title="Editi, Pakua au Printi Flyer ya QR ya Meza hii"
                           >
                             <QrCode className="w-3.5 h-3.5" />
@@ -431,7 +441,7 @@ export const CustomerTableModal: React.FC<CustomerTableModalProps> = ({
                           {t.status === 'occupied' ? 'Kuna Watu' : 'Wazi'}
                         </span>
                       </div>
-                    </button>
+                    </div>
                   );
                 })}
               </div>

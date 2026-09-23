@@ -142,6 +142,10 @@ interface AppContextType {
   showReservationModal: boolean;
   setShowReservationModal: (open: boolean) => void;
 
+  // Global & Dar es Salaam Map Modal
+  showGlobalMapModal: boolean;
+  setShowGlobalMapModal: (open: boolean) => void;
+
   // Thermal Receipt / KOT Modal
   showThermalReceiptModal: boolean;
   setShowThermalReceiptModal: (open: boolean) => void;
@@ -498,6 +502,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setReservations(prev => [res, ...prev]);
   };
   const [showReservationModal, setShowReservationModal] = useState(false);
+  const [showGlobalMapModal, setShowGlobalMapModal] = useState(false);
 
   // Thermal Receipt / KOT modal
   const [showThermalReceiptModal, setShowThermalReceiptModal] = useState(false);
@@ -1206,6 +1211,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addReservation,
         showReservationModal,
         setShowReservationModal,
+        showGlobalMapModal,
+        setShowGlobalMapModal,
         showThermalReceiptModal,
         setShowThermalReceiptModal,
         receiptTableOrder,

@@ -15,7 +15,8 @@ import {
   ShieldCheck,
   QrCode,
   Calendar,
-  Award
+  Award,
+  Globe2
 } from 'lucide-react';
 import { formatPrice } from '../utils/formatters';
 
@@ -37,6 +38,7 @@ export const WebHeader: React.FC = () => {
     activeTable,
     setShowCustomerTableModal,
     setShowReservationModal,
+    setShowGlobalMapModal,
     loyaltyPoints
   } = useApp();
 
@@ -99,10 +101,15 @@ export const WebHeader: React.FC = () => {
                   DAR
                 </span>
               </div>
-              <p className="text-[9px] sm:text-[11px] text-neutral-500 dark:text-neutral-400 flex items-center space-x-1">
-                <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-emerald-500 shrink-0" />
-                <span className="whitespace-nowrap">Masaki & Slipway</span>
-              </p>
+              <button
+                type="button"
+                onClick={() => setShowGlobalMapModal(true)}
+                className="text-[9px] sm:text-[11px] text-neutral-500 dark:text-neutral-400 flex items-center space-x-1 hover:text-emerald-400 transition-colors cursor-pointer group"
+                title="Tazama Ramani ya Dunia & Dar es Salaam"
+              >
+                <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-emerald-500 shrink-0 group-hover:scale-110 transition-transform" />
+                <span className="whitespace-nowrap border-b border-dotted border-neutral-400/60 group-hover:border-emerald-400">Masaki & Slipway (Ramani)</span>
+              </button>
             </div>
           </div>
 
@@ -264,6 +271,16 @@ export const WebHeader: React.FC = () => {
                 <span>Mezani</span>
               </button>
             )}
+
+            {/* Global & Dar es Salaam Map button */}
+            <button
+              onClick={() => setShowGlobalMapModal(true)}
+              className="flex items-center space-x-1 px-2 sm:px-2.5 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 dark:text-blue-400 border border-blue-500/30 text-xs font-bold transition-all cursor-pointer"
+              title="Fungua Ramani ya Dunia na Dar es Salaam"
+            >
+              <Globe2 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Ramani</span>
+            </button>
 
             {/* Table Reservation Button */}
             <button
