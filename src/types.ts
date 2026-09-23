@@ -181,3 +181,23 @@ export interface PromoOffer {
   bannerImage?: string;
   minSpend: number;
 }
+
+export interface SlideBanner {
+  id: string;
+  tag: string;
+  title: string;
+  titleHighlight?: string;
+  description: string;
+  ctaText: string;
+  promoCode?: string;
+  ussdNumber?: string;
+  bgGradient: string;
+  accentColor: string;
+  imageUrl?: string;
+  decorativeEmoji?: string;
+  targetCategory?: string;
+  active: boolean;
+  orderIndex: number;
+  createdAt: number;
+}
+

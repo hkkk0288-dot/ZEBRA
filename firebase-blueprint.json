@@ -90,6 +90,30 @@
         "createdAt": { "type": "number" }
       },
       "required": ["id", "tableNumber", "waiterName", "status", "totalTZS"]
+    },
+    "SlideBanner": {
+      "title": "SlideBanner",
+      "description": "Hero sliding promotional banners managed by Admin",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "tag": { "type": "string", "maxLength": 150 },
+        "title": { "type": "string", "maxLength": 150 },
+        "titleHighlight": { "type": "string", "maxLength": 100 },
+        "description": { "type": "string", "maxLength": 500 },
+        "ctaText": { "type": "string", "maxLength": 50 },
+        "promoCode": { "type": "string", "maxLength": 30 },
+        "ussdNumber": { "type": "string", "maxLength": 30 },
+        "bgGradient": { "type": "string", "maxLength": 100 },
+        "accentColor": { "type": "string", "maxLength": 30 },
+        "imageUrl": { "type": "string", "maxLength": 500 },
+        "decorativeEmoji": { "type": "string", "maxLength": 20 },
+        "targetCategory": { "type": "string", "maxLength": 50 },
+        "active": { "type": "boolean" },
+        "orderIndex": { "type": "number" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["id", "title", "description", "ctaText", "active"]
     }
   },
   "firestore": {
@@ -108,6 +132,10 @@
     "/table_orders/{tableOrderId}": {
       "schema": "TableOrder",
       "description": "Dine-in table orders handled by Waiters and Kitchen"
+    },
+    "/banners/{bannerId}": {
+      "schema": "SlideBanner",
+      "description": "Hero promotional banners rotating on the home page"
     }
   }
 }

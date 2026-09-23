@@ -1,4 +1,4 @@
-import { Category, MenuItem, PromoOffer, UserProfile } from '../types';
+import { Category, MenuItem, PromoOffer, UserProfile, SlideBanner } from '../types';
 
 export const CATEGORIES: Category[] = [
   { id: 'all', name: 'All Dishes', swahiliName: 'Vyakula Vyote', icon: '🍽️' },
@@ -346,3 +346,79 @@ export const USSD_NETWORKS = [
     logo: '🟠 HALOPESA'
   }
 ];
+
+export const INITIAL_SLIDE_BANNERS: SlideBanner[] = [
+  {
+    id: 'banner-1',
+    tag: 'Festive Offer • Zebra Restaurant',
+    title: '30% OFF',
+    titleHighlight: 'Everything',
+    description: 'Authentic wood-fired pizzas, gourmet smash burgers, and fresh Swahili mishkaki & biryani delivered hot across Dar es Salaam.',
+    ctaText: 'Claim 30% Off',
+    promoCode: 'ZEBRA30',
+    ussdNumber: '*150*00#',
+    bgGradient: 'from-emerald-950 via-neutral-900 to-amber-950',
+    accentColor: '#10b981',
+    imageUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1200&q=80',
+    decorativeEmoji: '🍕',
+    targetCategory: 'all',
+    active: true,
+    orderIndex: 0,
+    createdAt: Date.now() - 3600000
+  },
+  {
+    id: 'banner-2',
+    tag: 'Weekend Special • Nyama Choma Carnival',
+    title: 'Mishkaki & BBQ',
+    titleHighlight: '25% OFF',
+    description: 'Juicy tenderloin beef skewers, spiced chicken wings, charcoal grilled lamb chops and crispy chips mayai delivered hot in Masaki & Slipway.',
+    ctaText: 'Agiza Nyama Choma',
+    promoCode: 'MISHKAKI25',
+    ussdNumber: '*150*00#',
+    bgGradient: 'from-orange-950 via-neutral-900 to-rose-950',
+    accentColor: '#f97316',
+    imageUrl: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=80',
+    decorativeEmoji: '🥩',
+    targetCategory: 'meat',
+    active: true,
+    orderIndex: 1,
+    createdAt: Date.now() - 7200000
+  },
+  {
+    id: 'banner-3',
+    tag: 'Zanzibar Spice Feast • Coastal Delicacy',
+    title: 'Swahili Biryani & Pilau',
+    titleHighlight: 'Buy 2 Get 1 Free',
+    description: 'Aromatic coastal biryani layered with tender spiced mutton, fried onions, boiled eggs, sweet raisins, and fresh cucumber kachumbari.',
+    ctaText: 'Onja Biryani Sasa',
+    promoCode: 'BIRYANI2X',
+    ussdNumber: '*150*00#',
+    bgGradient: 'from-amber-950 via-neutral-900 to-emerald-950',
+    accentColor: '#f59e0b',
+    imageUrl: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=1200&q=80',
+    decorativeEmoji: '🍗',
+    targetCategory: 'swahili',
+    active: true,
+    orderIndex: 2,
+    createdAt: Date.now() - 10800000
+  },
+  {
+    id: 'banner-4',
+    tag: 'Artisan Gourmet Burgers • Fresh & Juicy',
+    title: 'Smash Truffle Burgers',
+    titleHighlight: 'Combo Free Drink',
+    description: 'Double smashed Wagyu patties, melted mature cheddar, caramelized onions, smoked beef bacon, and secret Zebra burger sauce on a brioche bun.',
+    ctaText: 'Agiza Burger Combo',
+    promoCode: 'BURGERZEBRA',
+    ussdNumber: '*150*00#',
+    bgGradient: 'from-red-950 via-neutral-900 to-amber-950',
+    accentColor: '#ef4444',
+    imageUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1200&q=80',
+    decorativeEmoji: '🍔',
+    targetCategory: 'fast_food',
+    active: true,
+    orderIndex: 3,
+    createdAt: Date.now() - 14400000
+  }
+];
+

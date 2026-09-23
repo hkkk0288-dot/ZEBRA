@@ -9,7 +9,7 @@ import {
 } from 'firebase/firestore';
 import { db, auth } from './firebase';
 import { AdminUserRecord } from '../components/admin/adminMockData';
-import { MenuItem, TableOrder } from '../types';
+import { MenuItem, TableOrder, SlideBanner } from '../types';
 
 export enum OperationType {
   CREATE = 'create',
@@ -234,3 +234,62 @@ export function subscribeToTableOrders(callback: (orders: TableOrder[]) => void)
     return () => {};
   }
 }
+
+// ----------------------------------------------------------------------------
+// 4. Slide Banners (Mabango ya Slaidi)
+// ----------------------------------------------------------------------------
+export const BANNERS_COLLECTION = 'banners';
+
+export async function fetchBannersFromFirestore(): Promise<SlideBanner[] | null> {
+  if (!db) return null;
+  try {
+    const colRef = collection(db, BANNERS_COLLECTION);
+    const snap = await getDocs(colRef);
+    if (snap.empty) return null;
+    const banners = snap.docs.map(d => ({ id: d.id, ...d.data() } as SlideBanner));
+    return banners.sort((a, b) => a.orderIndex - b.orderIndex);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.LIST, BANNERS_COLLECTION);
+    return null;
+  }
+}
+
+export async function saveBannerToFirestore(banner: SlideBanner): Promise<boolean> {
+  if (!db) return false;
+  const path = `${BANNERS_COLLECTION}/${banner.id}`;
+  try {
+    await setDoc(doc(db, BANNERS_COLLECTION, banner.id), banner, { merge: true });
+    return true;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, path);
+    return false;
+  }
+}
+
+export async function deleteBannerFromFirestore(bannerId: string): Promise<boolean> {
+  if (!db) return false;
+  const path = `${BANNERS_COLLECTION}/${bannerId}`;
+  try {
+    await deleteDoc(doc(db, BANNERS_COLLECTION, bannerId));
+    return true;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, path);
+    return false;
+  }
+}
+
+export function subscribeToSlideBanners(callback: (banners: SlideBanner[]) => void) {
+  if (!db) return () => {};
+  try {
+    return onSnapshot(collection(db, BANNERS_COLLECTION), snap => {
+      const banners = snap.docs.map(d => ({ id: d.id, ...d.data() } as SlideBanner));
+      callback(banners.sort((a, b) => a.orderIndex - b.orderIndex));
+    }, error => {
+      handleFirestoreError(error, OperationType.GET, BANNERS_COLLECTION);
+    });
+  } catch (err) {
+    console.warn("Could not subscribe to banners:", err);
+    return () => {};
+  }
+}
+

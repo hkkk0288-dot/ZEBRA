@@ -16,6 +16,7 @@ import {
   AlertTriangle,
   ArrowLeft,
   UtensilsCrossed,
+  Sparkles,
   X
 } from 'lucide-react';
 
@@ -23,12 +24,14 @@ export type AdminTab =
   | 'dashboard'
   | 'tracking'
   | 'orders'
+  | 'waiter'
   | 'drivers'
   | 'products'
   | 'merchants'
   | 'payouts'
   | 'transactions'
   | 'vouchers'
+  | 'banners'
   | 'users'
   | 'analytics'
   | 'help'
@@ -47,6 +50,7 @@ interface AdminSidebarProps {
   payoutsBadge?: number;
   transactionsBadge?: number;
   vouchersBadge?: number;
+  bannersBadge?: number;
   usersBadge?: number;
 }
 
@@ -63,6 +67,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   payoutsBadge = 4,
   transactionsBadge = 5,
   vouchersBadge = 12,
+  bannersBadge,
   usersBadge = 6
 }) => {
   const navSections = [
@@ -72,17 +77,19 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
         { id: 'tracking', label: 'Live Tracking', icon: MapPin },
         { id: 'orders', label: 'Orders', icon: ShoppingBag, badge: ordersBadge },
+        { id: 'waiter', label: 'Waiter POS & Floor', icon: UtensilsCrossed },
         { id: 'drivers', label: 'Drivers', icon: Bike, badge: driversBadge },
         { id: 'products', label: 'Products & Dishes', icon: UtensilsCrossed, badge: productsBadge },
         { id: 'merchants', label: 'Kitchen Branches', icon: Store }
       ]
     },
     {
-      group: 'Finances',
+      group: 'Finances & Marketing',
       items: [
+        { id: 'banners', label: 'Slide Banners (Mabango)', icon: Sparkles, badge: bannersBadge },
+        { id: 'vouchers', label: 'Promotions & Vouchers', icon: Gift, badge: vouchersBadge },
         { id: 'payouts', label: 'Merchant Payouts', icon: CreditCard, badge: payoutsBadge },
-        { id: 'transactions', label: 'Transactions', icon: Receipt, badge: transactionsBadge },
-        { id: 'vouchers', label: 'Promotions & Vouchers', icon: Gift, badge: vouchersBadge }
+        { id: 'transactions', label: 'Transactions', icon: Receipt, badge: transactionsBadge }
       ]
     },
     {

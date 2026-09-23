@@ -11,10 +11,12 @@ import { AdminMerchantsView } from './admin/AdminMerchantsView';
 import { AdminPayoutsView } from './admin/AdminPayoutsView';
 import { AdminTransactionsView } from './admin/AdminTransactionsView';
 import { AdminVouchersView } from './admin/AdminVouchersView';
+import { AdminBannersView } from './admin/AdminBannersView';
 import { AdminUsersView } from './admin/AdminUsersView';
 import { AdminAnalyticsView } from './admin/AdminAnalyticsView';
 import { AdminHelpView } from './admin/AdminHelpView';
 import { AdminSettingsView } from './admin/AdminSettingsView';
+import { WaiterView } from './waiter/WaiterView';
 import {
   AlertTriangle,
   X,
@@ -24,7 +26,7 @@ import {
 } from 'lucide-react';
 
 export const AdminDashboardView: React.FC = () => {
-  const { theme, currency, setActiveTab, menuItems } = useApp();
+  const { theme, currency, setActiveTab, menuItems, banners } = useApp();
   const isDark = theme === 'dark';
 
   const [currentTab, setCurrentTab] = useState<AdminTab>('dashboard');
@@ -60,6 +62,7 @@ export const AdminDashboardView: React.FC = () => {
         payoutsBadge={4}
         transactionsBadge={5}
         vouchersBadge={12}
+        bannersBadge={banners.length}
         usersBadge={6}
       />
 
@@ -101,6 +104,8 @@ export const AdminDashboardView: React.FC = () => {
 
           {currentTab === 'orders' && <AdminOrdersView isDark={isDark} />}
 
+          {currentTab === 'waiter' && <WaiterView />}
+
           {currentTab === 'drivers' && <AdminDriversView isDark={isDark} />}
 
           {currentTab === 'products' && <AdminProductsView />}
@@ -112,6 +117,8 @@ export const AdminDashboardView: React.FC = () => {
           {currentTab === 'transactions' && <AdminTransactionsView currency={currency} />}
 
           {currentTab === 'vouchers' && <AdminVouchersView currency={currency} />}
+
+          {currentTab === 'banners' && <AdminBannersView />}
 
           {currentTab === 'users' && <AdminUsersView currency={currency} />}
 

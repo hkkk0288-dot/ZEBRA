@@ -10,7 +10,9 @@ import {
   Sun,
   MapPin,
   PhoneCall,
-  LogIn
+  LogIn,
+  UtensilsCrossed,
+  ShieldCheck
 } from 'lucide-react';
 import { formatPrice } from '../utils/formatters';
 
@@ -169,6 +171,32 @@ export const WebHeader: React.FC = () => {
                   {activeOrdersCount > 0 && (
                     <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
                   )}
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('waiter')}
+                  className={`px-3 py-1.5 rounded-xl transition-colors flex items-center space-x-1.5 text-xs font-bold ${
+                    activeTab === 'waiter'
+                      ? 'bg-amber-500 text-neutral-950 shadow-sm'
+                      : 'bg-amber-500/15 text-amber-500 hover:bg-amber-500/25'
+                  }`}
+                  title="Waiter & Floor POS"
+                >
+                  <UtensilsCrossed className="w-3.5 h-3.5" />
+                  <span>Waiter POS</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('admin')}
+                  className={`px-3 py-1.5 rounded-xl transition-colors flex items-center space-x-1.5 text-xs font-bold ${
+                    activeTab === 'admin'
+                      ? 'bg-orange-600 text-white shadow-sm'
+                      : 'bg-orange-500/15 text-orange-600 dark:text-orange-400 hover:bg-orange-500/25'
+                  }`}
+                  title="Admin Dashboard"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Admin</span>
                 </button>
 
                 <button

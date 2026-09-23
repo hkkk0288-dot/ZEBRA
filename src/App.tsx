@@ -17,6 +17,7 @@ import { OrderTrackingView } from './components/OrderTrackingView';
 import { FavoritesView } from './components/FavoritesView';
 import { ProfileView } from './components/ProfileView';
 import { AdminDashboardView } from './components/AdminDashboardView';
+import { WaiterView } from './components/waiter/WaiterView';
 import { AuthView } from './components/AuthView';
 import { Smartphone, Monitor, ShieldCheck, User, LogIn } from 'lucide-react';
 
@@ -39,6 +40,8 @@ const MainContent: React.FC = () => {
         return isLoggedIn ? <ProfileView /> : <AuthView />;
       case 'auth':
         return <AuthView />;
+      case 'waiter':
+        return <WaiterView />;
       case 'admin':
         return <AdminDashboardView />;
       default:

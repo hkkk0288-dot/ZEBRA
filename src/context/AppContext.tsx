@@ -11,15 +11,25 @@ import {
   UserProfile,
   NavigationTab,
   AuthMode,
-  PendingAction
+  PendingAction,
+  SystemRole,
+  RolePermissions,
+  SlideBanner
 } from '../types';
 import {
   DEFAULT_USER,
   GUEST_USER,
   INITIAL_MENU_ITEMS,
   PROMO_OFFERS,
-  USSD_NETWORKS
+  USSD_NETWORKS,
+  INITIAL_SLIDE_BANNERS
 } from '../data/mockData';
+import {
+  fetchBannersFromFirestore,
+  saveBannerToFirestore,
+  deleteBannerFromFirestore,
+  subscribeToSlideBanners
+} from '../services/firebaseDbService';
 import { generateOrderNumber, generateUssdRef } from '../utils/formatters';
 
 interface AppContextType {
@@ -29,6 +39,11 @@ interface AppContextType {
   setCurrency: (c: 'USD' | 'TZS') => void;
   androidFrame: boolean;
   setAndroidFrame: (val: boolean) => void;
+
+  banners: SlideBanner[];
+  addBanner: (b: Omit<SlideBanner, 'id' | 'createdAt'>) => Promise<void>;
+  updateBanner: (b: SlideBanner) => Promise<void>;
+  deleteBanner: (id: string) => Promise<void>;
   
   user: UserProfile;
   loginAsGuest: () => void;
@@ -166,6 +181,65 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved ? JSON.parse(saved) : [];
   });
 
+  // Slide Banners state (Admin can add/edit/delete, displays as slider)
+  const [banners, setBanners] = useState<SlideBanner[]>(() => {
+    const saved = localStorage.getItem('zebra_slide_banners');
+    return saved ? JSON.parse(saved) : INITIAL_SLIDE_BANNERS;
+  });
+
+  // Sync banners with localStorage
+  useEffect(() => {
+    localStorage.setItem('zebra_slide_banners', JSON.stringify(banners));
+  }, [banners]);
+
+  // Sync banners with Firebase Firestore & subscribe
+  useEffect(() => {
+    const initCloudBanners = async () => {
+      try {
+        const cloudBanners = await fetchBannersFromFirestore();
+        if (cloudBanners && cloudBanners.length > 0) {
+          setBanners(cloudBanners);
+        } else {
+          // Seed initial banners to Firestore
+          for (const b of INITIAL_SLIDE_BANNERS) {
+            await saveBannerToFirestore(b);
+          }
+        }
+      } catch (err) {
+        console.warn('Banner Firestore init notice:', err);
+      }
+    };
+    initCloudBanners();
+
+    // Subscribe to live Firestore changes
+    const unsub = subscribeToSlideBanners(updatedBanners => {
+      if (updatedBanners && updatedBanners.length > 0) {
+        setBanners(updatedBanners);
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  const addBanner = async (b: Omit<SlideBanner, 'id' | 'createdAt'>) => {
+    const newBanner: SlideBanner = {
+      ...b,
+      id: `banner-${Date.now()}`,
+      createdAt: Date.now()
+    };
+    setBanners(prev => [...prev, newBanner]);
+    await saveBannerToFirestore(newBanner);
+  };
+
+  const updateBanner = async (b: SlideBanner) => {
+    setBanners(prev => prev.map(item => item.id === b.id ? b : item));
+    await saveBannerToFirestore(b);
+  };
+
+  const deleteBanner = async (id: string) => {
+    setBanners(prev => prev.filter(item => item.id !== id));
+    await deleteBannerFromFirestore(id);
+  };
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
@@ -278,26 +352,67 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     let displayName = user.name || 'David Johnson';
     let userEmail = user.email || 'customer@zebradsm.com';
     let userPhone = user.phone || '+255 754 123 456';
+    let systemRole: SystemRole = 'Customer';
+    let rolePermissions: RolePermissions | undefined = undefined;
+    let branch: string | undefined = undefined;
+    let userAvatar = user.avatar || DEFAULT_USER.avatar;
+
+    // Check against saved admin/staff accounts in local store or default
+    try {
+      const savedStaffStr = localStorage.getItem('zebra_admin_users');
+      if (savedStaffStr) {
+        const staffList: any[] = JSON.parse(savedStaffStr);
+        const match = staffList.find(
+          s =>
+            s.email?.toLowerCase() === trimmed.toLowerCase() ||
+            s.phone?.replace(/[\s-]/g, '') === trimmed.replace(/[\s-]/g, '') ||
+            s.name?.toLowerCase() === trimmed.toLowerCase()
+        );
+        if (match) {
+          systemRole = match.role;
+          rolePermissions = match.permissions;
+          branch = match.assignedBranch;
+          displayName = match.name;
+          userEmail = match.email;
+          userPhone = match.phone;
+          if (match.avatar) userAvatar = match.avatar;
+        }
+      }
+    } catch {}
+
+    if (trimmed.toLowerCase().includes('waiter') || trimmed.toLowerCase().includes('mhudumu')) {
+      systemRole = 'Waiter';
+    } else if (trimmed.toLowerCase().includes('admin')) {
+      systemRole = 'Super Admin';
+    }
 
     if (trimmed.includes('@')) {
       userEmail = trimmed;
       const part = trimmed.split('@')[0].replace(/[._-]/g, ' ');
-      displayName = part.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+      if (displayName === 'David Johnson') {
+        displayName = part.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+      }
     } else if (/^(\+?255|0)[67]\d{8}$/.test(trimmed.replace(/\s+/g, ''))) {
       userPhone = trimmed;
     } else {
-      // 3 names or any name
-      displayName = trimmed.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+      if (displayName === 'David Johnson') {
+        displayName = trimmed.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+      }
     }
     
+    const isAdminLike = systemRole === 'Super Admin' || systemRole === 'Kitchen Manager' || trimmed.toLowerCase().includes('admin');
+
     const updatedUser: UserProfile = {
       ...user,
       id: `usr-${Date.now()}`,
       name: displayName,
       email: userEmail,
       phone: userPhone,
-      avatar: user.avatar || DEFAULT_USER.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-      role: trimmed.toLowerCase().includes('admin') ? 'admin' : 'customer'
+      avatar: userAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+      role: isAdminLike ? 'admin' : 'customer',
+      systemRole,
+      permissions: rolePermissions,
+      assignedBranch: branch
     };
     setUser(updatedUser);
     setIsLoggedIn(true);
@@ -316,7 +431,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     }
 
-    resolvePendingAction();
+    if (systemRole === 'Waiter') {
+      setActiveTab('waiter');
+    } else if (systemRole === 'Super Admin') {
+      setActiveTab('admin');
+    } else {
+      resolvePendingAction();
+    }
     return true;
   };
 
@@ -670,6 +791,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setCurrency,
         androidFrame,
         setAndroidFrame,
+        banners,
+        addBanner,
+        updateBanner,
+        deleteBanner,
         user,
         loginAsGuest,
         updateUser,
