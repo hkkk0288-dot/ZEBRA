@@ -47,7 +47,7 @@ export interface AdminTransaction {
   orderNumber: string;
   customerName: string;
   customerPhone: string;
-  provider: 'M-Pesa USSD' | 'Tigo Pesa' | 'Airtel Money' | 'HaloPesa' | 'Visa/Mastercard';
+  provider: 'M-Pesa USSD' | 'Tigo Pesa' | 'Airtel Money' | 'HaloPesa' | 'Visa/Mastercard' | 'Mongike Mobile Money';
   amount: number;
   currency: 'TZS' | 'USD';
   referenceCode: string;

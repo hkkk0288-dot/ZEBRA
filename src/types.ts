@@ -57,7 +57,14 @@ export interface Category {
 
 export type OrderStatus = 'pending' | 'confirmed' | 'preparing' | 'on_the_way' | 'delivered' | 'cancelled';
 
-export type PaymentProvider = 'ussd_mpesa' | 'ussd_tigopesa' | 'ussd_airtel' | 'ussd_halopesa' | 'cash_on_delivery' | 'card';
+export type PaymentProvider =
+  | 'mongike_mobile_money'
+  | 'ussd_mpesa'
+  | 'ussd_tigopesa'
+  | 'ussd_airtel'
+  | 'ussd_halopesa'
+  | 'cash_on_delivery'
+  | 'card';
 
 export interface Order {
   id: string;
@@ -72,6 +79,16 @@ export interface Order {
   currency: 'USD' | 'TZS';
   paymentMethod: PaymentProvider;
   paymentStatus: 'pending' | 'paid' | 'failed';
+  mongikeDetails?: {
+    id?: string;
+    gatewayRef?: string;
+    amount?: number;
+    buyerPhone?: string;
+    status?: string;
+    expiresAt?: string;
+    initiatedAt?: string;
+    isSimulated?: boolean;
+  };
   ussdDetails?: {
     network: string;
     phoneNumber: string;

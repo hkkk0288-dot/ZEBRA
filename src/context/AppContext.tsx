@@ -33,6 +33,7 @@ import {
   subscribeToSlideBanners
 } from '../services/firebaseDbService';
 import { generateOrderNumber, generateUssdRef } from '../utils/formatters';
+import { mongikeService } from '../services/mongikeService';
 
 interface AppContextType {
   theme: 'dark' | 'light';
@@ -699,9 +700,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       throw new Error('Tafadhali ingia au jisajili kwanza');
     }
 
-    const isUssd = details.paymentMethod.startsWith('ussd_');
+    const isMongike = details.paymentMethod === 'mongike_mobile_money';
+    const isUssd = details.paymentMethod.startsWith('ussd_') || isMongike;
     const netConfig = USSD_NETWORKS.find(n => n.id === details.paymentMethod);
     const refCode = generateUssdRef();
+    const amountTZS = Math.round(totalAmount * 2600);
 
     const newOrder: Order = {
       id: `ord-${Date.now()}`,
@@ -734,8 +737,50 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       createdAt: Date.now()
     };
 
-    if (isUssd && netConfig) {
-      const amountTZS = Math.round(totalAmount * 2600);
+    if (isMongike) {
+      const buyerPhone = details.phoneNumber || user.phone;
+      try {
+        const mongikeResult = await mongikeService.initiatePayment({
+          orderId: newOrder.orderNumber,
+          amount: amountTZS,
+          buyerPhone,
+          feePayer: 'MERCHANT',
+          buyerName: user.name,
+          buyerEmail: user.email,
+          metadata: {
+            orderId: newOrder.id,
+            itemsCount: cart.length
+          }
+        });
+
+        if (mongikeResult.data) {
+          newOrder.mongikeDetails = {
+            id: mongikeResult.data.id,
+            gatewayRef: mongikeResult.data.gateway_ref,
+            amount: mongikeResult.data.amount,
+            buyerPhone,
+            status: mongikeResult.data.status,
+            expiresAt: mongikeResult.data.expires_at,
+            initiatedAt: new Date().toISOString(),
+            isSimulated: mongikeResult.isSimulated
+          };
+          newOrder.ussdDetails = {
+            network: 'Mongike Mobile Money (Tanzania)',
+            phoneNumber: buyerPhone,
+            referenceCode: mongikeResult.data.gateway_ref || refCode,
+            ussdString: `*150*00*1*445566*${amountTZS}#`
+          };
+        }
+      } catch (err) {
+        console.warn('[Mongike] Payment initiate error:', err);
+        newOrder.ussdDetails = {
+          network: 'Mongike Mobile Money',
+          phoneNumber: buyerPhone,
+          referenceCode: refCode,
+          ussdString: `*150*00*1*445566*${amountTZS}#`
+        };
+      }
+    } else if (isUssd && netConfig) {
       newOrder.ussdDetails = {
         network: netConfig.name,
         phoneNumber: details.phoneNumber || user.phone,
@@ -765,6 +810,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             ...ord,
             paymentStatus: 'paid',
             status: 'preparing',
+            mongikeDetails: ord.mongikeDetails
+              ? { ...ord.mongikeDetails, status: 'COMPLETED' }
+              : undefined,
             ussdDetails: ord.ussdDetails
               ? { ...ord.ussdDetails, referenceCode: refCode, paidAt: new Date().toLocaleTimeString() }
               : undefined

@@ -4,10 +4,6 @@ import {
   Sparkles,
   ChevronRight,
   ChevronLeft,
-  Smartphone,
-  MapPin,
-  Check,
-  Copy,
   Settings2,
   ExternalLink
 } from 'lucide-react';
@@ -15,8 +11,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { SlideBanner } from '../types';
 
 interface SlideBannerCarouselProps {
-  onOpenMapModal: () => void;
-  onOpenUssdModal: () => void;
+  onOpenMapModal?: () => void;
+  onOpenUssdModal?: () => void;
 }
 
 export const SlideBannerCarousel: React.FC<SlideBannerCarouselProps> = ({
@@ -39,7 +35,6 @@ export const SlideBannerCarousel: React.FC<SlideBannerCarouselProps> = ({
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [direction, setDirection] = useState<'left' | 'right'>('right');
 
   const touchStartX = useRef<number | null>(null);
@@ -110,13 +105,6 @@ export const SlideBannerCarousel: React.FC<SlideBannerCarouselProps> = ({
     } else {
       setActiveTab('cart');
     }
-  };
-
-  const handleCopyCode = (code: string) => {
-    navigator.clipboard.writeText(code);
-    setCopiedCode(code);
-    applyPromoCode(code);
-    setTimeout(() => setCopiedCode(null), 2500);
   };
 
   const isAdmin = user.role === 'admin' || user.systemRole === 'Super Admin' || user.permissions?.canManageSettings;
@@ -192,53 +180,15 @@ export const SlideBannerCarousel: React.FC<SlideBannerCarouselProps> = ({
               {currentBanner.description}
             </p>
 
-            {/* Banner Quick Actions: On Mobile only single sleek CTA, on Desktop includes Code/USSD/Map */}
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-2 sm:mt-3.5">
+            {/* Banner Quick Actions: Single sleek, high-conversion modern CTA button */}
+            <div className="flex items-center gap-2 sm:gap-3 mt-2 sm:mt-3.5">
               {/* Claim / CTA button */}
               <button
                 onClick={() => handleClaim(currentBanner)}
-                className="w-auto inline-flex items-center space-x-1.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold text-xs sm:text-sm py-1.5 sm:py-2.5 px-3.5 sm:px-5 rounded-full shadow-lg shadow-emerald-500/40 transition-all cursor-pointer"
+                className="w-auto inline-flex items-center space-x-1.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold text-xs sm:text-sm py-2 sm:py-2.5 px-4 sm:px-6 rounded-full shadow-lg shadow-emerald-500/40 transition-all cursor-pointer"
               >
                 <span>{currentBanner.ctaText || 'Claim Offer'}</span>
                 <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              </button>
-
-              {/* Promo Code Badge - Hidden on mobile, shown on desktop */}
-              {currentBanner.promoCode && (
-                <button
-                  type="button"
-                  onClick={() => handleCopyCode(currentBanner.promoCode!)}
-                  className="hidden sm:inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-black/60 hover:bg-black/80 border border-emerald-500/30 text-xs font-mono font-bold text-amber-300 transition-colors cursor-pointer"
-                  title="Click to copy coupon code"
-                >
-                  <span>Code:</span>
-                  <span className="text-white font-black">{currentBanner.promoCode}</span>
-                  {copiedCode === currentBanner.promoCode ? (
-                    <Check className="w-3.5 h-3.5 text-emerald-400 ml-1" />
-                  ) : (
-                    <Copy className="w-3 h-3 text-neutral-400 ml-1" />
-                  )}
-                </button>
-              )}
-
-              {/* USSD Dial Modal Trigger - Hidden on mobile, shown on desktop */}
-              <button
-                type="button"
-                onClick={onOpenUssdModal}
-                className="hidden sm:inline-flex items-center space-x-1 bg-white/10 hover:bg-white/20 text-white font-semibold text-xs py-2 px-3 rounded-xl backdrop-blur-sm transition-all cursor-pointer"
-              >
-                <Smartphone className="w-3.5 h-3.5 text-amber-400" />
-                <span>{currentBanner.ussdNumber || '*150*00#'}</span>
-              </button>
-
-              {/* Dar es Salaam Map Trigger - Hidden on mobile, shown on desktop */}
-              <button
-                type="button"
-                onClick={onOpenMapModal}
-                className="hidden sm:inline-flex items-center space-x-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-bold text-xs py-2 px-3.5 rounded-xl backdrop-blur-sm transition-all cursor-pointer"
-              >
-                <MapPin className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Ramani ya Dar es Salaam</span>
               </button>
             </div>
           </div>

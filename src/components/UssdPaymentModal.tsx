@@ -21,13 +21,16 @@ export const UssdPaymentModal: React.FC = () => {
   if (!ussdModalOrder) return null;
 
   const isDark = theme === 'dark';
-  const orderAmountTZS = Math.round(ussdModalOrder.total * 2600);
+  const isMongike = ussdModalOrder.paymentMethod === 'mongike_mobile_money' || Boolean(ussdModalOrder.mongikeDetails);
+  const mongikeRef = ussdModalOrder.mongikeDetails?.gatewayRef || ussdModalOrder.ussdDetails?.referenceCode || 'MGK-TZ';
+  const buyerPhone = ussdModalOrder.mongikeDetails?.buyerPhone || ussdModalOrder.customer.phone;
+  const orderAmountTZS = ussdModalOrder.mongikeDetails?.amount || Math.round(ussdModalOrder.total * 2600);
   const formattedTZS = `${orderAmountTZS.toLocaleString()} TZS`;
 
   const ussdFullString = `${selectedNetwork.code.replace('#', '')}*1*${selectedNetwork.paybill}*${orderAmountTZS}#`;
 
   const handleCopy = () => {
-    navigator.clipboard?.writeText(ussdFullString);
+    navigator.clipboard?.writeText(isMongike ? mongikeRef : ussdFullString);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -65,7 +68,7 @@ export const UssdPaymentModal: React.FC = () => {
       }
 
       setTimeout(() => {
-        completeUssdPayment(ussdModalOrder.id, ussdModalOrder.ussdDetails?.referenceCode || 'MP994827');
+        completeUssdPayment(ussdModalOrder.id, mongikeRef);
         setShowCarrierPrompt(false);
       }, 1500);
     }, 1800);
@@ -86,13 +89,21 @@ export const UssdPaymentModal: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-neutral-800/20">
           <div className="flex items-center space-x-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-500 flex items-center justify-center font-bold text-lg">
-              <Smartphone className="w-5 h-5" />
+            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-lg ${
+              isMongike
+                ? 'bg-emerald-500/20 text-emerald-400'
+                : 'bg-amber-500/20 text-amber-500'
+            }`}>
+              {isMongike ? <span>⚡</span> : <Smartphone className="w-5 h-5" />}
             </div>
             <div>
-              <h2 className="text-base font-bold font-display">Mlipo kupitia USSD</h2>
+              <h2 className="text-base font-bold font-display">
+                {isMongike ? 'Mongike Mobile Money' : 'Mlipo kupitia USSD'}
+              </h2>
               <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                Offline & Mobile Money Integration (Tanzania)
+                {isMongike
+                  ? 'Tanzania Live Push: M-Pesa, Tigo, Airtel, HaloPesa'
+                  : 'Offline & Mobile Money Integration (Tanzania)'}
               </p>
             </div>
           </div>
@@ -123,15 +134,38 @@ export const UssdPaymentModal: React.FC = () => {
                 ({formatPrice(ussdModalOrder.total, 'USD')})
               </span>
             </div>
-            <p className="text-[11px] text-neutral-500 mt-1">
-              Agizo Namba: <span className="font-mono font-bold text-neutral-300">{ussdModalOrder.orderNumber}</span>
-            </p>
+            <div className="flex items-center justify-center space-x-2 mt-1.5 text-[11px] text-neutral-400">
+              <span>Agizo: <strong className="text-neutral-200">{ussdModalOrder.orderNumber}</strong></span>
+              <span>•</span>
+              <span>Ref: <strong className="font-mono text-amber-400">{mongikeRef}</strong></span>
+            </div>
           </div>
 
-          {/* Telco Selector */}
+          {/* Mongike Push Active Banner */}
+          {isMongike && (
+            <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-start space-x-3">
+              <div className="relative flex h-3 w-3 mt-1">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+              </div>
+              <div className="text-xs space-y-1">
+                <div className="font-bold text-emerald-500 dark:text-emerald-400 flex items-center space-x-1.5">
+                  <span>Ombi la Malipo Limerushwa!</span>
+                  <span className="text-[10px] bg-emerald-500/20 px-1.5 py-0.5 rounded font-mono">
+                    {buyerPhone}
+                  </span>
+                </div>
+                <p className="text-neutral-600 dark:text-neutral-300 leading-relaxed text-[11px]">
+                  Skrini ya simu yako itaonyesha ujumbe wa mtandao wako (Vodacom, Tigo, Airtel, Halotel). Weka namba yako ya siri kukamilisha malipo.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Telco Selector (When user wants to switch or check dial codes) */}
           <div>
             <label className="block text-xs font-semibold text-neutral-400 mb-2">
-              Chagua Mtandao wa Simu (Select Mobile Network)
+              Mtandao wa Simu (Network)
             </label>
             <div className="grid grid-cols-2 gap-2.5">
               {USSD_NETWORKS.map(net => {
@@ -167,7 +201,7 @@ export const UssdPaymentModal: React.FC = () => {
             }`}
           >
             <div className="flex items-center justify-between text-xs text-neutral-400 mb-1.5">
-              <span className="font-medium">Direct USSD Code:</span>
+              <span className="font-medium">Direct USSD Code (Fallback):</span>
               <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-semibold">
                 Till: {selectedNetwork.paybill}
               </span>
@@ -196,23 +230,23 @@ export const UssdPaymentModal: React.FC = () => {
                 setUssdPin('');
                 setPushSuccess(false);
               }}
-              className="w-full bg-emerald-500 hover:bg-emerald-600 active:scale-[0.98] text-white font-bold py-3.5 px-4 rounded-2xl shadow-lg shadow-emerald-500/25 flex items-center justify-center space-x-2 transition-all"
+              className="w-full bg-emerald-500 hover:bg-emerald-600 active:scale-[0.98] text-white font-bold py-3.5 px-4 rounded-2xl shadow-lg shadow-emerald-500/25 flex items-center justify-center space-x-2 transition-all cursor-pointer"
             >
               <Smartphone className="w-4 h-4" />
-              <span>Simulate USSD Push & PIN</span>
+              <span>{isMongike ? 'Ingiza PIN / Kamilisha Malipo' : 'Simulate USSD Push & PIN'}</span>
             </button>
 
             {/* Direct Phone Dial (works on real Android devices without internet) */}
             <button
               onClick={handleDial}
-              className={`w-full py-3 px-4 rounded-2xl border font-semibold text-xs flex items-center justify-center space-x-2 transition-colors ${
+              className={`w-full py-3 px-4 rounded-2xl border font-semibold text-xs flex items-center justify-center space-x-2 transition-colors cursor-pointer ${
                 isDark
                   ? 'border-neutral-700 bg-neutral-800/80 hover:bg-neutral-700 text-neutral-200'
                   : 'border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800'
               }`}
             >
               <PhoneCall className="w-4 h-4 text-emerald-500" />
-              <span>Dial on Phone Dialer ({selectedNetwork.name})</span>
+              <span>Piga Moja kwa Moja ({selectedNetwork.name})</span>
             </button>
           </div>
 

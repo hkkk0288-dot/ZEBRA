@@ -35,7 +35,7 @@ export const CartView: React.FC = () => {
   } = useApp();
 
   const isDark = theme === 'dark';
-  const [selectedPayment, setSelectedPayment] = useState<PaymentProvider>('ussd_mpesa');
+  const [selectedPayment, setSelectedPayment] = useState<PaymentProvider>('mongike_mobile_money');
   const [deliveryAddress, setDeliveryAddress] = useState(
     user.addresses[0]?.street || 'Plot 44, Toure Drive, Masaki Peninsula, Dar es Salaam'
   );
@@ -325,6 +325,46 @@ export const CartView: React.FC = () => {
               </div>
 
               <div className="space-y-2">
+                {/* Mongike Mobile Money (Live STK Push) */}
+                <label
+                  onClick={() => setSelectedPayment('mongike_mobile_money')}
+                  className={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition-all ${
+                    selectedPayment === 'mongike_mobile_money'
+                      ? 'border-emerald-500 bg-emerald-500/10 shadow-sm ring-1 ring-emerald-500/30'
+                      : isDark
+                      ? 'border-neutral-800 bg-neutral-800/50 hover:border-neutral-700'
+                      : 'border-neutral-200 bg-neutral-50 hover:border-neutral-300'
+                  }`}
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-emerald-400 text-white flex items-center justify-center font-black text-sm shadow-sm">
+                      ⚡
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-neutral-900 dark:text-white flex items-center space-x-1.5">
+                        <span>Mongike Mobile Money</span>
+                        <span className="text-[10px] bg-emerald-500/20 text-emerald-400 font-bold px-1.5 py-0.5 rounded">
+                          Live STK Push TZ
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-neutral-400">
+                        Vodacom M-Pesa, Tigo Pesa, Airtel Money, HaloPesa
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                      selectedPayment === 'mongike_mobile_money'
+                        ? 'border-emerald-500 bg-emerald-500'
+                        : 'border-neutral-500'
+                    }`}
+                  >
+                    {selectedPayment === 'mongike_mobile_money' && (
+                      <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                    )}
+                  </div>
+                </label>
+
                 {/* USSD Mobile Money */}
                 <label
                   onClick={() => setSelectedPayment('ussd_mpesa')}

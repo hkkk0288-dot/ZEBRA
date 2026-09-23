@@ -40,6 +40,7 @@ export const FoodImage: React.FC<FoodImageProps> = ({
   }, [src]);
 
   const handleError = () => {
+    setIsLoading(false);
     if (!hasError) {
       setHasError(true);
       const fallback = CATEGORY_FALLBACKS[category.toLowerCase()] || DEFAULT_FOOD_IMG;
