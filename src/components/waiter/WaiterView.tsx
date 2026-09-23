@@ -20,25 +20,17 @@ import {
   Printer,
   Sparkles,
   Layers,
-  ChefHat
+  ChefHat,
+  QrCode
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { MenuItem, TableOrder, TableOrderItem } from '../../types';
+import { MenuItem, TableOrder, TableOrderItem, RestaurantTable } from '../../types';
 import {
   fetchTableOrdersFromFirestore,
   saveTableOrderToFirestore,
   updateTableOrderStatusInFirestore,
   subscribeToTableOrders
 } from '../../services/firebaseDbService';
-
-interface RestaurantTable {
-  id: string;
-  name: string;
-  section: 'Indoor' | 'Garden Terrace' | 'VIP Lounge';
-  capacity: number;
-  status: 'available' | 'occupied' | 'billing' | 'cleaning';
-  currentOrderId?: string;
-}
 
 const DEFAULT_TABLES: RestaurantTable[] = [
   { id: 'tbl-1', name: 'Table 01', section: 'Indoor', capacity: 4, status: 'occupied', currentOrderId: 'tord-101' },
@@ -105,17 +97,18 @@ const INITIAL_TABLE_ORDERS: TableOrder[] = [
 ];
 
 export const WaiterView: React.FC = () => {
-  const { menuItems, setActiveTab, user } = useApp();
-  
-  const [tables, setTables] = useState<RestaurantTable[]>(() => {
-    const saved = localStorage.getItem('zebra_restaurant_tables');
-    return saved ? JSON.parse(saved) : DEFAULT_TABLES;
-  });
-
-  const [orders, setOrders] = useState<TableOrder[]>(() => {
-    const saved = localStorage.getItem('zebra_table_orders');
-    return saved ? JSON.parse(saved) : INITIAL_TABLE_ORDERS;
-  });
+  const {
+    menuItems,
+    setActiveTab,
+    user,
+    tables,
+    setTables,
+    tableOrders: orders,
+    setTableOrders: setOrders,
+    waiterCalls,
+    dismissWaiterCall,
+    setActiveQrTable
+  } = useApp();
 
   const [activeTabFilter, setActiveTabFilter] = useState<'tables' | 'orders' | 'kitchen'>('tables');
   const [selectedTable, setSelectedTable] = useState<RestaurantTable | null>(null);
@@ -133,14 +126,6 @@ export const WaiterView: React.FC = () => {
   const [cloudSynced, setCloudSynced] = useState(false);
 
   const waiterDisplayName = user?.name || 'Neema Mwamburi (Staff Waiter)';
-
-  useEffect(() => {
-    localStorage.setItem('zebra_restaurant_tables', JSON.stringify(tables));
-  }, [tables]);
-
-  useEffect(() => {
-    localStorage.setItem('zebra_table_orders', JSON.stringify(orders));
-  }, [orders]);
 
   // Sync with Firestore
   useEffect(() => {
@@ -344,6 +329,40 @@ export const WaiterView: React.FC = () => {
         </div>
       </div>
 
+      {/* ACTIVE WAITER CALLS ALERTS */}
+      {waiterCalls && waiterCalls.length > 0 && (
+        <div className="space-y-2 animate-fadeIn">
+          {waiterCalls.map(call => (
+            <div
+              key={call.id}
+              className="p-4 rounded-2xl bg-amber-500/15 border-2 border-amber-500/40 text-neutral-900 dark:text-white flex items-center justify-between shadow-lg"
+            >
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500 text-neutral-950 flex items-center justify-center font-bold animate-bounce">
+                  <Bell className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm text-amber-600 dark:text-amber-400 flex items-center space-x-2">
+                    <span>🚨 Kengele ya Mhudumu: {call.tableNumber}</span>
+                    <span className="text-[10px] text-neutral-400 font-mono">({call.time})</span>
+                  </h4>
+                  <p className="text-xs text-neutral-700 dark:text-neutral-300 font-medium">
+                    Ombi: &quot;{call.reason || 'Mhudumu anahitajika mezani'}&quot;
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => dismissWaiterCall(call.id)}
+                className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-neutral-950 font-bold text-xs shadow-sm transition-colors cursor-pointer"
+              >
+                Nimepokea (Done)
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Tabs Switcher: Tables vs Orders vs Kitchen Monitor */}
       <div className="flex items-center space-x-2 border-b border-neutral-200 dark:border-neutral-800 pb-2">
         <button
@@ -461,6 +480,22 @@ export const WaiterView: React.FC = () => {
                       <Plus className="w-4 h-4 text-emerald-500" />
                     </div>
                   )}
+
+                  {/* QR Code Action Button */}
+                  <div className="mt-2.5 pt-2 border-t border-neutral-100 dark:border-neutral-800 flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveQrTable(table);
+                      }}
+                      className="w-full py-1.5 px-2.5 rounded-xl bg-neutral-100 hover:bg-emerald-500 hover:text-white dark:bg-neutral-800 dark:hover:bg-emerald-600 text-neutral-700 dark:text-neutral-300 font-bold text-[11px] flex items-center justify-center space-x-1.5 transition-colors cursor-pointer"
+                      title={`Tengeneza na chapisha QR Code ya ${table.name}`}
+                    >
+                      <QrCode className="w-3.5 h-3.5 text-emerald-500 group-hover:text-white" />
+                      <span>QR Code ya Meza</span>
+                    </button>
+                  </div>
                 </div>
               );
             })}

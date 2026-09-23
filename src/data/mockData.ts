@@ -1,4 +1,4 @@
-import { Category, MenuItem, PromoOffer, UserProfile, SlideBanner } from '../types';
+import { Category, MenuItem, PromoOffer, UserProfile, SlideBanner, RestaurantTable, TableOrder } from '../types';
 
 export const CATEGORIES: Category[] = [
   { id: 'all', name: 'All Dishes', swahiliName: 'Vyakula Vyote', icon: '🍽️' },
@@ -421,4 +421,36 @@ export const INITIAL_SLIDE_BANNERS: SlideBanner[] = [
     createdAt: Date.now() - 14400000
   }
 ];
+
+export const DEFAULT_RESTAURANT_TABLES: RestaurantTable[] = [
+  { id: 'tbl-1', name: 'Table 01', section: 'Indoor', capacity: 4, status: 'available' },
+  { id: 'tbl-2', name: 'Table 02', section: 'Indoor', capacity: 2, status: 'available' },
+  { id: 'tbl-3', name: 'Table 03', section: 'Garden Terrace', capacity: 6, status: 'available' },
+  { id: 'tbl-4', name: 'Table 04', section: 'Indoor', capacity: 4, status: 'available' },
+  { id: 'tbl-5', name: 'VIP Lounge 1', section: 'VIP Lounge', capacity: 8, status: 'available' },
+  { id: 'tbl-6', name: 'Table 06', section: 'Garden Terrace', capacity: 4, status: 'available' },
+  { id: 'tbl-7', name: 'Table 07', section: 'Indoor', capacity: 2, status: 'available' },
+  { id: 'tbl-8', name: 'VIP Deck 2', section: 'VIP Lounge', capacity: 10, status: 'available' },
+];
+
+export const INITIAL_TABLE_ORDERS: TableOrder[] = [
+  {
+    id: 'tord-101',
+    orderNumber: 'TBL-101',
+    tableNumber: 'Table 01',
+    waiterName: 'Neema Mwamburi',
+    waiterId: 'usr-wtr-5',
+    guestCount: 3,
+    items: [
+      { dishId: 'dish-1', name: 'Mishkaki ya Ng\'ombe (Beef Skewers)', quantity: 3, priceTZS: 12000, notes: 'Pili pili pembeni' },
+      { dishId: 'dish-6', name: 'Chips Mayai Special na Kachumbari', quantity: 2, priceTZS: 7000 },
+      { dishId: 'drink-1', name: 'Passion Juice ya Baridi (Fresh)', quantity: 3, priceTZS: 4500 }
+    ],
+    totalTZS: 63500,
+    status: 'kitchen_prep',
+    notes: 'Haraka kidogo wateja wana kikao saa nane',
+    createdAt: Date.now() - 15 * 60 * 1000
+  }
+];
+
 

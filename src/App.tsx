@@ -19,10 +19,27 @@ import { ProfileView } from './components/ProfileView';
 import { AdminDashboardView } from './components/AdminDashboardView';
 import { WaiterView } from './components/waiter/WaiterView';
 import { AuthView } from './components/AuthView';
+import { TableQrModal } from './components/TableQrModal';
+import { CustomerTableModal } from './components/CustomerTableModal';
 import { Smartphone, Monitor, ShieldCheck, User, LogIn } from 'lucide-react';
 
 const MainContent: React.FC = () => {
-  const { activeTab, setActiveTab, theme, androidFrame, setAndroidFrame, isLoggedIn } = useApp();
+  const {
+    activeTab,
+    setActiveTab,
+    theme,
+    androidFrame,
+    setAndroidFrame,
+    isLoggedIn,
+    tables,
+    activeTable,
+    setActiveTable,
+    activeQrTable,
+    setActiveQrTable,
+    showCustomerTableModal,
+    setShowCustomerTableModal,
+    callWaiterForTable
+  } = useApp();
 
   const isDark = theme === 'dark';
 
@@ -139,6 +156,31 @@ const MainContent: React.FC = () => {
         {/* Modals */}
         <FoodDetailModal />
         <UssdPaymentModal />
+        {activeQrTable && (
+          <TableQrModal
+            table={activeQrTable}
+            onClose={() => setActiveQrTable(null)}
+            onSelectTableForDineIn={(t) => {
+              setActiveTable(t);
+              setActiveTab('home');
+            }}
+          />
+        )}
+        {showCustomerTableModal && (
+          <CustomerTableModal
+            tables={tables}
+            activeTable={activeTable}
+            onSelectTable={(t) => {
+              setActiveTable(t);
+              setActiveTab('home');
+            }}
+            onClearTable={() => setActiveTable(null)}
+            onClose={() => setShowCustomerTableModal(false)}
+            onCallWaiter={(tableNumber, reason) => {
+              callWaiterForTable(tableNumber, reason);
+            }}
+          />
+        )}
       </div>
     );
   }
@@ -171,6 +213,34 @@ const MainContent: React.FC = () => {
       {/* Detail & Payment Modals */}
       <FoodDetailModal />
       <UssdPaymentModal />
+
+      {/* Table Dine-in & QR Modals */}
+      {activeQrTable && (
+        <TableQrModal
+          table={activeQrTable}
+          onClose={() => setActiveQrTable(null)}
+          onSelectTableForDineIn={(t) => {
+            setActiveTable(t);
+            setActiveTab('home');
+          }}
+        />
+      )}
+
+      {showCustomerTableModal && (
+        <CustomerTableModal
+          tables={tables}
+          activeTable={activeTable}
+          onSelectTable={(t) => {
+            setActiveTable(t);
+            setActiveTab('home');
+          }}
+          onClearTable={() => setActiveTable(null)}
+          onClose={() => setShowCustomerTableModal(false)}
+          onCallWaiter={(tableNumber, reason) => {
+            callWaiterForTable(tableNumber, reason);
+          }}
+        />
+      )}
     </div>
   );
 };

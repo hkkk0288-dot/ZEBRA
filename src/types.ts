@@ -71,6 +71,9 @@ export interface Order {
   orderNumber: string;
   date: string;
   status: OrderStatus;
+  orderType?: 'delivery' | 'pickup' | 'dine_in';
+  tableNumber?: string;
+  tableId?: string;
   items: CartItem[];
   subtotal: number;
   deliveryFee: number;
@@ -151,6 +154,23 @@ export interface TableOrder {
   createdAt: number;
 }
 
+
+export interface RestaurantTable {
+  id: string;
+  name: string;
+  section: 'Indoor' | 'Garden Terrace' | 'VIP Lounge';
+  capacity: number;
+  status: 'available' | 'occupied' | 'billing' | 'cleaning';
+  currentOrderId?: string;
+  qrCodeUrl?: string;
+}
+
+export interface WaiterCall {
+  id: string;
+  tableNumber: string;
+  time: string;
+  reason?: string;
+}
 
 export type PendingAction =
   | {

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { formatPrice } from '../utils/formatters';
-import { ArrowLeft, Trash2, Tag, Plus, Minus, MapPin, Check, Smartphone, CreditCard, Banknote, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Trash2, Tag, Plus, Minus, MapPin, Check, Smartphone, CreditCard, Banknote, ShieldCheck, UtensilsCrossed, QrCode } from 'lucide-react';
 import { PaymentProvider } from '../types';
 import { FoodImage } from './FoodImage';
 
@@ -31,16 +31,32 @@ export const CartView: React.FC = () => {
     isLoggedIn,
     setAuthRedirectMessage,
     setPendingAction,
-    setAuthMode
+    setAuthMode,
+    activeTable,
+    setActiveTable,
+    setShowCustomerTableModal
   } = useApp();
 
   const isDark = theme === 'dark';
+  const [diningMode, setDiningMode] = useState<'delivery' | 'dine_in'>(activeTable ? 'dine_in' : 'delivery');
+
+  useEffect(() => {
+    if (activeTable) {
+      setDiningMode('dine_in');
+    }
+  }, [activeTable]);
+
   const [selectedPayment, setSelectedPayment] = useState<PaymentProvider>('mongike_mobile_money');
   const [deliveryAddress, setDeliveryAddress] = useState(
     user.addresses[0]?.street || 'Plot 44, Toure Drive, Masaki Peninsula, Dar es Salaam'
   );
   const [phoneNumber, setPhoneNumber] = useState(user.phone || '+255 712 345 678');
+  const [tableNotes, setTableNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Effective delivery fee based on dining mode
+  const effectiveDeliveryFee = diningMode === 'dine_in' ? 0 : deliveryFee;
+  const effectiveTotal = Math.max(0, subtotal + effectiveDeliveryFee - discountAmount);
 
   const handleCheckout = async () => {
     if (cart.length === 0) return;
@@ -51,12 +67,22 @@ export const CartView: React.FC = () => {
       setActiveTab('auth');
       return;
     }
+
+    if (diningMode === 'dine_in' && !activeTable) {
+      setShowCustomerTableModal(true);
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       await placeOrder({
         paymentMethod: selectedPayment,
         phoneNumber,
-        deliveryAddress
+        deliveryAddress: diningMode === 'dine_in' ? `Meza: ${activeTable?.name} (Dine-In Masaki)` : deliveryAddress,
+        notes: tableNotes,
+        orderType: diningMode,
+        tableNumber: activeTable?.name,
+        tableId: activeTable?.id
       });
     } finally {
       setIsSubmitting(false);
@@ -222,45 +248,166 @@ export const CartView: React.FC = () => {
               ))}
             </div>
 
-            {/* Delivery Address & Contact Section */}
+            {/* Dining Mode Selection: Mezani (Dine-In QR) vs Delivery */}
             <div
-              className={`p-5 rounded-3xl border space-y-3.5 ${
+              className={`p-4 rounded-3xl border space-y-3 ${
                 isDark ? 'bg-neutral-900/80 border-neutral-800' : 'bg-white border-neutral-200 shadow-sm'
               }`}
             >
-              <div className="flex items-center space-x-2 text-xs font-bold text-neutral-900 dark:text-white uppercase tracking-wider">
-                <MapPin className="w-4 h-4 text-emerald-500" />
-                <span>Delivery Location (Dar es Salaam)</span>
+              <div className="text-xs font-bold text-neutral-900 dark:text-white uppercase tracking-wider flex items-center justify-between">
+                <span>Chaguo la Huduma / Service Type</span>
+                {activeTable && (
+                  <span className="text-[10px] bg-emerald-500/20 text-emerald-500 px-2 py-0.5 rounded-full font-bold">
+                    Mezani: {activeTable.name}
+                  </span>
+                )}
               </div>
-              <input
-                type="text"
-                value={deliveryAddress}
-                onChange={e => setDeliveryAddress(e.target.value)}
-                className={`w-full p-3 rounded-2xl text-xs outline-none border transition-colors ${
-                  isDark
-                    ? 'bg-neutral-800/80 border-neutral-700 text-white focus:border-emerald-500'
-                    : 'bg-neutral-50 border-neutral-300 text-neutral-900 focus:border-emerald-500'
-                }`}
-                placeholder="Street address, building, or area in Dar es Salaam"
-              />
 
-              <div className="pt-1">
-                <label className="block text-[11px] font-semibold text-neutral-400 mb-1">
-                  Recipient Phone (kwa ajili ya USSD Push & Rider Contact)
-                </label>
-                <input
-                  type="tel"
-                  value={phoneNumber}
-                  onChange={e => setPhoneNumber(e.target.value)}
-                  className={`w-full p-3 rounded-2xl text-xs font-mono outline-none border transition-colors ${
-                    isDark
-                      ? 'bg-neutral-800/80 border-neutral-700 text-emerald-400 focus:border-emerald-500'
-                      : 'bg-neutral-50 border-neutral-300 text-emerald-600 focus:border-emerald-500'
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setDiningMode('dine_in')}
+                  className={`py-3 px-3 rounded-2xl border text-left transition-all flex flex-col items-center justify-center space-y-1 text-center cursor-pointer ${
+                    diningMode === 'dine_in'
+                      ? 'bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/20'
+                      : isDark
+                      ? 'bg-neutral-800/60 border-neutral-700 text-neutral-300 hover:border-neutral-600'
+                      : 'bg-neutral-50 border-neutral-200 text-neutral-700 hover:border-neutral-300'
                   }`}
-                  placeholder="+255 7XX XXX XXX"
-                />
+                >
+                  <UtensilsCrossed className="w-5 h-5" />
+                  <span className="font-bold text-xs">🍽️ Kula Mezani (Dine-In)</span>
+                  <span className={`text-[10px] ${diningMode === 'dine_in' ? 'text-white/80' : 'text-emerald-500 font-semibold'}`}>
+                    Delivery Bure (0 TZS)
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDiningMode('delivery')}
+                  className={`py-3 px-3 rounded-2xl border text-left transition-all flex flex-col items-center justify-center space-y-1 text-center cursor-pointer ${
+                    diningMode === 'delivery'
+                      ? 'bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/20'
+                      : isDark
+                      ? 'bg-neutral-800/60 border-neutral-700 text-neutral-300 hover:border-neutral-600'
+                      : 'bg-neutral-50 border-neutral-200 text-neutral-700 hover:border-neutral-300'
+                  }`}
+                >
+                  <MapPin className="w-5 h-5" />
+                  <span className="font-bold text-xs">🛵 Lete Mahali Nilipo</span>
+                  <span className={`text-[10px] ${diningMode === 'delivery' ? 'text-white/80' : 'text-neutral-400'}`}>
+                    Dar es Salaam Delivery
+                  </span>
+                </button>
               </div>
+
+              {/* Dine-In Table Status and Selector */}
+              {diningMode === 'dine_in' && (
+                <div className="pt-2 space-y-2">
+                  {activeTable ? (
+                    <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between">
+                      <div className="flex items-center space-x-2.5">
+                        <div className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold text-xs">
+                          ✓
+                        </div>
+                        <div>
+                          <p className="font-bold text-xs text-neutral-900 dark:text-white">
+                            {activeTable.name} • {activeTable.section}
+                          </p>
+                          <p className="text-[10px] text-emerald-600 dark:text-emerald-400">
+                            Chakula kitaletwa moja kwa moja mezani kwako
+                          </p>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setShowCustomerTableModal(true)}
+                        className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline px-2 py-1"
+                      >
+                        Badili Meza
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between">
+                      <div className="text-xs text-amber-700 dark:text-amber-400">
+                        <span className="font-bold">Bado haujachagua meza!</span>
+                        <p className="text-[10px] text-neutral-500">
+                          Tafadhali chagua au changanua QR ya meza uliyoketi
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setShowCustomerTableModal(true)}
+                        className="px-3 py-1.5 rounded-xl bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-600 transition-colors shrink-0"
+                      >
+                        Chagua Meza
+                      </button>
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-neutral-400 mb-1">
+                      Maelekezo Maalum ya Mezani (Hiari)
+                    </label>
+                    <input
+                      type="text"
+                      value={tableNotes}
+                      onChange={e => setTableNotes(e.target.value)}
+                      placeholder="Mfano: Pili pili pembeni, vinywaji vitangulie kabla ya msosi"
+                      className={`w-full p-2.5 rounded-xl text-xs outline-none border transition-colors ${
+                        isDark
+                          ? 'bg-neutral-800/80 border-neutral-700 text-white focus:border-emerald-500'
+                          : 'bg-neutral-50 border-neutral-300 text-neutral-900 focus:border-emerald-500'
+                      }`}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
+
+            {/* Delivery Address & Contact Section (shown if delivery mode) */}
+            {diningMode === 'delivery' && (
+              <div
+                className={`p-5 rounded-3xl border space-y-3.5 ${
+                  isDark ? 'bg-neutral-900/80 border-neutral-800' : 'bg-white border-neutral-200 shadow-sm'
+                }`}
+              >
+                <div className="flex items-center space-x-2 text-xs font-bold text-neutral-900 dark:text-white uppercase tracking-wider">
+                  <MapPin className="w-4 h-4 text-emerald-500" />
+                  <span>Delivery Location (Dar es Salaam)</span>
+                </div>
+                <input
+                  type="text"
+                  value={deliveryAddress}
+                  onChange={e => setDeliveryAddress(e.target.value)}
+                  className={`w-full p-3 rounded-2xl text-xs outline-none border transition-colors ${
+                    isDark
+                      ? 'bg-neutral-800/80 border-neutral-700 text-white focus:border-emerald-500'
+                      : 'bg-neutral-50 border-neutral-300 text-neutral-900 focus:border-emerald-500'
+                  }`}
+                  placeholder="Street address, building, or area in Dar es Salaam"
+                />
+
+                <div className="pt-1">
+                  <label className="block text-[11px] font-semibold text-neutral-400 mb-1">
+                    Recipient Phone (kwa ajili ya USSD Push & Rider Contact)
+                  </label>
+                  <input
+                    type="tel"
+                    value={phoneNumber}
+                    onChange={e => setPhoneNumber(e.target.value)}
+                    className={`w-full p-3 rounded-2xl text-xs font-mono outline-none border transition-colors ${
+                      isDark
+                        ? 'bg-neutral-800/80 border-neutral-700 text-emerald-400 focus:border-emerald-500'
+                        : 'bg-neutral-50 border-neutral-300 text-emerald-600 focus:border-emerald-500'
+                    }`}
+                    placeholder="+255 7XX XXX XXX"
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Right Column: Promo, Payment & Bill Summary */}
@@ -491,9 +638,13 @@ export const CartView: React.FC = () => {
               </div>
 
               <div className="flex justify-between text-xs text-neutral-500 dark:text-neutral-400">
-                <span>Delivery (Dar es Salaam)</span>
+                <span>{diningMode === 'dine_in' ? 'Huduma Mezani (Dine-In)' : 'Delivery (Dar es Salaam)'}</span>
                 <span className="font-semibold text-neutral-800 dark:text-neutral-200">
-                  {deliveryFee === 0 ? 'FREE' : formatPrice(deliveryFee, currency)}
+                  {effectiveDeliveryFee === 0 ? (
+                    <span className="text-emerald-500 font-bold">BURE (0 TZS)</span>
+                  ) : (
+                    formatPrice(effectiveDeliveryFee, currency)
+                  )}
                 </span>
               </div>
 
@@ -510,11 +661,11 @@ export const CartView: React.FC = () => {
                 </span>
                 <div className="text-right">
                   <span className="text-2xl font-black font-display text-emerald-500">
-                    {formatPrice(totalAmount, currency)}
+                    {formatPrice(effectiveTotal, currency)}
                   </span>
                   {currency === 'USD' && (
                     <div className="text-xs text-neutral-400 font-mono">
-                      ≈ {formatPrice(totalAmount, 'TZS')}
+                      ≈ {formatPrice(effectiveTotal, 'TZS')}
                     </div>
                   )}
                 </div>

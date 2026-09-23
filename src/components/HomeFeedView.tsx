@@ -45,7 +45,9 @@ export const HomeFeedView: React.FC = () => {
     setActiveTab,
     applyPromoCode,
     androidFrame,
-    isLoggedIn
+    isLoggedIn,
+    activeTable,
+    setShowCustomerTableModal
   } = useApp();
 
   const isDark = theme === 'dark';
@@ -228,6 +230,68 @@ export const HomeFeedView: React.FC = () => {
           onOpenMapModal={() => setShowMapModal(true)}
           onOpenUssdModal={() => setShowNotificationModal(true)}
         />
+
+        {/* Table Dine-In Status & Quick Order Bar */}
+        {activeTable ? (
+          <div className="p-3 sm:p-4 rounded-2xl sm:rounded-3xl bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-500 text-white flex items-center justify-center font-bold text-base shadow-sm shrink-0">
+                🍽️
+              </div>
+              <div>
+                <div className="flex items-center space-x-2">
+                  <span className="font-bold text-sm text-neutral-900 dark:text-white">
+                    Umeketi: {activeTable.name} ({activeTable.section})
+                  </span>
+                  <span className="text-[10px] bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold px-2 py-0.5 rounded-full">
+                    Oda ya Mezani
+                  </span>
+                </div>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
+                  Weka oda ya vyakula & vinywaji vitakavyoletwa moja kwa moja mezani kwako bila tozo ya delivery.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2 w-full sm:w-auto justify-end">
+              <button
+                onClick={() => setShowCustomerTableModal(true)}
+                className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-neutral-800 dark:text-neutral-200 transition-colors cursor-pointer"
+              >
+                Piga Kengele / Badili
+              </button>
+              <button
+                onClick={() => setActiveTab('cart')}
+                className="text-xs font-bold px-4 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white transition-all shadow-sm cursor-pointer"
+              >
+                Tazama Sahani / Bili
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="p-2.5 sm:p-3.5 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-amber-500/10 via-emerald-500/10 to-transparent border border-neutral-200 dark:border-neutral-800 flex items-center justify-between gap-2">
+            <div className="flex items-center space-x-2.5">
+              <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-500 flex items-center justify-center text-sm font-bold shrink-0">
+                📱
+              </div>
+              <div>
+                <p className="text-xs font-bold text-neutral-900 dark:text-white">
+                  Upo Zebra Restaurant Masaki sasa hivi?
+                </p>
+                <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
+                  Changanua QR code mezani kwako au chagua namba ya meza uweke oda mezani
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowCustomerTableModal(true)}
+              className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-neutral-950 font-bold text-xs shrink-0 transition-colors cursor-pointer shadow-xs"
+            >
+              Chagua Meza
+            </button>
+          </div>
+        )}
 
         {/* Categories Bar - Sleek, Compact & Modern */}
         <div>

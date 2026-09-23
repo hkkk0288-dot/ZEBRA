@@ -12,7 +12,8 @@ import {
   PhoneCall,
   LogIn,
   UtensilsCrossed,
-  ShieldCheck
+  ShieldCheck,
+  QrCode
 } from 'lucide-react';
 import { formatPrice } from '../utils/formatters';
 
@@ -30,7 +31,9 @@ export const WebHeader: React.FC = () => {
     theme,
     toggleTheme,
     searchQuery,
-    setSearchQuery
+    setSearchQuery,
+    activeTable,
+    setShowCustomerTableModal
   } = useApp();
 
   const isDark = theme === 'dark';
@@ -235,8 +238,29 @@ export const WebHeader: React.FC = () => {
             )}
           </div>
 
-          {/* Quick Actions (Currency, Theme, Cart, Menu) */}
+          {/* Quick Actions (Table, Currency, Theme, Cart, Menu) */}
           <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+            {/* Table / QR Dine-In Indicator */}
+            {activeTable ? (
+              <button
+                onClick={() => setShowCustomerTableModal(true)}
+                className="px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-600 dark:text-emerald-400 text-[10px] sm:text-xs font-bold flex items-center space-x-1 hover:bg-emerald-500/30 transition-all cursor-pointer"
+                title="Upo mezani. Bofya kuona maelezo au kupiga kengele ya mhudumu"
+              >
+                <UtensilsCrossed className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                <span className="truncate max-w-[70px] sm:max-w-none">{activeTable.name}</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowCustomerTableModal(true)}
+                className="hidden sm:flex items-center space-x-1 px-2.5 py-1.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 text-xs font-bold transition-all cursor-pointer"
+                title="Umeketi mezani? Bofya kuingiza namba ya meza au kuchanganua QR"
+              >
+                <QrCode className="w-3.5 h-3.5 text-emerald-500" />
+                <span>Mezani</span>
+              </button>
+            )}
+
             {/* Currency Switcher */}
             <button
               onClick={() => setCurrency(currency === 'USD' ? 'TZS' : 'USD')}

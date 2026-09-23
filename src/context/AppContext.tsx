@@ -15,7 +15,10 @@ import {
   SystemRole,
   RolePermissions,
   SlideBanner,
-  Category
+  Category,
+  RestaurantTable,
+  TableOrder,
+  WaiterCall
 } from '../types';
 import {
   DEFAULT_USER,
@@ -24,13 +27,18 @@ import {
   PROMO_OFFERS,
   USSD_NETWORKS,
   INITIAL_SLIDE_BANNERS,
-  CATEGORIES
+  CATEGORIES,
+  DEFAULT_RESTAURANT_TABLES,
+  INITIAL_TABLE_ORDERS
 } from '../data/mockData';
 import {
   fetchBannersFromFirestore,
   saveBannerToFirestore,
   deleteBannerFromFirestore,
-  subscribeToSlideBanners
+  subscribeToSlideBanners,
+  fetchTableOrdersFromFirestore,
+  saveTableOrderToFirestore,
+  subscribeToTableOrders
 } from '../services/firebaseDbService';
 import { generateOrderNumber, generateUssdRef } from '../utils/formatters';
 import { mongikeService } from '../services/mongikeService';
@@ -99,8 +107,26 @@ interface AppContextType {
     phoneNumber?: string;
     deliveryAddress: string;
     notes?: string;
+    orderType?: 'delivery' | 'pickup' | 'dine_in';
+    tableNumber?: string;
+    tableId?: string;
   }) => Promise<Order>;
   updateOrderStatus: (orderId: string, status: OrderStatus) => void;
+
+  // Restaurant Tables & Dine-in QR ordering
+  tables: RestaurantTable[];
+  setTables: React.Dispatch<React.SetStateAction<RestaurantTable[]>>;
+  activeTable: RestaurantTable | null;
+  setActiveTable: (t: RestaurantTable | null) => void;
+  tableOrders: TableOrder[];
+  setTableOrders: React.Dispatch<React.SetStateAction<TableOrder[]>>;
+  waiterCalls: WaiterCall[];
+  callWaiterForTable: (tableNumber: string, reason?: string) => void;
+  dismissWaiterCall: (id: string) => void;
+  showCustomerTableModal: boolean;
+  setShowCustomerTableModal: (open: boolean) => void;
+  activeQrTable: RestaurantTable | null;
+  setActiveQrTable: (t: RestaurantTable | null) => void;
 
   activeTab: NavigationTab;
   setActiveTab: (tab: NavigationTab) => void;
@@ -319,6 +345,109 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     return null;
   });
+
+  // Restaurant Tables state
+  const [tables, setTables] = useState<RestaurantTable[]>(() => {
+    const saved = localStorage.getItem('zebra_restaurant_tables');
+    return saved ? JSON.parse(saved) : DEFAULT_RESTAURANT_TABLES;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('zebra_restaurant_tables', JSON.stringify(tables));
+  }, [tables]);
+
+  // Active table if customer scanned table QR code or selected table
+  const [activeTable, setActiveTableState] = useState<RestaurantTable | null>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tableParam = params.get('table');
+      if (tableParam) {
+        const match = DEFAULT_RESTAURANT_TABLES.find(
+          t => t.id.toLowerCase() === tableParam.toLowerCase() || t.name.toLowerCase() === tableParam.toLowerCase()
+        );
+        if (match) return match;
+      }
+      const saved = localStorage.getItem('zebra_active_table');
+      return saved ? JSON.parse(saved) : null;
+    }
+    return null;
+  });
+
+  const setActiveTable = (tbl: RestaurantTable | null) => {
+    setActiveTableState(tbl);
+    if (tbl) {
+      localStorage.setItem('zebra_active_table', JSON.stringify(tbl));
+    } else {
+      localStorage.removeItem('zebra_active_table');
+    }
+  };
+
+  // Check URL parameter dynamically on mount and window location changes
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const tableParam = params.get('table');
+    if (tableParam) {
+      const match = tables.find(
+        t => t.id.toLowerCase() === tableParam.toLowerCase() || t.name.toLowerCase() === tableParam.toLowerCase()
+      );
+      if (match) {
+        setActiveTable(match);
+      }
+    }
+  }, [tables]);
+
+  // Table Orders (Waiter & Kitchen KDS)
+  const [tableOrders, setTableOrders] = useState<TableOrder[]>(() => {
+    const saved = localStorage.getItem('zebra_table_orders');
+    return saved ? JSON.parse(saved) : INITIAL_TABLE_ORDERS;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('zebra_table_orders', JSON.stringify(tableOrders));
+  }, [tableOrders]);
+
+  // Sync Table Orders with Firestore & live listener
+  useEffect(() => {
+    const initCloudTableOrders = async () => {
+      try {
+        const cloudTableOrders = await fetchTableOrdersFromFirestore();
+        if (cloudTableOrders && cloudTableOrders.length > 0) {
+          setTableOrders(cloudTableOrders);
+        }
+      } catch (err) {
+        console.warn('Table orders Firestore notice:', err);
+      }
+    };
+    initCloudTableOrders();
+
+    const unsub = subscribeToTableOrders(updatedOrders => {
+      if (updatedOrders && updatedOrders.length > 0) {
+        setTableOrders(updatedOrders);
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  // Waiter call requests (bell notifications from table customers)
+  const [waiterCalls, setWaiterCalls] = useState<WaiterCall[]>([]);
+  const callWaiterForTable = (tableNumber: string, reason: string = 'Mhudumu anahitajika') => {
+    const newCall: WaiterCall = {
+      id: `wcall-${Date.now()}`,
+      tableNumber,
+      reason,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    setWaiterCalls(prev => [newCall, ...prev]);
+  };
+
+  const dismissWaiterCall = (id: string) => {
+    setWaiterCalls(prev => prev.filter(c => c.id !== id));
+  };
+
+  // Modals for Table QR tent card and Customer table selection
+  const [showCustomerTableModal, setShowCustomerTableModal] = useState(false);
+  const [activeQrTable, setActiveQrTable] = useState<RestaurantTable | null>(null);
 
   // Persistence effects
   useEffect(() => {
@@ -691,6 +820,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     phoneNumber?: string;
     deliveryAddress: string;
     notes?: string;
+    orderType?: 'delivery' | 'pickup' | 'dine_in';
+    tableNumber?: string;
+    tableId?: string;
   }): Promise<Order> => {
     if (!isLoggedIn) {
       setAuthRedirectMessage('Tafadhali ingia au jisajili kwanza ili ukamilishe malipo na uagize chakula chako.');
@@ -700,22 +832,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       throw new Error('Tafadhali ingia au jisajili kwanza');
     }
 
+    const isDineIn = details.orderType === 'dine_in' || !!activeTable;
+    const assignedTable = activeTable?.name || details.tableNumber;
+    const effectiveDeliveryFee = isDineIn ? 0 : deliveryFee;
+    const effectiveTotal = Math.max(0, subtotal + effectiveDeliveryFee - discountAmount);
+
     const isMongike = details.paymentMethod === 'mongike_mobile_money';
     const isUssd = details.paymentMethod.startsWith('ussd_') || isMongike;
     const netConfig = USSD_NETWORKS.find(n => n.id === details.paymentMethod);
     const refCode = generateUssdRef();
-    const amountTZS = Math.round(totalAmount * 2600);
+    const amountTZS = Math.round(effectiveTotal * 2600);
 
     const newOrder: Order = {
       id: `ord-${Date.now()}`,
       orderNumber: generateOrderNumber(),
       date: 'Just now',
       status: 'pending',
+      orderType: isDineIn ? 'dine_in' : (details.orderType || 'delivery'),
+      tableNumber: isDineIn ? assignedTable : undefined,
+      tableId: isDineIn ? (activeTable?.id || details.tableId) : undefined,
       items: [...cart],
       subtotal,
-      deliveryFee,
+      deliveryFee: effectiveDeliveryFee,
       discount: discountAmount,
-      total: totalAmount,
+      total: effectiveTotal,
       currency,
       paymentMethod: details.paymentMethod,
       paymentStatus: isUssd ? 'pending' : 'paid',
@@ -723,10 +863,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         name: user.name,
         phone: details.phoneNumber || user.phone,
         email: user.email,
-        address: details.deliveryAddress,
+        address: isDineIn ? `Meza: ${assignedTable} (Dine-In Zebra Masaki)` : details.deliveryAddress,
         notes: details.notes
       },
-      rider: {
+      rider: isDineIn ? undefined : {
         name: 'Rashid "Speedy" Mwinyi',
         phone: '+255 744 192 883',
         vehicle: 'Boxer 150cc (MC-3910)',
@@ -736,6 +876,45 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       },
       createdAt: Date.now()
     };
+
+    // If Dine-In, also create TableOrder for Waiter POS & Kitchen KDS and sync to Firestore
+    if (isDineIn && assignedTable) {
+      const newTableOrder: TableOrder = {
+        id: `tord-${Date.now()}`,
+        orderNumber: `TBL-${newOrder.orderNumber.replace('ZEB-', '')}`,
+        tableNumber: assignedTable,
+        waiterName: 'Self-Service QR Online',
+        waiterId: 'online-qr',
+        guestCount: activeTable?.capacity || 2,
+        items: cart.map(c => ({
+          dishId: c.menuItem.id,
+          name: c.menuItem.name,
+          quantity: c.quantity,
+          priceTZS: c.menuItem.priceTZS || Math.round(c.totalPrice * 2600),
+          notes: c.specialInstructions
+        })),
+        totalTZS: amountTZS,
+        status: 'ordered',
+        notes: details.notes ? `Oda ya QR: ${details.notes}` : 'Oda imewekwa moja kwa moja kupitia QR ya Meza',
+        createdAt: Date.now()
+      };
+
+      setTableOrders(prev => [newTableOrder, ...prev]);
+
+      // Update table status to occupied
+      setTables(prev =>
+        prev.map(tbl =>
+          (tbl.name === assignedTable || tbl.id === activeTable?.id)
+            ? { ...tbl, status: 'occupied', currentOrderId: newTableOrder.id }
+            : tbl
+        )
+      );
+
+      // Save to Firestore asynchronously
+      saveTableOrderToFirestore(newTableOrder).catch(err =>
+        console.warn('Could not save table order to firestore:', err)
+      );
+    }
 
     if (isMongike) {
       const buyerPhone = details.phoneNumber || user.phone;
@@ -915,6 +1094,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setActiveOrder,
         placeOrder,
         updateOrderStatus,
+        tables,
+        setTables,
+        activeTable,
+        setActiveTable,
+        tableOrders,
+        setTableOrders,
+        waiterCalls,
+        callWaiterForTable,
+        dismissWaiterCall,
+        showCustomerTableModal,
+        setShowCustomerTableModal,
+        activeQrTable,
+        setActiveQrTable,
         activeTab,
         setActiveTab,
         authMode,
