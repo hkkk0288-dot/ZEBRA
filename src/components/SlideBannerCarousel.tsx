@@ -97,6 +97,17 @@ export const SlideBannerCarousel: React.FC<SlideBannerCarouselProps> = ({
   };
 
   const handleClaim = (banner: SlideBanner) => {
+    if (
+      banner.id === 'banner-map' ||
+      banner.targetCategory === 'map' ||
+      banner.title?.toLowerCase().includes('ramani') ||
+      banner.description?.toLowerCase().includes('ramani')
+    ) {
+      if (onOpenMapModal) {
+        onOpenMapModal();
+        return;
+      }
+    }
     if (banner.promoCode) {
       applyPromoCode(banner.promoCode);
     }

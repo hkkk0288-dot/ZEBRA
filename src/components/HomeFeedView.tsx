@@ -24,7 +24,8 @@ import { motion } from 'motion/react';
 import { FoodImage } from './FoodImage';
 import { DarEsSalaamMap } from './DarEsSalaamMap';
 import { SlideBannerCarousel } from './SlideBannerCarousel';
-import { GlobalMapModal } from './GlobalMapModal';
+import { GlobalMapModal, MapLayerKey } from './GlobalMapModal';
+import { HomeMapSection } from './HomeMapSection';
 
 export const HomeFeedView: React.FC = () => {
   const {
@@ -56,6 +57,12 @@ export const HomeFeedView: React.FC = () => {
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showMapModal, setShowMapModal] = useState(false);
+  const [selectedMapLayer, setSelectedMapLayer] = useState<MapLayerKey>('tanganyika_east_africa');
+
+  const handleOpenMap = (layer?: MapLayerKey) => {
+    if (layer) setSelectedMapLayer(layer);
+    setShowMapModal(true);
+  };
 
   // Filter items
   const filteredItems = menuItems.filter(item => {
@@ -562,6 +569,12 @@ export const HomeFeedView: React.FC = () => {
           </div>
         )}
 
+        {/* Global & Dar es Salaam Map Section */}
+        <HomeMapSection
+          onOpenFullMap={handleOpenMap}
+          isDark={isDark}
+        />
+
         {/* Empty Search / Category state */}
         {filteredItems.length === 0 && (
           <div className="py-16 text-center">
@@ -634,6 +647,7 @@ export const HomeFeedView: React.FC = () => {
         isOpen={showMapModal}
         onClose={() => setShowMapModal(false)}
         isDark={isDark}
+        initialMode={selectedMapLayer}
       />
     </div>
   );

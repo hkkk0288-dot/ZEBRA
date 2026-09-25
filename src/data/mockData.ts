@@ -421,6 +421,24 @@ export const INITIAL_SLIDE_BANNERS: SlideBanner[] = [
     active: true,
     orderIndex: 3,
     createdAt: Date.now() - 14400000
+  },
+  {
+    id: 'banner-map',
+    tag: '🌍 Kijiografia • Tanzania & Ulimwengu',
+    title: 'Ramani ya Dunia',
+    titleHighlight: '& Dar es Salaam',
+    description: 'Tazama ramani kamili ya kijiografia ya dunia pamoja na matawi 4 ya Zebra Restaurant (Masaki, Kariakoo, Oysterbay & Slipway).',
+    ctaText: 'Fungua Ramani Hii',
+    promoCode: 'RAMANI',
+    ussdNumber: '*150*00#',
+    bgGradient: 'from-blue-950 via-neutral-900 to-emerald-950',
+    accentColor: '#3b82f6',
+    imageUrl: '/world_map.png',
+    decorativeEmoji: '🌍',
+    targetCategory: 'map',
+    active: true,
+    orderIndex: 4,
+    createdAt: Date.now()
   }
 ];
 

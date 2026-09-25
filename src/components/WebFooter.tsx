@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 
 export const WebFooter: React.FC = () => {
-  const { setActiveTab, setSelectedCategory, theme } = useApp();
+  const { setActiveTab, setSelectedCategory, theme, setShowGlobalMapModal } = useApp();
   const isDark = theme === 'dark';
 
   return (
@@ -105,6 +105,15 @@ export const WebFooter: React.FC = () => {
                 </div>
               </li>
             </ul>
+
+            <button
+              type="button"
+              onClick={() => setShowGlobalMapModal(true)}
+              className="mt-3 w-full py-2 px-3 rounded-xl bg-blue-500/15 hover:bg-blue-500/25 border border-blue-500/30 text-blue-400 text-xs font-bold flex items-center justify-center space-x-2 transition-all cursor-pointer"
+            >
+              <span>🌍</span>
+              <span>Tazama Ramani ya Dunia & Dar</span>
+            </button>
           </div>
 
           {/* Col 4: Quick Links & Hours */}
