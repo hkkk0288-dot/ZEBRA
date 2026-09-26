@@ -22,6 +22,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { formatPrice } from '../utils/formatters';
+import { MapLocationPickerModal } from './MapLocationPickerModal';
 
 const AVATAR_PRESETS = [
   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
@@ -60,6 +61,7 @@ export const ProfileView: React.FC = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const [showAddAddress, setShowAddAddress] = useState(false);
+  const [showAddressMapPicker, setShowAddressMapPicker] = useState(false);
   const [newAddressLabel, setNewAddressLabel] = useState('Nyumbani');
   const [newAddressStreet, setNewAddressStreet] = useState('');
 
@@ -502,6 +504,15 @@ export const ProfileView: React.FC = () => {
                     </button>
                   ))}
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowAddressMapPicker(true)}
+                  className="w-full py-2 px-3 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-400 font-bold text-xs flex items-center justify-center space-x-1.5 transition-colors cursor-pointer"
+                >
+                  <span>🗺️ Chagua Eneo kwenye Ramani (Dar es Salaam)</span>
+                </button>
+
                 <input
                   type="text"
                   value={newAddressStreet}
@@ -695,6 +706,17 @@ export const ProfileView: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Map Location Picker Modal */}
+      <MapLocationPickerModal
+        isOpen={showAddressMapPicker}
+        onClose={() => setShowAddressMapPicker(false)}
+        onSelectLocation={result => {
+          setNewAddressStreet(result.address);
+        }}
+        initialAddress={newAddressStreet}
+        isDark={isDark}
+      />
     </div>
   );
 };

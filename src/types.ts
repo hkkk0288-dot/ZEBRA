@@ -19,6 +19,7 @@ export interface MenuItem {
   swahiliName?: string;
   description: string;
   price: number; // in USD
+  priceUSD?: number; // alias for USD
   priceTZS: number; // in Tanzanian Shillings
   category: string;
   image: string;
@@ -39,6 +40,8 @@ export interface MenuItem {
 export interface CartItem {
   cartItemId: string;
   menuItem: MenuItem;
+  item?: MenuItem; // alias for menuItem
+  name?: string; // alias for dish name
   selectedSize: SizeOption;
   selectedIngredients: IngredientOption[];
   quantity: number;
@@ -71,9 +74,11 @@ export interface Order {
   orderNumber: string;
   date: string;
   status: OrderStatus;
-  orderType?: 'delivery' | 'pickup' | 'dine_in';
+  orderType?: 'delivery' | 'pickup' | 'dine_in' | 'takeaway';
   tableNumber?: string;
   tableId?: string;
+  deliveryAddress?: string;
+  notes?: string;
   items: CartItem[];
   subtotal: number;
   deliveryFee: number;
@@ -120,7 +125,7 @@ export interface Order {
   createdAt: number;
 }
 
-export type NavigationTab = 'home' | 'favorites' | 'cart' | 'orders' | 'profile' | 'admin' | 'waiter' | 'reservations' | 'auth';
+export type NavigationTab = 'home' | 'favorites' | 'cart' | 'orders' | 'profile' | 'admin' | 'waiter' | 'reservations' | 'auth' | 'pos' | 'oss' | 'kds';
 export type AuthMode = 'login' | 'signup';
 
 export interface BillSplitShare {

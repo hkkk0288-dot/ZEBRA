@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { formatPrice } from '../utils/formatters';
-import { ArrowLeft, Trash2, Tag, Plus, Minus, MapPin, Check, Smartphone, CreditCard, Banknote, ShieldCheck, UtensilsCrossed, QrCode } from 'lucide-react';
+import { ArrowLeft, Trash2, Tag, Plus, Minus, MapPin, Check, Smartphone, CreditCard, Banknote, ShieldCheck, UtensilsCrossed, QrCode, ShoppingBag } from 'lucide-react';
 import { PaymentProvider } from '../types';
 import { FoodImage } from './FoodImage';
+import { MapLocationPickerModal } from './MapLocationPickerModal';
 
 export const CartView: React.FC = () => {
   const {
@@ -43,7 +44,7 @@ export const CartView: React.FC = () => {
   } = useApp();
 
   const isDark = theme === 'dark';
-  const [diningMode, setDiningMode] = useState<'delivery' | 'dine_in'>(activeTable ? 'dine_in' : 'delivery');
+  const [diningMode, setDiningMode] = useState<'delivery' | 'takeaway' | 'dine_in'>(activeTable ? 'dine_in' : 'delivery');
 
   useEffect(() => {
     if (activeTable) {
@@ -52,6 +53,7 @@ export const CartView: React.FC = () => {
   }, [activeTable]);
 
   const [selectedPayment, setSelectedPayment] = useState<PaymentProvider>('mongike_mobile_money');
+  const [showMapPicker, setShowMapPicker] = useState<boolean>(false);
   const [deliveryAddress, setDeliveryAddress] = useState(
     user.addresses[0]?.street || 'Plot 44, Toure Drive, Masaki Peninsula, Dar es Salaam'
   );
@@ -60,8 +62,83 @@ export const CartView: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Effective delivery fee based on dining mode
-  const effectiveDeliveryFee = diningMode === 'dine_in' ? 0 : deliveryFee;
+  const effectiveDeliveryFee = diningMode === 'delivery' ? deliveryFee : 0;
   const effectiveTotal = Math.max(0, subtotal + effectiveDeliveryFee - discountAmount - loyaltyDiscountAmount);
+
+  // WhatsApp Order Handler (Matching Screenshot 6 & 7)
+  const handleProceedToWhatsApp = async () => {
+    if (cart.length === 0) return;
+
+    const orderId = `25${Date.now().toString().slice(-6)}`;
+    const randomToken = `0${Math.floor(100 + Math.random() * 900)}`;
+
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('en-GB');
+    const hours = now.getHours();
+    const timeStart = `${String(hours).padStart(2, '0')}:00`;
+    const timeEnd = `${String(hours + 1).padStart(2, '0')}:00`;
+    const deliveryTimeStr = `${dateStr} (${timeStart} - ${timeEnd})`;
+
+    let itemLines = '';
+    cart.forEach((c, idx) => {
+      const dish = c.menuItem || c.item;
+      const itemPrice = currency === 'TZS' ? dish?.priceTZS : (dish?.priceUSD ?? dish?.price ?? 0);
+      const formattedItemPrice = formatPrice(itemPrice, currency);
+      const totalItemPrice = formatPrice(itemPrice * c.quantity, currency);
+
+      itemLines += `\n${idx + 1}) ${dish?.name}`;
+      if (c.selectedSize?.name) itemLines += ` (Size: ${c.selectedSize.name})`;
+      if (c.selectedIngredients.length > 0) itemLines += ` [${c.selectedIngredients.map(i => i.name).join(', ')}]`;
+      itemLines += `\n-----------------------------------`;
+      itemLines += `\nPrice : ${formattedItemPrice}`;
+      itemLines += `\nQuantity : ${c.quantity}`;
+      itemLines += `\nDiscount : ${formatPrice(0, currency)}`;
+      itemLines += `\nTotal : ${totalItemPrice}\n`;
+    });
+
+    const orderTypeLabel = diningMode === 'delivery' ? 'Delivery' : diningMode === 'takeaway' ? 'Takeaway' : 'Dine-In';
+
+    const msg =
+`Order - Zebra Restaurant - PWA Online Food Ordering System
+***********************************
+Order ID#: ${orderId}
+Token #: ${randomToken}
+Order Type : ${orderTypeLabel}
+Delivery Time : ${deliveryTimeStr}
+-----------------------------------
+Order Details
+-----------------------------------${itemLines}
+-----------------------------------
+Subtotal : ${formatPrice(subtotal, currency)}
+Delivery Charge : ${formatPrice(effectiveDeliveryFee, currency)}
+Discount : ${formatPrice(discountAmount + loyaltyDiscountAmount, currency)}
+Total Amount : ${formatPrice(effectiveTotal, currency)}
+-----------------------------------
+Customer Details:
+Name : ${user?.name || 'Customer'}
+Phone : ${phoneNumber}
+Destination : ${diningMode === 'delivery' ? deliveryAddress : diningMode === 'dine_in' ? `Table ${activeTable?.name}` : 'Takeaway Counter'}
+${tableNotes ? `Notes : ${tableNotes}\n` : ''}-----------------------------------
+Thank you for choosing Zebra Restaurant!`;
+
+    // Save order in system queue
+    try {
+      await placeOrder({
+        paymentMethod: selectedPayment,
+        phoneNumber,
+        deliveryAddress: `${orderTypeLabel.toUpperCase()} - ${deliveryAddress} (Token #${randomToken})`,
+        notes: `WhatsApp Order: ${orderId}`,
+        orderType: diningMode === 'dine_in' ? 'dine_in' : diningMode === 'takeaway' ? 'pickup' : 'delivery'
+      });
+    } catch (e) {
+      console.warn('Place order notice:', e);
+    }
+
+    // Open WhatsApp
+    const encoded = encodeURIComponent(msg);
+    const restaurantWhatsApp = '255712345678';
+    window.open(`https://wa.me/${restaurantWhatsApp}?text=${encoded}`, '_blank');
+  };
 
   const handleCheckout = async () => {
     if (cart.length === 0) return;
@@ -85,7 +162,7 @@ export const CartView: React.FC = () => {
         phoneNumber,
         deliveryAddress: diningMode === 'dine_in' ? `Meza: ${activeTable?.name} (Dine-In Masaki)` : deliveryAddress,
         notes: tableNotes,
-        orderType: diningMode,
+        orderType: diningMode === 'takeaway' ? 'pickup' : diningMode,
         tableNumber: activeTable?.name,
         tableId: activeTable?.id
       });
@@ -268,29 +345,11 @@ export const CartView: React.FC = () => {
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setDiningMode('dine_in')}
-                  className={`py-3 px-3 rounded-2xl border text-left transition-all flex flex-col items-center justify-center space-y-1 text-center cursor-pointer ${
-                    diningMode === 'dine_in'
-                      ? 'bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/20'
-                      : isDark
-                      ? 'bg-neutral-800/60 border-neutral-700 text-neutral-300 hover:border-neutral-600'
-                      : 'bg-neutral-50 border-neutral-200 text-neutral-700 hover:border-neutral-300'
-                  }`}
-                >
-                  <UtensilsCrossed className="w-5 h-5" />
-                  <span className="font-bold text-xs">🍽️ Kula Mezani (Dine-In)</span>
-                  <span className={`text-[10px] ${diningMode === 'dine_in' ? 'text-white/80' : 'text-emerald-500 font-semibold'}`}>
-                    Delivery Bure (0 TZS)
-                  </span>
-                </button>
-
+              <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
                   onClick={() => setDiningMode('delivery')}
-                  className={`py-3 px-3 rounded-2xl border text-left transition-all flex flex-col items-center justify-center space-y-1 text-center cursor-pointer ${
+                  className={`py-2.5 px-2 rounded-2xl border text-left transition-all flex flex-col items-center justify-center space-y-1 text-center cursor-pointer ${
                     diningMode === 'delivery'
                       ? 'bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/20'
                       : isDark
@@ -298,10 +357,46 @@ export const CartView: React.FC = () => {
                       : 'bg-neutral-50 border-neutral-200 text-neutral-700 hover:border-neutral-300'
                   }`}
                 >
-                  <MapPin className="w-5 h-5" />
-                  <span className="font-bold text-xs">🛵 Lete Mahali Nilipo</span>
-                  <span className={`text-[10px] ${diningMode === 'delivery' ? 'text-white/80' : 'text-neutral-400'}`}>
-                    Dar es Salaam Delivery
+                  <MapPin className="w-4 h-4" />
+                  <span className="font-bold text-xs">🛵 Delivery</span>
+                  <span className={`text-[9px] ${diningMode === 'delivery' ? 'text-white/80' : 'text-neutral-400'}`}>
+                    Lete Nilipo
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDiningMode('takeaway')}
+                  className={`py-2.5 px-2 rounded-2xl border text-left transition-all flex flex-col items-center justify-center space-y-1 text-center cursor-pointer ${
+                    diningMode === 'takeaway'
+                      ? 'bg-teal-500 text-white border-teal-500 shadow-md shadow-teal-500/20'
+                      : isDark
+                      ? 'bg-neutral-800/60 border-neutral-700 text-neutral-300 hover:border-neutral-600'
+                      : 'bg-neutral-50 border-neutral-200 text-neutral-700 hover:border-neutral-300'
+                  }`}
+                >
+                  <ShoppingBag className="w-4 h-4" />
+                  <span className="font-bold text-xs">🛍️ Takeaway</span>
+                  <span className={`text-[9px] ${diningMode === 'takeaway' ? 'text-white/80' : 'text-teal-400 font-semibold'}`}>
+                    Bure (0 TZS)
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDiningMode('dine_in')}
+                  className={`py-2.5 px-2 rounded-2xl border text-left transition-all flex flex-col items-center justify-center space-y-1 text-center cursor-pointer ${
+                    diningMode === 'dine_in'
+                      ? 'bg-amber-500 text-neutral-950 border-amber-500 shadow-md shadow-amber-500/20'
+                      : isDark
+                      ? 'bg-neutral-800/60 border-neutral-700 text-neutral-300 hover:border-neutral-600'
+                      : 'bg-neutral-50 border-neutral-200 text-neutral-700 hover:border-neutral-300'
+                  }`}
+                >
+                  <UtensilsCrossed className="w-4 h-4" />
+                  <span className="font-bold text-xs">🍽️ Dine-In</span>
+                  <span className={`text-[9px] ${diningMode === 'dine_in' ? 'text-neutral-950/80 font-bold' : 'text-amber-500 font-semibold'}`}>
+                    Mezani
                   </span>
                 </button>
               </div>
@@ -375,25 +470,72 @@ export const CartView: React.FC = () => {
             {/* Delivery Address & Contact Section (shown if delivery mode) */}
             {diningMode === 'delivery' && (
               <div
-                className={`p-5 rounded-3xl border space-y-3.5 ${
+                className={`p-4 sm:p-5 rounded-3xl border space-y-3.5 ${
                   isDark ? 'bg-neutral-900/80 border-neutral-800' : 'bg-white border-neutral-200 shadow-sm'
                 }`}
               >
-                <div className="flex items-center space-x-2 text-xs font-bold text-neutral-900 dark:text-white uppercase tracking-wider">
-                  <MapPin className="w-4 h-4 text-emerald-500" />
-                  <span>Delivery Location (Dar es Salaam)</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2 text-xs font-bold text-neutral-900 dark:text-white uppercase tracking-wider">
+                    <MapPin className="w-4 h-4 text-emerald-500" />
+                    <span>Delivery Location (Dar es Salaam)</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowMapPicker(true)}
+                    className="text-[11px] font-bold text-emerald-500 hover:text-emerald-400 flex items-center space-x-1 py-1 px-2.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 transition-colors cursor-pointer"
+                  >
+                    <span>🗺️ Chagua kwenye Ramani</span>
+                  </button>
                 </div>
-                <input
-                  type="text"
-                  value={deliveryAddress}
-                  onChange={e => setDeliveryAddress(e.target.value)}
-                  className={`w-full p-3 rounded-2xl text-xs outline-none border transition-colors ${
-                    isDark
-                      ? 'bg-neutral-800/80 border-neutral-700 text-white focus:border-emerald-500'
-                      : 'bg-neutral-50 border-neutral-300 text-neutral-900 focus:border-emerald-500'
-                  }`}
-                  placeholder="Street address, building, or area in Dar es Salaam"
-                />
+
+                {/* Primary Map Select Action Banner */}
+                <button
+                  type="button"
+                  onClick={() => setShowMapPicker(true)}
+                  className="w-full py-2.5 px-3 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-teal-500/15 to-transparent border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/20 font-bold text-xs flex items-center justify-between transition-all cursor-pointer group text-left"
+                >
+                  <div className="flex items-center space-x-2 min-w-0 mr-2">
+                    <span className="text-base group-hover:scale-110 transition-transform shrink-0">📍</span>
+                    <span className="truncate text-neutral-200 font-medium">
+                      {deliveryAddress || 'Gusa kuchagua eneo kwenye ramani...'}
+                    </span>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-xl bg-emerald-500 text-white font-extrabold text-[10px] shrink-0 shadow-xs whitespace-nowrap">
+                    Fungua Ramani ➔
+                  </span>
+                </button>
+
+                <div className="space-y-1">
+                  <label className="block text-[11px] font-semibold text-neutral-400">
+                    Au andika maelezo ya mtaa / jengo / namba ya nyumba:
+                  </label>
+                  <input
+                    type="text"
+                    value={deliveryAddress}
+                    onChange={e => setDeliveryAddress(e.target.value)}
+                    className={`w-full p-3 rounded-2xl text-xs outline-none border transition-colors ${
+                      isDark
+                        ? 'bg-neutral-800/80 border-neutral-700 text-white focus:border-emerald-500'
+                        : 'bg-neutral-50 border-neutral-300 text-neutral-900 focus:border-emerald-500'
+                    }`}
+                    placeholder="Mfano: Toure Drive, Masaki Peninsula karibu na Slipway"
+                  />
+                </div>
+
+                {/* Quick Area Chips */}
+                <div className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar pt-0.5">
+                  <span className="text-[10px] text-neutral-400 shrink-0 font-medium">Mitaa:</span>
+                  {['Masaki Peninsula', 'Oysterbay', 'Mikocheni', 'Kariakoo', 'Upanga', 'Sinza', 'Mwenge', 'Mbezi Beach'].map(area => (
+                    <button
+                      key={area}
+                      type="button"
+                      onClick={() => setDeliveryAddress(`${area}, Dar es Salaam`)}
+                      className="text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 whitespace-nowrap transition-colors border border-neutral-700/60"
+                    >
+                      {area}
+                    </button>
+                  ))}
+                </div>
 
                 <div className="pt-1">
                   <label className="block text-[11px] font-semibold text-neutral-400 mb-1">
@@ -760,26 +902,37 @@ export const CartView: React.FC = () => {
               </div>
             </div>
 
-            {/* Checkout CTA */}
-            <div>
+            {/* Checkout CTAs: WhatsApp (Screenshot 6) & App Checkout */}
+            <div className="space-y-2 pt-1">
+              {/* Big Green Proceed to WhatsApp Button (Screenshot 6) */}
               <button
+                type="button"
+                onClick={handleProceedToWhatsApp}
+                className="w-full py-4 px-6 rounded-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-extrabold text-base shadow-xl shadow-[#25D366]/30 flex items-center justify-center space-x-2.5 active:scale-[0.98] transition-all cursor-pointer"
+              >
+                <span className="text-xl">💬</span>
+                <span>Proceed to WhatsApp</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={handleCheckout}
                 disabled={isSubmitting}
-                className={`w-full active:scale-[0.98] font-bold py-4 px-6 rounded-full shadow-lg flex items-center justify-center space-x-2 text-base transition-all disabled:opacity-50 ${
+                className={`w-full active:scale-[0.98] font-bold py-3.5 px-6 rounded-full shadow-md flex items-center justify-center space-x-2 text-xs sm:text-sm transition-all disabled:opacity-50 cursor-pointer ${
                   !isLoggedIn
                     ? 'bg-amber-500 hover:bg-amber-400 text-neutral-950 shadow-amber-500/25'
-                    : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-500/30'
+                    : 'bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700'
                 }`}
               >
                 {isSubmitting ? (
-                  <span>Processing Order...</span>
+                  <span>Inatayarisha Oda...</span>
                 ) : !isLoggedIn ? (
                   <span>
-                    🔑 Ingia / Jisajili ili Kulipa · {formatPrice(totalAmount, currency)}
+                    🔑 Ingia / Jisajili ili Kulipa Moja kwa Moja
                   </span>
                 ) : (
                   <span>
-                    Checkout Now · {formatPrice(totalAmount, currency)}
+                    Lipa Ndani ya App (STK Push / USSD) · {formatPrice(effectiveTotal, currency)}
                   </span>
                 )}
               </button>
@@ -787,6 +940,17 @@ export const CartView: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Interactive Map Location Picker Modal */}
+      <MapLocationPickerModal
+        isOpen={showMapPicker}
+        onClose={() => setShowMapPicker(false)}
+        onSelectLocation={result => {
+          setDeliveryAddress(result.address);
+        }}
+        initialAddress={deliveryAddress}
+        isDark={isDark}
+      />
     </div>
   );
 };

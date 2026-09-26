@@ -16,9 +16,13 @@ import {
   QrCode,
   Calendar,
   Award,
-  Globe2
+  Globe2,
+  Tv,
+  Store,
+  Sparkles
 } from 'lucide-react';
 import { formatPrice } from '../utils/formatters';
+import { LuckySpinWheelModal } from './LuckySpinWheelModal';
 
 export const WebHeader: React.FC = () => {
   const {
@@ -43,6 +47,7 @@ export const WebHeader: React.FC = () => {
   } = useApp();
 
   const isDark = theme === 'dark';
+  const [showLuckyWheel, setShowLuckyWheel] = useState(false);
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   const cartTotal = cart.reduce((sum, item) => sum + item.totalPrice, 0);
@@ -152,6 +157,35 @@ export const WebHeader: React.FC = () => {
               Menu
             </button>
 
+            {/* OSS Screen (Accessible to all: table & waiting line customers) */}
+            <button
+              onClick={() => setActiveTab('oss')}
+              className={`px-3 py-1.5 rounded-xl transition-colors flex items-center space-x-1.5 text-xs font-bold cursor-pointer ${
+                activeTab === 'oss'
+                  ? 'bg-emerald-500 text-neutral-950 shadow-sm font-extrabold'
+                  : 'bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 border border-emerald-500/30'
+              }`}
+              title="Order Status Screen (Token TV Display kwa Wateja wa Mezani na Mstari)"
+            >
+              <Tv className="w-3.5 h-3.5 text-emerald-400" />
+              <span>OSS Screen</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+            </button>
+
+            {/* POS Terminal */}
+            <button
+              onClick={() => setActiveTab('pos')}
+              className={`px-3 py-1.5 rounded-xl transition-colors flex items-center space-x-1.5 text-xs font-bold cursor-pointer ${
+                activeTab === 'pos'
+                  ? 'bg-teal-500 text-white shadow-sm shadow-teal-500/30'
+                  : 'bg-teal-500/15 text-teal-400 hover:bg-teal-500/25 border border-teal-500/30'
+              }`}
+              title="Point of Sale (POS Terminal)"
+            >
+              <Store className="w-3.5 h-3.5" />
+              <span>POS Terminal</span>
+            </button>
+
             <button
               onClick={() => setActiveTab('favorites')}
               className={`px-3.5 py-2 rounded-xl transition-colors flex items-center space-x-1.5 ${
@@ -187,18 +221,18 @@ export const WebHeader: React.FC = () => {
                   )}
                 </button>
 
-                <button
-                  onClick={() => setActiveTab('waiter')}
-                  className={`px-3 py-1.5 rounded-xl transition-colors flex items-center space-x-1.5 text-xs font-bold ${
-                    activeTab === 'waiter'
-                      ? 'bg-amber-500 text-neutral-950 shadow-sm'
-                      : 'bg-amber-500/15 text-amber-500 hover:bg-amber-500/25'
-                  }`}
-                  title="Waiter & Floor POS"
-                >
-                  <UtensilsCrossed className="w-3.5 h-3.5" />
-                  <span>Waiter POS</span>
-                </button>
+            <button
+              onClick={() => setActiveTab('waiter')}
+              className={`px-3 py-1.5 rounded-xl transition-colors flex items-center space-x-1.5 text-xs font-bold ${
+                activeTab === 'waiter'
+                  ? 'bg-amber-500 text-neutral-950 shadow-sm'
+                  : 'bg-amber-500/15 text-amber-500 hover:bg-amber-500/25'
+              }`}
+              title="Waiter & Floor POS"
+            >
+              <UtensilsCrossed className="w-3.5 h-3.5" />
+              <span>Waiter POS</span>
+            </button>
 
                 <button
                   onClick={() => setActiveTab('admin')}
@@ -304,6 +338,17 @@ export const WebHeader: React.FC = () => {
               </div>
             )}
 
+            {/* Lucky Spin Wheel Button - shown on tablet/desktop to save mobile header space */}
+            <button
+              type="button"
+              onClick={() => setShowLuckyWheel(true)}
+              className="hidden sm:flex items-center space-x-1 px-2 sm:px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-400 border border-amber-500/30 text-xs font-bold transition-all cursor-pointer"
+              title="Zungusha Gurudumu la Bahati"
+            >
+              <span>🎡</span>
+              <span className="hidden sm:inline">Bahati</span>
+            </button>
+
             {/* Currency Switcher */}
             <button
               onClick={() => setCurrency(currency === 'USD' ? 'TZS' : 'USD')}
@@ -369,6 +414,12 @@ export const WebHeader: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Lucky Spin Wheel Modal */}
+      <LuckySpinWheelModal
+        isOpen={showLuckyWheel}
+        onClose={() => setShowLuckyWheel(false)}
+      />
     </header>
   );
 };

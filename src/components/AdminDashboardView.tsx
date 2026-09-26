@@ -17,6 +17,9 @@ import { AdminAnalyticsView } from './admin/AdminAnalyticsView';
 import { AdminHelpView } from './admin/AdminHelpView';
 import { AdminSettingsView } from './admin/AdminSettingsView';
 import { WaiterView } from './waiter/WaiterView';
+import { PosTerminalView } from './pos/PosTerminalView';
+import { OrderStatusScreenView } from './oss/OrderStatusScreenView';
+import { KitchenDisplayView } from './kds/KitchenDisplayView';
 import {
   AlertTriangle,
   X,
@@ -99,6 +102,12 @@ export const AdminDashboardView: React.FC = () => {
               isDark={isDark}
             />
           )}
+
+          {currentTab === 'pos' && <PosTerminalView />}
+
+          {currentTab === 'oss' && <OrderStatusScreenView />}
+
+          {currentTab === 'kds' && <KitchenDisplayView />}
 
           {currentTab === 'tracking' && <AdminLiveTracking isDark={isDark} />}
 

@@ -26,6 +26,7 @@ import { DarEsSalaamMap } from './DarEsSalaamMap';
 import { SlideBannerCarousel } from './SlideBannerCarousel';
 import { GlobalMapModal, MapLayerKey } from './GlobalMapModal';
 import { HomeMapSection } from './HomeMapSection';
+import { MapLocationPickerModal } from './MapLocationPickerModal';
 
 export const HomeFeedView: React.FC = () => {
   const {
@@ -57,6 +58,8 @@ export const HomeFeedView: React.FC = () => {
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showMapModal, setShowMapModal] = useState(false);
+  const [showLocationPicker, setShowLocationPicker] = useState(false);
+  const [currentLocationName, setCurrentLocationName] = useState('Masaki Peninsula, Dar es Salaam');
   const [selectedMapLayer, setSelectedMapLayer] = useState<MapLayerKey>('tanganyika_east_africa');
 
   const handleOpenMap = (layer?: MapLayerKey) => {
@@ -137,12 +140,13 @@ export const HomeFeedView: React.FC = () => {
                   {isLoggedIn ? user.name : 'Zebra Customer'}
                 </h1>
                 <button
-                  onClick={() => setShowMapModal(true)}
+                  type="button"
+                  onClick={() => setShowLocationPicker(true)}
                   className="flex items-center space-x-1 text-[11px] text-neutral-500 dark:text-neutral-400 hover:text-emerald-400 cursor-pointer transition-colors"
-                  title="Fungua Ramani ya Dar es Salaam"
+                  title="Chagua eneo la kuletewa chakula kwenye ramani"
                 >
                   <MapPin className="w-3 h-3 text-amber-500" />
-                  <span className="truncate max-w-[140px] font-medium border-b border-dotted border-neutral-500">Dar es Salaam (Ramani)</span>
+                  <span className="truncate max-w-[140px] font-medium border-b border-dotted border-neutral-500">{currentLocationName}</span>
                 </button>
               </div>
             </div>
@@ -240,76 +244,129 @@ export const HomeFeedView: React.FC = () => {
           onOpenUssdModal={() => setShowNotificationModal(true)}
         />
 
+        {/* Quick Location & Delivery Area Selection on Map */}
+        <div className="p-3 sm:p-3.5 rounded-2xl sm:rounded-3xl bg-neutral-900/50 dark:bg-neutral-900/80 border border-neutral-800 flex flex-col xs:flex-row items-stretch xs:items-center justify-between gap-2.5 shadow-xs">
+          <div className="flex items-center space-x-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm font-bold shrink-0">
+              📍
+            </div>
+            <div className="min-w-0 flex-1">
+              <span className="text-[10px] text-neutral-400 uppercase font-bold tracking-wider block">
+                Eneo la Kuletewa Chakula (Dar es Salaam):
+              </span>
+              <span className="text-xs font-bold text-white truncate block">
+                {currentLocationName}
+              </span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowLocationPicker(true)}
+            className="px-3 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/40 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 active:scale-95 text-center flex items-center justify-center space-x-1"
+          >
+            <span>🗺️ Chagua kwenye Ramani</span>
+          </button>
+        </div>
+
         {/* Table Dine-In Status & Quick Order Bar */}
         {activeTable ? (
-          <div className="p-3 sm:p-4 rounded-2xl sm:rounded-3xl bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-500 text-white flex items-center justify-center font-bold text-base shadow-sm shrink-0">
+          <div className="p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-start sm:items-center space-x-3">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-emerald-500 text-white flex items-center justify-center font-bold text-base shadow-sm shrink-0">
                 🍽️
               </div>
-              <div>
-                <div className="flex items-center space-x-2">
-                  <span className="font-bold text-sm text-neutral-900 dark:text-white">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="font-extrabold text-xs sm:text-sm text-neutral-900 dark:text-white">
                     Umeketi: {activeTable.name} ({activeTable.section})
                   </span>
                   <span className="text-[10px] bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold px-2 py-0.5 rounded-full">
                     Oda ya Mezani
                   </span>
                 </div>
-                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
+                <p className="text-[11px] sm:text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 leading-relaxed">
                   Weka oda ya vyakula & vinywaji vitakavyoletwa moja kwa moja mezani kwako bila tozo ya delivery.
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center space-x-2 w-full sm:w-auto justify-end">
+            <div className="flex items-center space-x-2 w-full sm:w-auto shrink-0 pt-1 sm:pt-0">
               <button
                 onClick={() => setShowCustomerTableModal(true)}
-                className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-neutral-800 dark:text-neutral-200 transition-colors cursor-pointer"
+                className="flex-1 sm:flex-initial text-xs font-semibold px-3.5 py-2 rounded-xl bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-neutral-800 dark:text-neutral-200 transition-colors cursor-pointer text-center whitespace-nowrap"
               >
                 Piga Kengele / Badili
               </button>
               <button
                 onClick={() => setActiveTab('cart')}
-                className="text-xs font-bold px-4 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white transition-all shadow-sm cursor-pointer"
+                className="flex-1 sm:flex-initial text-xs font-bold px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white transition-all shadow-sm cursor-pointer text-center whitespace-nowrap"
               >
                 Tazama Sahani / Bili
               </button>
             </div>
           </div>
         ) : (
-          <div className="p-2.5 sm:p-3.5 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-amber-500/10 via-emerald-500/10 to-transparent border border-neutral-200 dark:border-neutral-800 flex items-center justify-between gap-2">
-            <div className="flex items-center space-x-2.5">
-              <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-500 flex items-center justify-center text-sm font-bold shrink-0">
+          <div className="p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-amber-500/10 via-emerald-500/10 to-transparent border border-amber-500/20 dark:border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-start sm:items-center space-x-3">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-amber-500/20 text-amber-500 flex items-center justify-center text-lg font-bold shrink-0">
                 📱
               </div>
-              <div>
-                <p className="text-xs font-bold text-neutral-900 dark:text-white">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-extrabold text-neutral-900 dark:text-white leading-snug">
                   Upo Zebra Restaurant Masaki sasa hivi?
                 </p>
-                <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
+                <p className="text-[11px] sm:text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 leading-relaxed">
                   Changanua QR code mezani kwako au chagua namba ya meza uweke oda mezani
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+            <div className="flex items-center space-x-2 w-full sm:w-auto shrink-0 pt-1 sm:pt-0">
               <button
                 type="button"
                 onClick={() => setShowReservationModal(true)}
-                className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 font-bold text-xs transition-colors cursor-pointer"
+                className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 font-bold text-xs transition-colors cursor-pointer text-center whitespace-nowrap active:scale-95"
               >
                 Weka Nafasi
               </button>
               <button
+                type="button"
                 onClick={() => setShowCustomerTableModal(true)}
-                className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-neutral-950 font-bold text-xs transition-colors cursor-pointer shadow-xs"
+                className="flex-1 sm:flex-initial px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-neutral-950 font-extrabold text-xs transition-colors cursor-pointer shadow-xs text-center whitespace-nowrap active:scale-95"
               >
                 Chagua Meza
               </button>
             </div>
           </div>
         )}
+
+        {/* OSS Token Tracker Banner (Customers can see order progress from table or waiting line) */}
+        <div className="p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-teal-500/15 via-emerald-500/15 to-transparent border border-teal-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-start sm:items-center space-x-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-teal-500 text-neutral-950 font-black flex items-center justify-center text-lg shadow-sm shrink-0">
+              📺
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center space-x-1.5">
+                <span className="font-extrabold text-xs sm:text-sm text-neutral-900 dark:text-white">
+                  Fuatilia Token Yako ya Mezani au Mstari (OSS Screen)
+                </span>
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0" />
+              </div>
+              <p className="text-[11px] sm:text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 leading-relaxed">
+                Angalia maendeleo ya chakula chako kwa namba ya tokeni moja kwa moja ukiwa mezani au kwenye mstari wa kusubiri.
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('oss')}
+            className="w-full sm:w-auto px-4 py-2 rounded-xl bg-teal-500 hover:bg-teal-600 text-white font-extrabold text-xs transition-all shadow-sm cursor-pointer whitespace-nowrap active:scale-95 shrink-0 text-center"
+          >
+            Fuatilia Token ➔
+          </button>
+        </div>
 
         {/* Categories Bar - Sleek, Compact & Modern */}
         <div>
@@ -648,6 +705,17 @@ export const HomeFeedView: React.FC = () => {
         onClose={() => setShowMapModal(false)}
         isDark={isDark}
         initialMode={selectedMapLayer}
+      />
+
+      {/* Map Location Picker Modal (Select delivery location anywhere on the map) */}
+      <MapLocationPickerModal
+        isOpen={showLocationPicker}
+        onClose={() => setShowLocationPicker(false)}
+        onSelectLocation={result => {
+          setCurrentLocationName(result.address);
+        }}
+        initialAddress={currentLocationName}
+        isDark={isDark}
       />
     </div>
   );

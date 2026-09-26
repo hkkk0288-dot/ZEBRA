@@ -35,7 +35,7 @@ export const CustomerTableModal: React.FC<CustomerTableModalProps> = ({
   onClose,
   onCallWaiter
 }) => {
-  const { setActiveQrTable } = useApp();
+  const { setActiveQrTable, setActiveTab } = useApp();
   const [modalMode, setModalMode] = useState<'camera' | 'manual'>('camera');
   const [selectedSection, setSelectedSection] = useState<'All' | 'Indoor' | 'Garden Terrace' | 'VIP Lounge'>('All');
   const [callNotice, setCallNotice] = useState<string | null>(null);
@@ -296,6 +296,19 @@ export const CustomerTableModal: React.FC<CustomerTableModalProps> = ({
                   🧾 Lete Bili
                 </button>
               </div>
+
+              {/* OSS Screen shortcut for table */}
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  setActiveTab('oss');
+                }}
+                className="w-full py-2 px-3 rounded-xl bg-teal-500/15 hover:bg-teal-500/25 border border-teal-500/30 text-teal-400 font-bold text-xs flex items-center justify-center space-x-1.5 transition-colors cursor-pointer"
+              >
+                <span>📺 Fuatilia Maendeleo ya Oda Yako (OSS Screen)</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
             </div>
           )}
 

@@ -17,11 +17,15 @@ import {
   ArrowLeft,
   UtensilsCrossed,
   Sparkles,
+  Tv,
   X
 } from 'lucide-react';
 
 export type AdminTab =
   | 'dashboard'
+  | 'pos'
+  | 'oss'
+  | 'kds'
   | 'tracking'
   | 'orders'
   | 'waiter'
@@ -75,6 +79,9 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       group: 'Operations',
       items: [
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+        { id: 'pos', label: 'POS Terminal', icon: Store },
+        { id: 'oss', label: 'OSS Token Screen', icon: Tv },
+        { id: 'kds', label: 'KDS Kitchen', icon: UtensilsCrossed },
         { id: 'tracking', label: 'Live Tracking', icon: MapPin },
         { id: 'orders', label: 'Orders', icon: ShoppingBag, badge: ordersBadge },
         { id: 'waiter', label: 'Waiter POS & Floor', icon: UtensilsCrossed },

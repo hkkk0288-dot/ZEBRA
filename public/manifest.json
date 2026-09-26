@@ -1,0 +1,38 @@
+{
+  "id": "/",
+  "name": "Zebra Restaurant - PWA Online Food Ordering System",
+  "short_name": "Zebra Food",
+  "description": "Agiza vyakula vizuri vya Kiswahili na Kimataifa kutoka Zebra Restaurant. PWA yenye POS, ufuatiliaji wa tokeni na GPS ya moja kwa moja.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#09090b",
+  "theme_color": "#10b981",
+  "categories": ["food", "shopping", "lifestyle"],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

@@ -22,7 +22,11 @@ import { AuthView } from './components/AuthView';
 import { TableQrModal } from './components/TableQrModal';
 import { CustomerTableModal } from './components/CustomerTableModal';
 import { GlobalMapModal } from './components/GlobalMapModal';
-import { Smartphone, Monitor, ShieldCheck, User, LogIn } from 'lucide-react';
+import { PosTerminalView } from './components/pos/PosTerminalView';
+import { OrderStatusScreenView } from './components/oss/OrderStatusScreenView';
+import { KitchenDisplayView } from './components/kds/KitchenDisplayView';
+import { PwaInstallBanner } from './components/PwaInstallBanner';
+import { Smartphone, Monitor, ShieldCheck, User, LogIn, Store, Tv } from 'lucide-react';
 
 const MainContent: React.FC = () => {
   const {
@@ -64,6 +68,12 @@ const MainContent: React.FC = () => {
         return <WaiterView />;
       case 'admin':
         return <AdminDashboardView />;
+      case 'pos':
+        return <PosTerminalView />;
+      case 'oss':
+        return <OrderStatusScreenView />;
+      case 'kds':
+        return <KitchenDisplayView />;
       default:
         return <HomeFeedView />;
     }
@@ -78,35 +88,60 @@ const MainContent: React.FC = () => {
         }`}
       >
         {/* Top Desktop Toolbar to toggle Android Mockup vs Responsive View */}
-        <header className="w-full py-2.5 px-4 flex items-center justify-between z-40 bg-black/60 backdrop-blur-md border-b border-white/10 text-xs text-neutral-400">
-          <div className="flex items-center space-x-2">
+        <header className="w-full py-2 px-3 sm:px-4 flex items-center justify-between z-40 bg-black/80 backdrop-blur-md border-b border-white/10 text-xs text-neutral-400 overflow-x-auto no-scrollbar">
+          <div className="flex items-center space-x-2 shrink-0 mr-2">
             <span className="text-base">🦓</span>
-            <span className="font-bold text-white tracking-wide font-display">
-              Zebra Restaurant (Mobile Phone Simulator)
+            <span className="font-bold text-white tracking-wide font-display text-xs sm:text-sm">
+              Zebra Restaurant
             </span>
-            <span className="hidden sm:inline text-neutral-500">|</span>
-            <span className="hidden sm:inline text-amber-400 font-medium">
+            <span className="hidden md:inline text-neutral-500">|</span>
+            <span className="hidden md:inline text-amber-400 font-medium">
               AmourCodes
             </span>
           </div>
 
-          <div className="flex items-center space-x-2 sm:space-x-3">
+          <div className="flex items-center space-x-1.5 sm:space-x-3 shrink-0">
+            {/* Direct access to POS & OSS */}
+            <button
+              onClick={() => setActiveTab(activeTab === 'pos' ? 'home' : 'pos')}
+              className={`flex items-center space-x-1 px-2.5 sm:px-3 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer ${
+                activeTab === 'pos'
+                  ? 'bg-teal-500 text-white shadow-sm shadow-teal-500/40'
+                  : 'bg-neutral-800 text-teal-400 hover:bg-neutral-700'
+              }`}
+            >
+              <Store className="w-3.5 h-3.5" />
+              <span>POS</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab(activeTab === 'oss' ? 'home' : 'oss')}
+              className={`flex items-center space-x-1 px-2.5 sm:px-3 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer ${
+                activeTab === 'oss'
+                  ? 'bg-emerald-500 text-neutral-950 shadow-sm font-extrabold'
+                  : 'bg-neutral-800 text-emerald-400 hover:bg-neutral-700'
+              }`}
+            >
+              <Tv className="w-3.5 h-3.5" />
+              <span>OSS</span>
+            </button>
+
             {/* Direct access to Login / Regista page (Requested) */}
             <button
               onClick={() => setActiveTab(activeTab === 'auth' ? 'home' : 'auth')}
-              className={`flex items-center space-x-1 px-3 py-1 rounded-full text-[11px] font-bold transition-all ${
+              className={`flex items-center space-x-1 px-2.5 sm:px-3 py-1 rounded-full text-[11px] font-bold transition-all ${
                 activeTab === 'auth'
                   ? 'bg-amber-400 text-neutral-950 shadow-sm shadow-amber-400/40'
                   : 'bg-neutral-800 text-amber-400 hover:bg-neutral-700'
               }`}
             >
               <LogIn className="w-3.5 h-3.5" />
-              <span>{activeTab === 'auth' ? 'Rudi Home' : 'Login / Regista'}</span>
+              <span>{activeTab === 'auth' ? 'Rudi' : 'Login'}</span>
             </button>
 
             <button
               onClick={() => setActiveTab(activeTab === 'admin' ? 'home' : 'admin')}
-              className={`flex items-center space-x-1 px-3 py-1 rounded-full text-[11px] font-bold transition-colors ${
+              className={`flex items-center space-x-1 px-2.5 sm:px-3 py-1 rounded-full text-[11px] font-bold transition-colors ${
                 activeTab === 'admin'
                   ? 'bg-amber-500 text-neutral-900'
                   : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
@@ -115,12 +150,12 @@ const MainContent: React.FC = () => {
               {activeTab === 'admin' ? (
                 <>
                   <User className="w-3.5 h-3.5" />
-                  <span>Customer View</span>
+                  <span>Customer</span>
                 </>
               ) : (
                 <>
                   <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Admin Dashboard</span>
+                  <span>Admin</span>
                 </>
               )}
             </button>
@@ -128,18 +163,18 @@ const MainContent: React.FC = () => {
             {/* Switch to Full Website Mode */}
             <button
               onClick={() => setAndroidFrame(false)}
-              className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-500/20 transition-all"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-500/20 transition-all whitespace-nowrap"
             >
-              <Monitor className="w-4 h-4" />
-              <span>Switch to Full Website View</span>
+              <Monitor className="w-3.5 h-3.5" />
+              <span className="hidden xs:inline">Full Website</span>
             </button>
           </div>
         </header>
 
-        {/* Mobile Mockup Device Enclosure */}
-        <main className="w-full flex-1 flex justify-center py-6 px-4">
+        {/* Mobile Mockup Device Enclosure - Full-bleed on actual mobile screens, sleek phone enclosure on desktop */}
+        <main className="w-full flex-1 flex justify-center p-0 sm:py-6 sm:px-4">
           <div
-            className={`relative w-full max-w-[420px] h-[90vh] rounded-[44px] border-[8px] border-[#222228] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col ${
+            className={`relative w-full sm:max-w-[420px] min-h-screen sm:min-h-0 sm:h-[90vh] sm:rounded-[44px] sm:border-[8px] sm:border-[#222228] sm:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col ${
               isDark ? 'bg-[#0f0f11]' : 'bg-[#fafafa]'
             }`}
           >
@@ -251,6 +286,9 @@ const MainContent: React.FC = () => {
         onClose={() => setShowGlobalMapModal(false)}
         isDark={isDark}
       />
+
+      {/* PWA Install Banner */}
+      <PwaInstallBanner />
     </div>
   );
 };
