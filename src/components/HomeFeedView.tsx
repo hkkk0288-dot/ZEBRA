@@ -244,30 +244,6 @@ export const HomeFeedView: React.FC = () => {
           onOpenUssdModal={() => setShowNotificationModal(true)}
         />
 
-        {/* Quick Location & Delivery Area Selection on Map */}
-        <div className="p-3 sm:p-3.5 rounded-2xl sm:rounded-3xl bg-neutral-900/50 dark:bg-neutral-900/80 border border-neutral-800 flex flex-col xs:flex-row items-stretch xs:items-center justify-between gap-2.5 shadow-xs">
-          <div className="flex items-center space-x-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm font-bold shrink-0">
-              📍
-            </div>
-            <div className="min-w-0 flex-1">
-              <span className="text-[10px] text-neutral-400 uppercase font-bold tracking-wider block">
-                Eneo la Kuletewa Chakula (Dar es Salaam):
-              </span>
-              <span className="text-xs font-bold text-white truncate block">
-                {currentLocationName}
-              </span>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => setShowLocationPicker(true)}
-            className="px-3 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/40 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 active:scale-95 text-center flex items-center justify-center space-x-1"
-          >
-            <span>🗺️ Chagua kwenye Ramani</span>
-          </button>
-        </div>
-
         {/* Table Dine-In Status & Quick Order Bar */}
         {activeTable ? (
           <div className="p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
@@ -339,34 +315,6 @@ export const HomeFeedView: React.FC = () => {
             </div>
           </div>
         )}
-
-        {/* OSS Token Tracker Banner (Customers can see order progress from table or waiting line) */}
-        <div className="p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-teal-500/15 via-emerald-500/15 to-transparent border border-teal-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
-          <div className="flex items-start sm:items-center space-x-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-teal-500 text-neutral-950 font-black flex items-center justify-center text-lg shadow-sm shrink-0">
-              📺
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center space-x-1.5">
-                <span className="font-extrabold text-xs sm:text-sm text-neutral-900 dark:text-white">
-                  Fuatilia Token Yako ya Mezani au Mstari (OSS Screen)
-                </span>
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0" />
-              </div>
-              <p className="text-[11px] sm:text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 leading-relaxed">
-                Angalia maendeleo ya chakula chako kwa namba ya tokeni moja kwa moja ukiwa mezani au kwenye mstari wa kusubiri.
-              </p>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('oss')}
-            className="w-full sm:w-auto px-4 py-2 rounded-xl bg-teal-500 hover:bg-teal-600 text-white font-extrabold text-xs transition-all shadow-sm cursor-pointer whitespace-nowrap active:scale-95 shrink-0 text-center"
-          >
-            Fuatilia Token ➔
-          </button>
-        </div>
 
         {/* Categories Bar - Sleek, Compact & Modern */}
         <div>
