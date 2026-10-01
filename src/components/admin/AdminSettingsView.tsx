@@ -13,12 +13,13 @@ import {
   Palette,
   Eye,
   Film,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Store
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 export const AdminSettingsView: React.FC<{ onNavigateToTab?: (tab: string) => void }> = ({ onNavigateToTab }) => {
-  const { theme, toggleTheme, currency, setCurrency, appBranding, setShowSplashPreview } = useApp();
+  const { theme, toggleTheme, currency, setCurrency, appBranding, updateAppBranding, setShowSplashPreview } = useApp();
   const [tillNumber, setTillNumber] = useState('445566');
   const [baseDeliveryFee, setBaseDeliveryFee] = useState('3500');
   const [feePerKm, setFeePerKm] = useState('1000');
@@ -51,6 +52,87 @@ export const AdminSettingsView: React.FC<{ onNavigateToTab?: (tab: string) => vo
             <span>Settings Saved!</span>
           </div>
         )}
+      </div>
+
+      {/* Restaurant Operation Mode: Single Restaurant vs Multi-Branch */}
+      <div className="p-5 rounded-3xl bg-white dark:bg-[#151518] border border-neutral-200/80 dark:border-neutral-800 shadow-2xs space-y-4">
+        <div className="flex items-center justify-between pb-2 border-b border-neutral-100 dark:border-neutral-800">
+          <div className="flex items-center space-x-2 text-sm font-bold text-neutral-900 dark:text-white">
+            <Store className="w-4 h-4 text-emerald-500" />
+            <span>Aina ya Mgahawa (Single Restaurant vs Multi-Branch)</span>
+          </div>
+          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
+            {(appBranding.restaurantMode || 'single') === 'multi' ? 'Multi-Branch Network' : 'Single Restaurant'}
+          </span>
+        </div>
+
+        <p className="text-xs text-neutral-500 dark:text-neutral-400">
+          Kama mfumo ni <strong>Single Restaurant</strong>, mteja anapobofya ramani anafunguliwa ramani ya kuchagua au kubadilisha eneo lake tu la kuletewa chakula (Delivery Location). Kama ni <strong>Multi-Branch</strong>, wateja wanaona ramani ya matawi yote.
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          {/* Single Mode Card */}
+          <button
+            type="button"
+            onClick={() => {
+              updateAppBranding({ restaurantMode: 'single' });
+              setSavedNotice(true);
+              setTimeout(() => setSavedNotice(false), 2500);
+            }}
+            className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between space-y-2 ${
+              (appBranding.restaurantMode || 'single') === 'single'
+                ? 'border-emerald-500 bg-emerald-500/10 shadow-sm ring-1 ring-emerald-500/50'
+                : 'border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/40 hover:border-neutral-400'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="font-extrabold text-sm text-neutral-900 dark:text-white flex items-center space-x-1.5">
+                <span>🍽️</span>
+                <span>Mgahawa Mmoja (Single Restaurant)</span>
+              </span>
+              {(appBranding.restaurantMode || 'single') === 'single' && (
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
+              )}
+            </div>
+            <p className="text-[11px] text-neutral-500 dark:text-neutral-400 leading-relaxed">
+              Jiko moja kuu. Wateja wanapobofya ramani wanabadilisha eneo lao tu la kuletewa chakula (Delivery Location Picker).
+            </p>
+            <span className="inline-block text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+              ✓ Inapendekezwa (Chaguo Linalotumika)
+            </span>
+          </button>
+
+          {/* Multi Mode Card */}
+          <button
+            type="button"
+            onClick={() => {
+              updateAppBranding({ restaurantMode: 'multi' });
+              setSavedNotice(true);
+              setTimeout(() => setSavedNotice(false), 2500);
+            }}
+            className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between space-y-2 ${
+              appBranding.restaurantMode === 'multi'
+                ? 'border-emerald-500 bg-emerald-500/10 shadow-sm ring-1 ring-emerald-500/50'
+                : 'border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/40 hover:border-neutral-400'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="font-extrabold text-sm text-neutral-900 dark:text-white flex items-center space-x-1.5">
+                <span>🌐</span>
+                <span>Matawi Mengi (Multi-Restaurant / Multi-Hub)</span>
+              </span>
+              {appBranding.restaurantMode === 'multi' && (
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
+              )}
+            </div>
+            <p className="text-[11px] text-neutral-500 dark:text-neutral-400 leading-relaxed">
+              Matawi mengi (Masaki, Kariakoo, Slipway, n.k.). Wateja wanaona ramani ya matawi yote na wanaweza kuchagua tawi.
+            </p>
+            <span className="inline-block text-[10px] font-bold text-blue-500">
+              ✓ Mtandao wa matawi na hubs
+            </span>
+          </button>
+        </div>
       </div>
 
       {/* Featured Logo & Splash Screen Quick Card */}

@@ -148,6 +148,9 @@ interface AppContextType {
   // Global & Dar es Salaam Map Modal
   showGlobalMapModal: boolean;
   setShowGlobalMapModal: (open: boolean) => void;
+  showLocationPickerModal: boolean;
+  setShowLocationPickerModal: (open: boolean) => void;
+  openLocationOrMapModal: () => void;
 
   // Thermal Receipt / KOT Modal
   showThermalReceiptModal: boolean;
@@ -517,6 +520,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
   const [showReservationModal, setShowReservationModal] = useState(false);
   const [showGlobalMapModal, setShowGlobalMapModal] = useState(false);
+  const [showLocationPickerModal, setShowLocationPickerModal] = useState(false);
+
+  const openLocationOrMapModal = () => {
+    const isSingle = (appBranding.restaurantMode || 'single') === 'single';
+    if (isSingle) {
+      setShowLocationPickerModal(true);
+    } else {
+      setShowGlobalMapModal(true);
+    }
+  };
 
   // Thermal Receipt / KOT modal
   const [showThermalReceiptModal, setShowThermalReceiptModal] = useState(false);
@@ -1293,6 +1306,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setShowReservationModal,
         showGlobalMapModal,
         setShowGlobalMapModal,
+        showLocationPickerModal,
+        setShowLocationPickerModal,
+        openLocationOrMapModal,
         showThermalReceiptModal,
         setShowThermalReceiptModal,
         receiptTableOrder,

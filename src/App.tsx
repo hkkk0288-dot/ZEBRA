@@ -22,6 +22,7 @@ import { AuthView } from './components/AuthView';
 import { TableQrModal } from './components/TableQrModal';
 import { CustomerTableModal } from './components/CustomerTableModal';
 import { GlobalMapModal } from './components/GlobalMapModal';
+import { MapLocationPickerModal } from './components/MapLocationPickerModal';
 import { PosTerminalView } from './components/pos/PosTerminalView';
 import { OrderStatusScreenView } from './components/oss/OrderStatusScreenView';
 import { KitchenDisplayView } from './components/kds/KitchenDisplayView';
@@ -47,6 +48,8 @@ const MainContent: React.FC = () => {
     callWaiterForTable,
     showGlobalMapModal,
     setShowGlobalMapModal,
+    showLocationPickerModal,
+    setShowLocationPickerModal,
     appBranding,
     showSplashPreview,
     setShowSplashPreview
@@ -240,6 +243,22 @@ const MainContent: React.FC = () => {
           />
         )}
 
+        {/* Global & Dar es Salaam Map Modal */}
+        <GlobalMapModal
+          isOpen={showGlobalMapModal}
+          onClose={() => setShowGlobalMapModal(false)}
+          isDark={isDark}
+          onOpenLocationPicker={() => setShowLocationPickerModal(true)}
+        />
+
+        {/* Customer Delivery Location Picker */}
+        <MapLocationPickerModal
+          isOpen={showLocationPickerModal}
+          onClose={() => setShowLocationPickerModal(false)}
+          isDark={isDark}
+          onSelectLocation={() => setShowLocationPickerModal(false)}
+        />
+
         {/* Splash Screen (Picha au Video - Moja au Zaidi) */}
         {showSplash && (
           <SplashScreen
@@ -313,6 +332,15 @@ const MainContent: React.FC = () => {
         isOpen={showGlobalMapModal}
         onClose={() => setShowGlobalMapModal(false)}
         isDark={isDark}
+        onOpenLocationPicker={() => setShowLocationPickerModal(true)}
+      />
+
+      {/* Customer Delivery Location Picker */}
+      <MapLocationPickerModal
+        isOpen={showLocationPickerModal}
+        onClose={() => setShowLocationPickerModal(false)}
+        isDark={isDark}
+        onSelectLocation={() => setShowLocationPickerModal(false)}
       />
 
       {/* PWA Install Banner */}

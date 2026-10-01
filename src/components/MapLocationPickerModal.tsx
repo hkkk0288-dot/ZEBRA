@@ -11,7 +11,8 @@ import {
   Building,
   Layers,
   Sparkles,
-  Info
+  Info,
+  ArrowLeft
 } from 'lucide-react';
 
 export interface LocationPickerResult {
@@ -273,20 +274,31 @@ export const MapLocationPickerModal: React.FC<MapLocationPickerModalProps> = ({
         }`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 border-b border-neutral-800/80 shrink-0">
-          <div className="flex items-center space-x-2.5">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-lg shrink-0">
+        <div className="flex items-center justify-between px-3 sm:px-6 py-2.5 sm:py-3.5 border-b border-neutral-800/80 shrink-0 gap-2">
+          <div className="flex items-center space-x-2 sm:space-x-2.5 min-w-0">
+            {/* Back Button (Prominent Rudi Button) */}
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-2.5 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white font-bold text-xs flex items-center space-x-1.5 transition-all cursor-pointer active:scale-95 shrink-0 border border-neutral-700 shadow-sm"
+              title="Rudi Nyuma (Back)"
+            >
+              <ArrowLeft className="w-4 h-4 text-emerald-400" />
+              <span>Rudi</span>
+            </button>
+
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-lg shrink-0">
               📍
             </div>
-            <div>
-              <h3 className="font-extrabold text-sm sm:text-base font-display flex items-center space-x-2">
+            <div className="min-w-0 flex-1">
+              <h3 className="font-extrabold text-xs sm:text-base font-display flex items-center space-x-1.5 truncate">
                 <span>Chagua Eneo kwenye Ramani</span>
-                <span className="text-[10px] bg-emerald-500/20 text-emerald-400 font-bold px-2 py-0.5 rounded-full border border-emerald-500/30 hidden xs:inline-block">
+                <span className="text-[10px] bg-emerald-500/20 text-emerald-400 font-bold px-1.5 py-0.2 rounded-full border border-emerald-500/30 hidden xs:inline-block">
                   Dar es Salaam
                 </span>
               </h3>
-              <p className="text-[11px] text-neutral-400">
-                Bofya popote kwenye ramani au sogeza alama kuweka anwani ya delivery
+              <p className="text-[10px] sm:text-[11px] text-neutral-400 truncate">
+                Gusa ramani au sogeza alama kuweka anwani ya delivery
               </p>
             </div>
           </div>
@@ -294,10 +306,10 @@ export const MapLocationPickerModal: React.FC<MapLocationPickerModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-9 h-9 rounded-xl flex items-center justify-center text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors cursor-pointer shrink-0"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors cursor-pointer shrink-0"
             title="Funga"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
 

@@ -43,10 +43,12 @@ export const WebHeader: React.FC = () => {
     setShowCustomerTableModal,
     setShowReservationModal,
     setShowGlobalMapModal,
+    openLocationOrMapModal,
     loyaltyPoints,
     appBranding
   } = useApp();
 
+  const isSingle = (appBranding.restaurantMode || 'single') === 'single';
   const isDark = theme === 'dark';
   const [showLuckyWheel, setShowLuckyWheel] = useState(false);
 
@@ -117,12 +119,14 @@ export const WebHeader: React.FC = () => {
               </div>
               <button
                 type="button"
-                onClick={() => setShowGlobalMapModal(true)}
+                onClick={openLocationOrMapModal}
                 className="text-[9px] sm:text-[11px] text-neutral-500 dark:text-neutral-400 flex items-center space-x-1 hover:text-emerald-400 transition-colors cursor-pointer group"
-                title="Tazama Ramani ya Dunia & Dar es Salaam"
+                title={isSingle ? "Badilisha eneo lako la delivery kwenye ramani" : "Tazama Ramani ya Matawi"}
               >
                 <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-emerald-500 shrink-0 group-hover:scale-110 transition-transform" />
-                <span className="whitespace-nowrap border-b border-dotted border-neutral-400/60 group-hover:border-emerald-400">Masaki & Slipway (Ramani)</span>
+                <span className="whitespace-nowrap border-b border-dotted border-neutral-400/60 group-hover:border-emerald-400">
+                  {isSingle ? 'Eneo la Delivery (Ramani)' : 'Masaki & Slipway (Matawi)'}
+                </span>
               </button>
             </div>
           </div>
@@ -317,12 +321,12 @@ export const WebHeader: React.FC = () => {
 
             {/* Global & Dar es Salaam Map button */}
             <button
-              onClick={() => setShowGlobalMapModal(true)}
+              onClick={openLocationOrMapModal}
               className="flex items-center space-x-1 px-2 sm:px-2.5 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 dark:text-blue-400 border border-blue-500/30 text-xs font-bold transition-all cursor-pointer"
-              title="Fungua Ramani ya Dunia na Dar es Salaam"
+              title={isSingle ? "Chagua au badilisha eneo lako la delivery" : "Fungua Ramani ya Matawi"}
             >
               <Globe2 className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Ramani</span>
+              <span className="hidden sm:inline">{isSingle ? 'Eneo Langu' : 'Ramani'}</span>
             </button>
 
             {/* Table Reservation Button */}

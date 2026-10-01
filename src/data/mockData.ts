@@ -549,6 +549,7 @@ export const DEFAULT_BRANDING_CONFIG = {
   logoEmoji: '🦓',
   appName: 'Zebra Restaurant',
   tagline: 'Masaki Peninsula, Dar es Salaam',
+  restaurantMode: 'single' as const,
   splashEnabled: true,
   splashSlides: DEFAULT_SPLASH_SLIDES,
   splashAutoSkip: true,

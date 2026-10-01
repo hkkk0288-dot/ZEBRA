@@ -292,11 +292,14 @@ export interface SplashMediaItem {
   orderIndex: number;
 }
 
+export type RestaurantOperationMode = 'single' | 'multi';
+
 export interface AppBrandingConfig {
   logoUrl?: string; // Custom uploaded or preset image URL
   logoEmoji?: string; // e.g. "🦓" fallback
   appName: string; // "Zebra Restaurant"
   tagline: string; // "Masaki Peninsula, Dar es Salaam"
+  restaurantMode?: RestaurantOperationMode; // 'single' (Mgahawa Mmoja) | 'multi' (Matawi Mengi)
   splashEnabled: boolean;
   splashSlides: SplashMediaItem[];
   splashAutoSkip: boolean; // whether to automatically advance when timer ends

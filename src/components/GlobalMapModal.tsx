@@ -9,9 +9,11 @@ import {
   MapPin,
   ChevronRight,
   Clock,
-  Phone
+  Phone,
+  ArrowLeft
 } from 'lucide-react';
 import { InteractiveLiveMap, MapPreset } from './InteractiveLiveMap';
+import { useApp } from '../context/AppContext';
 
 export type MapLayerKey = MapPreset;
 
@@ -20,14 +22,19 @@ interface GlobalMapModalProps {
   onClose: () => void;
   isDark: boolean;
   initialMode?: MapPreset;
+  onOpenLocationPicker?: () => void;
 }
 
 export const GlobalMapModal: React.FC<GlobalMapModalProps> = ({
   isOpen,
   onClose,
   isDark,
-  initialMode = 'tanganyika_east_africa'
+  initialMode = 'tanganyika_east_africa',
+  onOpenLocationPicker
 }) => {
+  const { appBranding, setShowLocationPickerModal } = useApp();
+  const isSingle = (appBranding.restaurantMode || 'single') === 'single';
+
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [activePreset, setActivePreset] = useState<MapPreset>(initialMode);
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
@@ -83,32 +90,61 @@ export const GlobalMapModal: React.FC<GlobalMapModalProps> = ({
         }`}
       >
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-neutral-800/80 shrink-0">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-xl shrink-0">
+        <div className="flex items-center justify-between px-3 sm:px-6 py-2.5 sm:py-3 border-b border-neutral-800/80 shrink-0 gap-2">
+          <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+            {/* Back Button (Prominent Rudi Button) */}
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-2.5 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white font-bold text-xs flex items-center space-x-1.5 transition-all cursor-pointer active:scale-95 shrink-0 border border-neutral-700 shadow-sm"
+              title="Rudi Nyuma (Back)"
+            >
+              <ArrowLeft className="w-4 h-4 text-emerald-400" />
+              <span>Rudi</span>
+            </button>
+
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-lg sm:text-xl shrink-0">
               🗺️
             </div>
-            <div>
-              <div className="flex items-center space-x-2">
-                <h3 className="font-bold text-sm sm:text-lg font-display">
-                  Ramani Halisi ya Moja kwa Moja (Live Interactive Maps)
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center space-x-1.5">
+                <h3 className="font-bold text-xs sm:text-base font-display truncate">
+                  {isSingle ? 'Eneo la Mgahawa & Ramani' : 'Ramani ya Matawi (Live Branches)'}
                 </h3>
-                <span className="hidden sm:inline-flex px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-[10px] border border-emerald-500/30">
-                  Current GPS & Live Tiles
+                <span className="hidden md:inline-flex px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-[10px] border border-emerald-500/30">
+                  {isSingle ? 'Single Restaurant' : 'Multi-Hub'}
                 </span>
               </div>
-              <p className="text-[11px] sm:text-xs text-neutral-400 truncate max-w-[280px] sm:max-w-xl">
-                Ramani halisi shirikishi: Mitaani ya Mikocheni, Ukanda wa Morogoro, Tanzania nzima na ulimwengu
+              <p className="text-[10px] sm:text-xs text-neutral-400 truncate max-w-[200px] sm:max-w-md">
+                {isSingle ? 'Zebra Masaki HQ & Eneo la kuletewa chakula' : 'Matawi ya Mikocheni, Masaki, Kariakoo na Morogoro'}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-2 shrink-0">
+          <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+            {/* Switch to customer delivery location picker */}
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                if (onOpenLocationPicker) {
+                  onOpenLocationPicker();
+                } else {
+                  setShowLocationPickerModal(true);
+                }
+              }}
+              className="px-2.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/40 text-[11px] font-bold flex items-center space-x-1 transition-all cursor-pointer active:scale-95"
+              title="Badilisha eneo lako la delivery"
+            >
+              <MapPin className="w-3.5 h-3.5" />
+              <span className="hidden xs:inline">Eneo Langu</span>
+            </button>
+
             {/* Fullscreen toggle */}
             <button
               type="button"
               onClick={() => setIsFullscreen(!isFullscreen)}
-              className="p-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors hidden sm:flex items-center justify-center cursor-pointer"
+              className="p-1.5 sm:p-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors hidden sm:flex items-center justify-center cursor-pointer"
               title={isFullscreen ? 'Toka Skrini Kamili' : 'Skrini Kamili'}
             >
               {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
@@ -118,10 +154,10 @@ export const GlobalMapModal: React.FC<GlobalMapModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="p-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors cursor-pointer"
+              className="p-1.5 sm:p-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors cursor-pointer"
               title="Funga"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>
