@@ -136,8 +136,7 @@ export const SlideBannerCarousel: React.FC<SlideBannerCarouselProps> = ({
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: direction === 'right' ? -50 : 50 }}
           transition={{ duration: 0.45, ease: 'easeInOut' }}
-          className={`relative w-full overflow-hidden p-3.5 sm:p-5 md:p-6 text-white bg-gradient-to-r ${currentBanner.bgGradient || 'from-emerald-950 via-neutral-900 to-amber-950'} border border-white/10 min-h-[145px] sm:min-h-[195px]`}
-        >
+          className={`relative w-full overflow-hidden p-3 sm:p-4 md:p-6 text-white bg-gradient-to-r ${currentBanner.bgGradient || 'from-emerald-950 via-neutral-900 to-amber-950'} border border-white/10 min-h-[110px] sm:min-h-[160px]`}>
           {/* Subtle Background Food Image Overlay if present */}
           {currentBanner.imageUrl && (
             <div
@@ -159,7 +158,7 @@ export const SlideBannerCarousel: React.FC<SlideBannerCarouselProps> = ({
                 e.stopPropagation();
                 setActiveTab('admin');
               }}
-              className="absolute top-2.5 right-2.5 sm:top-4 sm:right-4 z-20 flex items-center space-x-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-black/50 hover:bg-black/80 backdrop-blur-md border border-white/20 text-[9px] sm:text-xs text-amber-300 font-bold transition-all shadow-md active:scale-95"
+              className="absolute top-2 right-2 sm:top-4 sm:right-4 z-20 flex items-center space-x-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-black/50 hover:bg-black/80 backdrop-blur-md border border-white/20 text-[9px] sm:text-xs text-amber-300 font-bold transition-all shadow-md active:scale-95"
               title="Badili Mabango / Admin Banners Manager"
             >
               <Settings2 className="w-3 h-3 text-amber-400" />
@@ -171,13 +170,13 @@ export const SlideBannerCarousel: React.FC<SlideBannerCarouselProps> = ({
           {/* Banner Main Content */}
           <div className="relative z-10 max-w-xl">
             {/* Tag Badge */}
-            <div className="inline-flex items-center space-x-1.5 bg-black/40 border border-white/20 px-2 sm:px-2.5 py-0.5 rounded-full text-[9px] sm:text-xs font-bold text-emerald-300 mb-1 sm:mb-1.5 backdrop-blur-md">
+            <div className="inline-flex items-center space-x-1 bg-black/40 border border-white/20 px-2 py-0.5 rounded-full text-[9px] sm:text-xs font-bold text-emerald-300 mb-1 backdrop-blur-md">
               <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-400" />
               <span>{currentBanner.tag}</span>
             </div>
 
             {/* Title & Highlight */}
-            <h2 className="text-xl sm:text-3xl md:text-5xl font-black font-display tracking-tight text-white leading-tight">
+            <h2 className="text-base sm:text-2xl md:text-4xl font-black font-display tracking-tight text-white leading-tight">
               <span>{currentBanner.title} </span>
               {currentBanner.titleHighlight && (
                 <span className="text-amber-400 drop-shadow-sm">
@@ -187,19 +186,19 @@ export const SlideBannerCarousel: React.FC<SlideBannerCarouselProps> = ({
             </h2>
 
             {/* Description - 1 clean line on mobile, full on desktop */}
-            <p className="text-[11px] sm:text-sm text-neutral-300 mt-1 sm:mt-1.5 font-medium leading-relaxed line-clamp-1 sm:line-clamp-none max-w-lg">
+            <p className="text-[10px] sm:text-xs md:text-sm text-neutral-300 mt-0.5 sm:mt-1 font-medium leading-relaxed line-clamp-1 sm:line-clamp-none max-w-lg">
               {currentBanner.description}
             </p>
 
             {/* Banner Quick Actions: Single sleek, high-conversion modern CTA button */}
-            <div className="flex items-center gap-2 sm:gap-3 mt-2 sm:mt-3.5">
+            <div className="flex items-center gap-2 sm:gap-3 mt-1.5 sm:mt-2.5">
               {/* Claim / CTA button */}
               <button
                 onClick={() => handleClaim(currentBanner)}
-                className="w-auto inline-flex items-center space-x-1.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold text-xs sm:text-sm py-2 sm:py-2.5 px-4 sm:px-6 rounded-full shadow-lg shadow-emerald-500/40 transition-all cursor-pointer"
+                className="w-auto inline-flex items-center space-x-1 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold text-xs sm:text-sm py-1 sm:py-2 px-3 sm:px-5 rounded-full shadow-md shadow-emerald-500/30 transition-all cursor-pointer"
               >
                 <span>{currentBanner.ctaText || 'Claim Offer'}</span>
-                <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               </button>
             </div>
           </div>

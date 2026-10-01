@@ -236,7 +236,7 @@ export const HomeFeedView: React.FC = () => {
       )}
 
       {/* Main Content Container - Full Width on Web, Compact on Mobile */}
-      <div className={`w-full max-w-full overflow-hidden ${androidFrame ? 'px-4 space-y-3.5 mt-1' : 'max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-3.5 sm:space-y-4 mt-1.5 sm:mt-2'}`}>
+      <div className={`w-full max-w-full overflow-hidden ${androidFrame ? 'px-3.5 space-y-2.5 mt-1' : 'max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-3 sm:space-y-4 mt-1 sm:mt-1.5'}`}>
         
         {/* Interactive Sliding Hero Banners (Admin Configurable) */}
         <SlideBannerCarousel
@@ -244,138 +244,93 @@ export const HomeFeedView: React.FC = () => {
           onOpenUssdModal={() => setShowNotificationModal(true)}
         />
 
-        {/* Table Dine-In Status & Quick Order Bar */}
-        {activeTable ? (
-          <div className="p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
-            <div className="flex items-start sm:items-center space-x-3">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-emerald-500 text-white flex items-center justify-center font-bold text-base shadow-sm shrink-0">
+        {/* Table Dine-In Status Bar (Only shown if customer is seated at a table) */}
+        {activeTable && (
+          <div className="p-3 sm:p-3.5 rounded-2xl sm:rounded-3xl bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 shadow-xs">
+            <div className="flex items-center space-x-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold text-sm shadow-sm shrink-0">
                 🍽️
               </div>
               <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="font-extrabold text-xs sm:text-sm text-neutral-900 dark:text-white">
-                    Umeketi: {activeTable.name} ({activeTable.section})
+                <div className="flex items-center space-x-1.5">
+                  <span className="font-extrabold text-xs sm:text-sm text-neutral-900 dark:text-white truncate">
+                    Meza {activeTable.name} ({activeTable.section})
                   </span>
-                  <span className="text-[10px] bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold px-2 py-0.5 rounded-full">
-                    Oda ya Mezani
+                  <span className="text-[9px] bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold px-2 py-0.5 rounded-full shrink-0">
+                    Dine-In
                   </span>
                 </div>
-                <p className="text-[11px] sm:text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 leading-relaxed">
-                  Weka oda ya vyakula & vinywaji vitakavyoletwa moja kwa moja mezani kwako bila tozo ya delivery.
+                <p className="text-[10px] sm:text-xs text-neutral-500 dark:text-neutral-400 truncate">
+                  Vyakula vitaandaliwa na kuletwa mezani kwako.
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center space-x-2 w-full sm:w-auto shrink-0 pt-1 sm:pt-0">
+            <div className="flex items-center space-x-2 w-full sm:w-auto shrink-0">
               <button
                 onClick={() => setShowCustomerTableModal(true)}
-                className="flex-1 sm:flex-initial text-xs font-semibold px-3.5 py-2 rounded-xl bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-neutral-800 dark:text-neutral-200 transition-colors cursor-pointer text-center whitespace-nowrap"
+                className="flex-1 sm:flex-initial text-[11px] font-semibold px-3 py-1.5 rounded-xl bg-black/5 dark:bg-white/10 hover:bg-black/10 text-neutral-800 dark:text-neutral-200 transition-colors cursor-pointer text-center"
               >
-                Piga Kengele / Badili
+                Badili Meza
               </button>
               <button
                 onClick={() => setActiveTab('cart')}
-                className="flex-1 sm:flex-initial text-xs font-bold px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white transition-all shadow-sm cursor-pointer text-center whitespace-nowrap"
+                className="flex-1 sm:flex-initial text-[11px] font-bold px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white transition-all shadow-sm cursor-pointer text-center"
               >
-                Tazama Sahani / Bili
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-amber-500/10 via-emerald-500/10 to-transparent border border-amber-500/20 dark:border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
-            <div className="flex items-start sm:items-center space-x-3">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-amber-500/20 text-amber-500 flex items-center justify-center text-lg font-bold shrink-0">
-                📱
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm font-extrabold text-neutral-900 dark:text-white leading-snug">
-                  Upo Zebra Restaurant Masaki sasa hivi?
-                </p>
-                <p className="text-[11px] sm:text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 leading-relaxed">
-                  Changanua QR code mezani kwako au chagua namba ya meza uweke oda mezani
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-2 w-full sm:w-auto shrink-0 pt-1 sm:pt-0">
-              <button
-                type="button"
-                onClick={() => setShowReservationModal(true)}
-                className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 font-bold text-xs transition-colors cursor-pointer text-center whitespace-nowrap active:scale-95"
-              >
-                Weka Nafasi
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowCustomerTableModal(true)}
-                className="flex-1 sm:flex-initial px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-neutral-950 font-extrabold text-xs transition-colors cursor-pointer shadow-xs text-center whitespace-nowrap active:scale-95"
-              >
-                Chagua Meza
+                Sahani / Bili
               </button>
             </div>
           </div>
         )}
 
-        {/* Categories Bar - Sleek, Compact & Modern */}
-        <div>
-          <div className="flex items-center justify-between mb-1.5 px-0.5">
-            <span className="text-xs font-bold text-neutral-400 dark:text-neutral-400 tracking-wide uppercase">
-              Categories
-            </span>
+        {/* Categories Bar - Sleek, Compact Horizontal Scroll */}
+        <div className="flex items-center space-x-1.5 sm:space-x-2 overflow-x-auto no-scrollbar py-0.5">
+          {categories.map(cat => {
+            const isSelected = selectedCategory === cat.id;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id)}
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs transition-all duration-200 shrink-0 cursor-pointer ${
+                  isSelected
+                    ? 'bg-emerald-500 text-white font-bold shadow-sm shadow-emerald-500/30 ring-1 ring-emerald-400'
+                    : isDark
+                    ? 'bg-neutral-900/90 text-neutral-300 border border-neutral-800 hover:border-neutral-700 hover:text-white'
+                    : 'bg-white text-neutral-700 border border-neutral-200 shadow-2xs hover:border-neutral-300'
+                }`}
+              >
+                <span className="text-sm select-none">{cat.icon}</span>
+                <span className="whitespace-nowrap font-semibold text-[11px] sm:text-xs">
+                  {cat.name}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Best Sellers Section */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between pt-0.5">
+            <div className="flex items-center space-x-1.5">
+              <Flame className="w-4 h-4 text-amber-500 shrink-0" />
+              <h2 className="text-sm sm:text-base font-extrabold font-display text-neutral-900 dark:text-white tracking-tight">
+                {selectedCategory === 'all'
+                  ? 'Best Sellers & Chef Specials'
+                  : categories.find(c => c.id === selectedCategory)?.name || 'Vyakula'}
+              </h2>
+              <span className="text-[10px] font-bold text-neutral-400 bg-neutral-200/50 dark:bg-neutral-800/80 px-2 py-0.5 rounded-full">
+                {bestSellers.length}
+              </span>
+            </div>
+
             {selectedCategory !== 'all' && (
               <button
                 onClick={() => setSelectedCategory('all')}
-                className="text-xs font-bold text-emerald-500 hover:text-emerald-400 cursor-pointer"
+                className="text-[11px] font-bold text-emerald-500 hover:text-emerald-400 cursor-pointer"
               >
                 Show All ({menuItems.length})
               </button>
             )}
-          </div>
-
-          {/* Compact modern category pills */}
-          <div className="flex items-center space-x-1.5 sm:space-x-2 overflow-x-auto no-scrollbar py-0.5">
-            {categories.map(cat => {
-              const isSelected = selectedCategory === cat.id;
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs transition-all duration-200 shrink-0 cursor-pointer ${
-                    isSelected
-                      ? 'bg-emerald-500 text-white font-bold shadow-sm shadow-emerald-500/30 scale-102 ring-1 ring-emerald-400'
-                      : isDark
-                      ? 'bg-neutral-900/80 text-neutral-300 border border-neutral-800/90 hover:border-neutral-700 hover:text-white'
-                      : 'bg-white text-neutral-700 border border-neutral-200 shadow-2xs hover:border-neutral-300'
-                  }`}
-                >
-                  <span className="text-sm select-none">{cat.icon}</span>
-                  <span className="whitespace-nowrap font-medium text-[11px] sm:text-xs">
-                    {cat.name}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Best Sellers Section */}
-        <div>
-          <div className="flex items-center justify-between mb-2 sm:mb-2.5">
-            <div>
-              <div className="flex items-center space-x-1.5 sm:space-x-2">
-                <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />
-                <h2 className="text-lg sm:text-xl font-bold font-display text-neutral-900 dark:text-white tracking-tight">
-                  Best Sellers & Chef Specials
-                </h2>
-              </div>
-              <p className="text-[11px] sm:text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
-                Most ordered dishes in Masaki, Oysterbay & Dar es Salaam
-              </p>
-            </div>
-
-            <div className="text-xs text-neutral-400">
-              Showing <strong className="text-emerald-500 font-bold">{bestSellers.length}</strong> items
-            </div>
           </div>
 
           {/* Responsive Modern Food Grid */}
@@ -497,15 +452,16 @@ export const HomeFeedView: React.FC = () => {
 
         {/* Full Menu & Swahili Specialties Section */}
         {otherItems.length > 0 && (
-          <div>
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <div>
-                <h2 className="text-lg sm:text-xl font-bold font-display text-neutral-900 dark:text-white tracking-tight">
+          <div className="space-y-2 pt-1">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-1.5">
+                <Sparkles className="w-4 h-4 text-emerald-500 shrink-0" />
+                <h2 className="text-sm sm:text-base font-extrabold font-display text-neutral-900 dark:text-white tracking-tight">
                   Zebra Signature & Swahili Dishes
                 </h2>
-                <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                  Local Tanzanian delicacies and freshly prepared dishes
-                </p>
+                <span className="text-[10px] font-bold text-neutral-400 bg-neutral-200/50 dark:bg-neutral-800/80 px-2 py-0.5 rounded-full">
+                  {otherItems.length}
+                </span>
               </div>
             </div>
 
