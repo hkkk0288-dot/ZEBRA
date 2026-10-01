@@ -26,6 +26,7 @@ import { PosTerminalView } from './components/pos/PosTerminalView';
 import { OrderStatusScreenView } from './components/oss/OrderStatusScreenView';
 import { KitchenDisplayView } from './components/kds/KitchenDisplayView';
 import { PwaInstallBanner } from './components/PwaInstallBanner';
+import { SplashScreen } from './components/SplashScreen';
 import { Smartphone, Monitor, ShieldCheck, User, LogIn, Store, Tv } from 'lucide-react';
 
 const MainContent: React.FC = () => {
@@ -45,10 +46,21 @@ const MainContent: React.FC = () => {
     setShowCustomerTableModal,
     callWaiterForTable,
     showGlobalMapModal,
-    setShowGlobalMapModal
+    setShowGlobalMapModal,
+    appBranding,
+    showSplashPreview,
+    setShowSplashPreview
   } = useApp();
 
   const isDark = theme === 'dark';
+
+  const [splashDismissed, setSplashDismissed] = React.useState(() => {
+    return sessionStorage.getItem('zebra_splash_seen') === 'true';
+  });
+
+  const showSplash =
+    (appBranding.splashEnabled && !splashDismissed && appBranding.splashSlides.length > 0) ||
+    showSplashPreview;
 
   const renderActiveView = () => {
     switch (activeTab) {
@@ -90,9 +102,17 @@ const MainContent: React.FC = () => {
         {/* Top Desktop Toolbar to toggle Android Mockup vs Responsive View */}
         <header className="w-full py-2 px-3 sm:px-4 flex items-center justify-between z-40 bg-black/80 backdrop-blur-md border-b border-white/10 text-xs text-neutral-400 overflow-x-auto no-scrollbar">
           <div className="flex items-center space-x-2 shrink-0 mr-2">
-            <span className="text-base">🦓</span>
+            {appBranding.logoUrl ? (
+              <img
+                src={appBranding.logoUrl}
+                alt={appBranding.appName}
+                className="w-5 h-5 rounded-md object-cover"
+              />
+            ) : (
+              <span className="text-base">{appBranding.logoEmoji || '🦓'}</span>
+            )}
             <span className="font-bold text-white tracking-wide font-display text-xs sm:text-sm">
-              Zebra Restaurant
+              {appBranding.appName}
             </span>
             <span className="hidden md:inline text-neutral-500">|</span>
             <span className="hidden md:inline text-amber-400 font-medium">
@@ -219,6 +239,14 @@ const MainContent: React.FC = () => {
             }}
           />
         )}
+
+        {/* Splash Screen (Picha au Video - Moja au Zaidi) */}
+        {showSplash && (
+          <SplashScreen
+            onFinish={() => setSplashDismissed(true)}
+            isPreview={showSplashPreview}
+          />
+        )}
       </div>
     );
   }
@@ -289,6 +317,14 @@ const MainContent: React.FC = () => {
 
       {/* PWA Install Banner */}
       <PwaInstallBanner />
+
+      {/* Splash Screen (Picha au Video - Moja au Zaidi) */}
+      {showSplash && (
+        <SplashScreen
+          onFinish={() => setSplashDismissed(true)}
+          isPreview={showSplashPreview}
+        />
+      )}
     </div>
   );
 };

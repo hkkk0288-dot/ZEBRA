@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 
 export const WebFooter: React.FC = () => {
-  const { setActiveTab, setSelectedCategory, theme, setShowGlobalMapModal } = useApp();
+  const { setActiveTab, setSelectedCategory, theme, setShowGlobalMapModal, appBranding } = useApp();
   const isDark = theme === 'dark';
 
   return (
@@ -25,13 +25,23 @@ export const WebFooter: React.FC = () => {
           {/* Col 1: Brand & About */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2.5">
-              <span className="text-3xl">🦓</span>
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 to-amber-500 flex items-center justify-center text-xl shadow-md overflow-hidden border border-white/10 shrink-0">
+                {appBranding.logoUrl ? (
+                  <img
+                    src={appBranding.logoUrl}
+                    alt={appBranding.appName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span>{appBranding.logoEmoji || '🦓'}</span>
+                )}
+              </div>
               <div>
                 <h3 className="text-xl font-bold font-display text-neutral-900 dark:text-white">
-                  Zebra Restaurant
+                  {appBranding.appName}
                 </h3>
                 <p className="text-xs text-emerald-500 font-semibold">
-                  Dar es Salaam Premier Food Delivery
+                  {appBranding.tagline}
                 </p>
               </div>
             </div>

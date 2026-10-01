@@ -71,6 +71,10 @@ export const AdminTopBar: React.FC<AdminTopBarProps> = ({
         return 'Financial Transactions';
       case 'vouchers':
         return 'Promotions & Vouchers';
+      case 'banners':
+        return 'Slide Banners (Mabango)';
+      case 'branding':
+        return 'Logo ya App & Splash Screen';
       case 'users':
         return 'Users & Roles';
       case 'analytics':

@@ -43,7 +43,8 @@ export const WebHeader: React.FC = () => {
     setShowCustomerTableModal,
     setShowReservationModal,
     setShowGlobalMapModal,
-    loyaltyPoints
+    loyaltyPoints,
+    appBranding
   } = useApp();
 
   const isDark = theme === 'dark';
@@ -94,13 +95,21 @@ export const WebHeader: React.FC = () => {
             onClick={() => setActiveTab('home')}
             className="flex items-center space-x-2 sm:space-x-3 cursor-pointer shrink-0"
           >
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-emerald-500 to-amber-500 flex items-center justify-center text-base sm:text-xl shadow-md shadow-emerald-500/20 shrink-0">
-              🦓
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-emerald-500 to-amber-500 flex items-center justify-center text-base sm:text-xl shadow-md shadow-emerald-500/20 overflow-hidden border border-white/10 shrink-0">
+              {appBranding.logoUrl ? (
+                <img
+                  src={appBranding.logoUrl}
+                  alt={appBranding.appName}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span>{appBranding.logoEmoji || '🦓'}</span>
+              )}
             </div>
             <div>
               <div className="flex items-center space-x-1 sm:space-x-1.5">
                 <span className="font-display font-extrabold text-sm sm:text-lg lg:text-xl tracking-tight text-neutral-900 dark:text-white whitespace-nowrap">
-                  Zebra Restaurant
+                  {appBranding.appName}
                 </span>
                 <span className="text-[8px] sm:text-[10px] font-bold bg-amber-500/20 text-amber-500 px-1 py-0.5 rounded shrink-0">
                   DAR

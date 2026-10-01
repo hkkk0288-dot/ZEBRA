@@ -19,7 +19,9 @@ import {
   RestaurantTable,
   TableOrder,
   WaiterCall,
-  TableReservation
+  TableReservation,
+  SplashMediaItem,
+  AppBrandingConfig
 } from '../types';
 import {
   DEFAULT_USER,
@@ -31,7 +33,8 @@ import {
   CATEGORIES,
   DEFAULT_RESTAURANT_TABLES,
   INITIAL_TABLE_ORDERS,
-  INITIAL_RESERVATIONS
+  INITIAL_RESERVATIONS,
+  DEFAULT_BRANDING_CONFIG
 } from '../data/mockData';
 import {
   fetchBannersFromFirestore,
@@ -199,6 +202,17 @@ interface AppContextType {
   pendingAction: PendingAction | null;
   setPendingAction: (action: PendingAction | null) => void;
   clearPendingAction: () => void;
+
+  // App Branding & Splash Screen
+  appBranding: AppBrandingConfig;
+  updateAppBranding: (config: Partial<AppBrandingConfig>) => void;
+  resetAppBranding: () => void;
+  showSplashPreview: boolean;
+  setShowSplashPreview: (show: boolean) => void;
+  addSplashSlide: (slide: Omit<SplashMediaItem, 'id' | 'orderIndex'>) => void;
+  updateSplashSlide: (id: string, updates: Partial<SplashMediaItem>) => void;
+  deleteSplashSlide: (id: string) => void;
+  reorderSplashSlides: (slides: SplashMediaItem[]) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -526,6 +540,72 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Loyalty Rewards
   const [redeemLoyaltyDiscount, setRedeemLoyaltyDiscount] = useState(false);
+
+  // App Branding & Splash Screen State
+  const [appBranding, setAppBranding] = useState<AppBrandingConfig>(() => {
+    const saved = localStorage.getItem('zebra_app_branding');
+    if (saved) {
+      try {
+        return { ...DEFAULT_BRANDING_CONFIG, ...JSON.parse(saved) };
+      } catch {}
+    }
+    return DEFAULT_BRANDING_CONFIG;
+  });
+
+  const [showSplashPreview, setShowSplashPreview] = useState(false);
+
+  const updateAppBranding = (config: Partial<AppBrandingConfig>) => {
+    setAppBranding(prev => {
+      const updated = { ...prev, ...config };
+      localStorage.setItem('zebra_app_branding', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const resetAppBranding = () => {
+    setAppBranding(DEFAULT_BRANDING_CONFIG);
+    localStorage.setItem('zebra_app_branding', JSON.stringify(DEFAULT_BRANDING_CONFIG));
+  };
+
+  const addSplashSlide = (slide: Omit<SplashMediaItem, 'id' | 'orderIndex'>) => {
+    setAppBranding(prev => {
+      const newSlide: SplashMediaItem = {
+        ...slide,
+        id: `splash-${Date.now()}`,
+        orderIndex: prev.splashSlides.length
+      };
+      const updatedSlides = [...prev.splashSlides, newSlide];
+      const updated = { ...prev, splashSlides: updatedSlides };
+      localStorage.setItem('zebra_app_branding', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const updateSplashSlide = (id: string, updates: Partial<SplashMediaItem>) => {
+    setAppBranding(prev => {
+      const updatedSlides = prev.splashSlides.map(s => (s.id === id ? { ...s, ...updates } : s));
+      const updated = { ...prev, splashSlides: updatedSlides };
+      localStorage.setItem('zebra_app_branding', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const deleteSplashSlide = (id: string) => {
+    setAppBranding(prev => {
+      const updatedSlides = prev.splashSlides.filter(s => s.id !== id);
+      const updated = { ...prev, splashSlides: updatedSlides };
+      localStorage.setItem('zebra_app_branding', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const reorderSplashSlides = (slides: SplashMediaItem[]) => {
+    setAppBranding(prev => {
+      const updated = { ...prev, splashSlides: slides };
+      localStorage.setItem('zebra_app_branding', JSON.stringify(updated));
+      return updated;
+    });
+  };
 
   // Persistence effects
   useEffect(() => {
@@ -1247,7 +1327,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setAuthRedirectMessage,
         pendingAction,
         setPendingAction,
-        clearPendingAction
+        clearPendingAction,
+        appBranding,
+        updateAppBranding,
+        resetAppBranding,
+        showSplashPreview,
+        setShowSplashPreview,
+        addSplashSlide,
+        updateSplashSlide,
+        deleteSplashSlide,
+        reorderSplashSlides
       }}
     >
       {children}

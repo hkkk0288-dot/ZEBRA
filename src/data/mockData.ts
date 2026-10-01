@@ -508,4 +508,51 @@ export const INITIAL_RESERVATIONS: TableReservation[] = [
   }
 ];
 
+export const DEFAULT_SPLASH_SLIDES = [
+  {
+    id: 'splash-1',
+    type: 'video' as const,
+    mediaUrl: 'https://assets.mixkit.co/videos/preview/mixkit-hands-holding-a-slice-of-freshly-baked-pizza-42971-large.mp4',
+    title: 'Karibu Zebra Restaurant Masaki',
+    subtitle: 'Chakula bora cha kisasa na vinywaji vitamu, kinatayarishwa kwa upendo na uzoefu',
+    durationSeconds: 5,
+    buttonText: 'Ruka ➔',
+    active: true,
+    orderIndex: 0
+  },
+  {
+    id: 'splash-2',
+    type: 'image' as const,
+    mediaUrl: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1600&q=85',
+    title: 'Nyama Choma & Swahili Flavour',
+    subtitle: 'Mishkaki ya moto, biryani safi na mbavu za kuchoma Dar es Salaam',
+    durationSeconds: 4,
+    buttonText: 'Endelea ➔',
+    active: true,
+    orderIndex: 1
+  },
+  {
+    id: 'splash-3',
+    type: 'video' as const,
+    mediaUrl: 'https://assets.mixkit.co/videos/preview/mixkit-pouring-a-red-drink-in-a-glass-with-ice-42472-large.mp4',
+    title: 'Uletewe Popote Dar Ndani ya Dakika 30',
+    subtitle: 'Oda mtandaoni au mezani ukitumia simu yako bila foleni au usumbufu',
+    durationSeconds: 5,
+    buttonText: 'Anza Sasa ➔',
+    active: true,
+    orderIndex: 2
+  }
+];
+
+export const DEFAULT_BRANDING_CONFIG = {
+  logoUrl: '',
+  logoEmoji: '🦓',
+  appName: 'Zebra Restaurant',
+  tagline: 'Masaki Peninsula, Dar es Salaam',
+  splashEnabled: true,
+  splashSlides: DEFAULT_SPLASH_SLIDES,
+  splashAutoSkip: true,
+  splashShowOncePerSession: false
+};
+
 

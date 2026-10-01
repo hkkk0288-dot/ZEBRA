@@ -278,3 +278,28 @@ export interface SlideBanner {
   createdAt: number;
 }
 
+export type SplashMediaType = 'image' | 'video';
+
+export interface SplashMediaItem {
+  id: string;
+  type: SplashMediaType;
+  mediaUrl: string;
+  title?: string;
+  subtitle?: string;
+  durationSeconds: number; // e.g. 4 seconds
+  buttonText?: string;
+  active: boolean;
+  orderIndex: number;
+}
+
+export interface AppBrandingConfig {
+  logoUrl?: string; // Custom uploaded or preset image URL
+  logoEmoji?: string; // e.g. "🦓" fallback
+  appName: string; // "Zebra Restaurant"
+  tagline: string; // "Masaki Peninsula, Dar es Salaam"
+  splashEnabled: boolean;
+  splashSlides: SplashMediaItem[];
+  splashAutoSkip: boolean; // whether to automatically advance when timer ends
+  splashShowOncePerSession: boolean;
+}
+

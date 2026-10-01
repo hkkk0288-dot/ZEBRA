@@ -9,12 +9,16 @@ import {
   Moon,
   Smartphone,
   Shield,
-  Layers
+  Layers,
+  Palette,
+  Eye,
+  Film,
+  Image as ImageIcon
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
-export const AdminSettingsView: React.FC = () => {
-  const { theme, toggleTheme, currency, setCurrency } = useApp();
+export const AdminSettingsView: React.FC<{ onNavigateToTab?: (tab: string) => void }> = ({ onNavigateToTab }) => {
+  const { theme, toggleTheme, currency, setCurrency, appBranding, setShowSplashPreview } = useApp();
   const [tillNumber, setTillNumber] = useState('445566');
   const [baseDeliveryFee, setBaseDeliveryFee] = useState('3500');
   const [feePerKm, setFeePerKm] = useState('1000');
@@ -47,6 +51,60 @@ export const AdminSettingsView: React.FC = () => {
             <span>Settings Saved!</span>
           </div>
         )}
+      </div>
+
+      {/* Featured Logo & Splash Screen Quick Card */}
+      <div className="p-5 rounded-3xl bg-gradient-to-r from-orange-500/15 via-amber-500/10 to-transparent border border-orange-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+        <div className="flex items-center space-x-3.5">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-500 to-amber-500 flex items-center justify-center text-2xl shadow-md overflow-hidden border border-white/20 shrink-0">
+            {appBranding.logoUrl ? (
+              <img
+                src={appBranding.logoUrl}
+                alt={appBranding.appName}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span>{appBranding.logoEmoji || '🦓'}</span>
+            )}
+          </div>
+          <div>
+            <div className="flex items-center space-x-2">
+              <h3 className="font-extrabold text-sm sm:text-base text-neutral-900 dark:text-white">
+                {appBranding.appName} • Logo & Splash Screen
+              </h3>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                appBranding.splashEnabled ? 'bg-emerald-500/20 text-emerald-500' : 'bg-neutral-500/20 text-neutral-400'
+              }`}>
+                {appBranding.splashEnabled ? 'Splash Active' : 'Splash Off'}
+              </span>
+            </div>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
+              Nembo ya app na video/picha za Splash Screen ({appBranding.splashSlides.length} slide{appBranding.splashSlides.length === 1 ? '' : 's'}).
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => setShowSplashPreview(true)}
+            className="px-3.5 py-2 rounded-xl bg-black/40 hover:bg-black/60 text-white font-bold text-xs flex items-center space-x-1.5 transition-colors cursor-pointer border border-white/10"
+          >
+            <Eye className="w-4 h-4 text-emerald-400" />
+            <span>Tazama Splash</span>
+          </button>
+
+          {onNavigateToTab && (
+            <button
+              type="button"
+              onClick={() => onNavigateToTab('branding')}
+              className="px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-xs flex items-center space-x-1.5 shadow-md shadow-orange-600/20 transition-all cursor-pointer active:scale-95"
+            >
+              <Palette className="w-4 h-4" />
+              <span>Sanidi Logo & Splash ➔</span>
+            </button>
+          )}
+        </div>
       </div>
 
       <form onSubmit={handleSave} className="space-y-4">

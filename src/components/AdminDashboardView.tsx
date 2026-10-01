@@ -16,6 +16,7 @@ import { AdminUsersView } from './admin/AdminUsersView';
 import { AdminAnalyticsView } from './admin/AdminAnalyticsView';
 import { AdminHelpView } from './admin/AdminHelpView';
 import { AdminSettingsView } from './admin/AdminSettingsView';
+import { AdminBrandingView } from './admin/AdminBrandingView';
 import { WaiterView } from './waiter/WaiterView';
 import { PosTerminalView } from './pos/PosTerminalView';
 import { OrderStatusScreenView } from './oss/OrderStatusScreenView';
@@ -135,7 +136,9 @@ export const AdminDashboardView: React.FC = () => {
 
           {currentTab === 'help' && <AdminHelpView />}
 
-          {currentTab === 'settings' && <AdminSettingsView />}
+          {currentTab === 'branding' && <AdminBrandingView />}
+
+          {currentTab === 'settings' && <AdminSettingsView onNavigateToTab={tab => setCurrentTab(tab as any)} />}
         </main>
       </div>
 

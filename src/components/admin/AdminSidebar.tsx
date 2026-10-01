@@ -1,4 +1,5 @@
 import React from 'react';
+import { useApp } from '../../context/AppContext';
 import {
   LayoutDashboard,
   MapPin,
@@ -18,7 +19,8 @@ import {
   UtensilsCrossed,
   Sparkles,
   Tv,
-  X
+  X,
+  Palette
 } from 'lucide-react';
 
 export type AdminTab =
@@ -36,6 +38,7 @@ export type AdminTab =
   | 'transactions'
   | 'vouchers'
   | 'banners'
+  | 'branding'
   | 'users'
   | 'analytics'
   | 'help'
@@ -74,6 +77,8 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   bannersBadge,
   usersBadge = 6
 }) => {
+  const { appBranding } = useApp();
+
   const navSections = [
     {
       group: 'Operations',
@@ -107,10 +112,11 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       ]
     },
     {
-      group: 'Appearance & Help',
+      group: 'Appearance & Brand',
       items: [
-        { id: 'help', label: 'Help', icon: HelpCircle },
-        { id: 'settings', label: 'Settings', icon: Settings }
+        { id: 'branding', label: 'Logo & Splash Screen', icon: Palette },
+        { id: 'settings', label: 'Settings', icon: Settings },
+        { id: 'help', label: 'Help', icon: HelpCircle }
       ]
     }
   ];
@@ -120,15 +126,23 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       {/* Brand Header */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-100 dark:border-neutral-800">
         <div className="flex items-center space-x-2.5">
-          <div className="w-9 h-9 rounded-2xl bg-amber-500/15 text-amber-500 flex items-center justify-center text-lg font-bold shadow-sm">
-            🦅
+          <div className="w-9 h-9 rounded-2xl bg-amber-500/15 text-amber-500 flex items-center justify-center text-lg font-bold shadow-sm overflow-hidden border border-amber-500/20 shrink-0">
+            {appBranding.logoUrl ? (
+              <img
+                src={appBranding.logoUrl}
+                alt={appBranding.appName}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span>{appBranding.logoEmoji || '🦓'}</span>
+            )}
           </div>
-          <div>
-            <h1 className="font-extrabold text-base font-display text-neutral-900 dark:text-white leading-tight">
-              Weagle
+          <div className="min-w-0">
+            <h1 className="font-extrabold text-sm sm:text-base font-display text-neutral-900 dark:text-white leading-tight truncate">
+              {appBranding.appName || 'Zebra Restaurant'}
             </h1>
-            <p className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
-              Zebra Restaurant Ops
+            <p className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 truncate">
+              Admin Ops Center
             </p>
           </div>
         </div>
