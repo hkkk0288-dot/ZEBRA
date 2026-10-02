@@ -12,7 +12,9 @@ import {
   Layers,
   Sparkles,
   Info,
-  ArrowLeft
+  ArrowLeft,
+  ZoomIn,
+  ZoomOut
 } from 'lucide-react';
 
 export interface LocationPickerResult {
@@ -57,6 +59,7 @@ export const MapLocationPickerModal: React.FC<MapLocationPickerModalProps> = ({
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const pinMarkerRef = useRef<L.Marker | null>(null);
+  const currentTileLayerRef = useRef<L.TileLayer | null>(null);
 
   const [currentCoords, setCurrentCoords] = useState<[number, number]>(initialCoords);
   const [selectedAddress, setSelectedAddress] = useState<string>(
@@ -67,6 +70,7 @@ export const MapLocationPickerModal: React.FC<MapLocationPickerModalProps> = ({
   const [isLocating, setIsLocating] = useState<boolean>(false);
   const [isResolvingAddress, setIsResolvingAddress] = useState<boolean>(false);
   const [locationNotice, setLocationNotice] = useState<string | null>(null);
+  const [mapType, setMapType] = useState<'roadmap' | 'satellite'>('roadmap');
 
   // Helper to find nearest known Dar area or reverse geocode
   const resolveLocationName = useCallback(async (lat: number, lng: number) => {
@@ -85,7 +89,7 @@ export const MapLocationPickerModal: React.FC<MapLocationPickerModalProps> = ({
 
     setSelectedArea(bestArea);
 
-    // Try online reverse geocode with Nominatim (free, open source OSM)
+    // Try online reverse geocode with Nominatim (free OSM)
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 2500);
@@ -143,20 +147,23 @@ export const MapLocationPickerModal: React.FC<MapLocationPickerModalProps> = ({
     }
 
     setIsLocating(true);
-    setLocationNotice('Inatafuta GPS ya kifaa chako...');
+    setLocationNotice('Inatafuta GPS ya eneo ulilopo...');
 
     navigator.geolocation.getCurrentPosition(
       position => {
         setIsLocating(false);
         const { latitude, longitude } = position.coords;
         updatePinPosition(latitude, longitude, true);
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.setView([latitude, longitude], 16, { animate: true });
+        }
         setLocationNotice('📍 Eneo lako la sasa limepatikana!');
         setTimeout(() => setLocationNotice(null), 3000);
       },
       error => {
         setIsLocating(false);
-        console.warn('Geolocation error:', error);
-        setLocationNotice('Haikuweza kupata GPS. Tafadhali bofya kwenye ramani moja kwa moja.');
+        console.warn('Geolocation notice:', error);
+        setLocationNotice('Haikuweza kupata GPS moja kwa moja. Gusa kwenye ramani kuchagua eneo.');
         setTimeout(() => setLocationNotice(null), 4000);
       },
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
@@ -171,6 +178,33 @@ export const MapLocationPickerModal: React.FC<MapLocationPickerModalProps> = ({
     }
   };
 
+  // Switch Tile Layer (Roadmap vs Satellite)
+  const setTileLayer = (type: 'roadmap' | 'satellite', map: L.Map) => {
+    if (currentTileLayerRef.current) {
+      map.removeLayer(currentTileLayerRef.current);
+    }
+
+    let layer: L.TileLayer;
+    if (type === 'satellite') {
+      // High-res Google Hybrid (Satellite + Road Names)
+      layer = L.tileLayer('https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+        subdomains: ['0', '1', '2', '3'],
+        maxZoom: 20,
+        attribution: '&copy; Google Maps'
+      });
+    } else {
+      // Google Roadmap (Clean street names in English & Swahili)
+      layer = L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+        subdomains: ['0', '1', '2', '3'],
+        maxZoom: 20,
+        attribution: '&copy; Google Maps'
+      });
+    }
+
+    layer.addTo(map);
+    currentTileLayerRef.current = layer;
+  };
+
   // Initialize Leaflet Map
   useEffect(() => {
     if (!isOpen || !mapContainerRef.current) return;
@@ -181,43 +215,36 @@ export const MapLocationPickerModal: React.FC<MapLocationPickerModalProps> = ({
 
       const map = L.map(mapContainerRef.current, {
         center: currentCoords,
-        zoom: 14,
+        zoom: 15,
         minZoom: 4,
-        maxZoom: 19,
+        maxZoom: 20,
         zoomControl: false,
         attributionControl: false
       });
 
-      // Free OpenStreetMap / Carto tiles (NO Google API Key or billing needed!)
-      const tileUrl = isDark
-        ? 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
-        : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-
-      L.tileLayer(tileUrl, {
-        subdomains: isDark ? 'abcd' : 'abc',
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap'
-      }).addTo(map);
+      // Set initial tile layer (Google Roadmap)
+      setTileLayer(mapType, map);
 
       // Create Custom Pulsing Delivery Pin
       const customPinIcon = L.divIcon({
         className: 'custom-map-pin',
         html: `
-          <div style="position: relative; display: flex; flex-direction: column; align-items: center; transform: translate(-50%, -100%);">
-            <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.5); border: 3px solid #ffffff; cursor: grab;">
-              <span style="font-size: 22px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">🛵</span>
+          <div style="position: relative; display: flex; flex-direction: column; align-items: center; transform: translate(-50%, -100%); z-index: 1000;">
+            <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.6); border: 3px solid #ffffff; cursor: grab;">
+              <span style="font-size: 24px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">🛵</span>
             </div>
             <div style="width: 4px; height: 12px; background: #059669; border-radius: 2px;"></div>
-            <div style="width: 14px; height: 6px; background: rgba(0,0,0,0.3); border-radius: 50%; filter: blur(2px);"></div>
+            <div style="width: 14px; height: 6px; background: rgba(0,0,0,0.4); border-radius: 50%; filter: blur(2px);"></div>
           </div>
         `,
-        iconSize: [44, 60],
-        iconAnchor: [22, 60]
+        iconSize: [46, 62],
+        iconAnchor: [23, 62]
       });
 
       const marker = L.marker(currentCoords, {
         icon: customPinIcon,
-        draggable: true
+        draggable: true,
+        zIndexOffset: 1000
       }).addTo(map);
 
       // When dragging the pin
@@ -234,9 +261,28 @@ export const MapLocationPickerModal: React.FC<MapLocationPickerModalProps> = ({
       pinMarkerRef.current = marker;
       mapInstanceRef.current = map;
 
-      // Ensure proper sizing
-      setTimeout(() => map.invalidateSize(), 100);
-      setTimeout(() => map.invalidateSize(), 300);
+      // Crucial: Multiple invalidateSize calls to ensure tiles render immediately on all devices
+      const timers = [
+        setTimeout(() => map.invalidateSize(), 50),
+        setTimeout(() => map.invalidateSize(), 150),
+        setTimeout(() => map.invalidateSize(), 300),
+        setTimeout(() => map.invalidateSize(), 600),
+        setTimeout(() => map.invalidateSize(), 1000)
+      ];
+
+      // ResizeObserver to detect layout changes
+      let ro: ResizeObserver | null = null;
+      if (typeof ResizeObserver !== 'undefined' && mapContainerRef.current) {
+        ro = new ResizeObserver(() => {
+          map.invalidateSize();
+        });
+        ro.observe(mapContainerRef.current);
+      }
+
+      return () => {
+        timers.forEach(t => clearTimeout(t));
+        if (ro) ro.disconnect();
+      };
     }, 50);
 
     return () => {
@@ -245,9 +291,19 @@ export const MapLocationPickerModal: React.FC<MapLocationPickerModalProps> = ({
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
         pinMarkerRef.current = null;
+        currentTileLayerRef.current = null;
       }
     };
   }, [isOpen]);
+
+  // Handle map type toggle
+  const toggleMapType = () => {
+    const nextType = mapType === 'roadmap' ? 'satellite' : 'roadmap';
+    setMapType(nextType);
+    if (mapInstanceRef.current) {
+      setTileLayer(nextType, mapInstanceRef.current);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -261,13 +317,16 @@ export const MapLocationPickerModal: React.FC<MapLocationPickerModalProps> = ({
   };
 
   const filteredAreas = POPULAR_DAR_AREAS.filter(
-    a => !searchQuery || a.name.toLowerCase().includes(searchQuery.toLowerCase()) || a.landmark.toLowerCase().includes(searchQuery.toLowerCase())
+    a =>
+      !searchQuery ||
+      a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.landmark.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-2 sm:p-4 animate-in fade-in duration-200">
       <div
-        className={`w-full max-w-2xl rounded-3xl border shadow-2xl overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[88vh] transition-all ${
+        className={`w-full max-w-2xl rounded-3xl border shadow-2xl overflow-hidden flex flex-col max-h-[94vh] sm:max-h-[90vh] transition-all ${
           isDark
             ? 'bg-[#12141a] border-neutral-800 text-white'
             : 'bg-white border-neutral-200 text-neutral-900'
@@ -276,7 +335,7 @@ export const MapLocationPickerModal: React.FC<MapLocationPickerModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between px-3 sm:px-6 py-2.5 sm:py-3.5 border-b border-neutral-800/80 shrink-0 gap-2">
           <div className="flex items-center space-x-2 sm:space-x-2.5 min-w-0">
-            {/* Back Button (Prominent Rudi Button) */}
+            {/* Back Button */}
             <button
               type="button"
               onClick={onClose}
@@ -314,7 +373,7 @@ export const MapLocationPickerModal: React.FC<MapLocationPickerModalProps> = ({
         </div>
 
         {/* Search & GPS Quick Actions */}
-        <div className="p-3 sm:p-4 border-b border-neutral-800/60 flex flex-col sm:flex-row gap-2.5 shrink-0 bg-neutral-900/30">
+        <div className="p-3 sm:p-4 border-b border-neutral-800/60 flex flex-col sm:flex-row gap-2.5 shrink-0 bg-neutral-900/40">
           {/* Quick search input */}
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
@@ -325,7 +384,7 @@ export const MapLocationPickerModal: React.FC<MapLocationPickerModalProps> = ({
               placeholder="Tafuta eneo: Masaki, Mikocheni, Kariakoo, Upanga..."
               className={`w-full pl-9 pr-3 py-2 rounded-xl text-xs outline-none border transition-colors ${
                 isDark
-                  ? 'bg-neutral-900/80 border-neutral-700 text-white placeholder-neutral-500 focus:border-emerald-500'
+                  ? 'bg-neutral-900/90 border-neutral-700 text-white placeholder-neutral-500 focus:border-emerald-500'
                   : 'bg-neutral-100 border-neutral-300 text-neutral-900 placeholder-neutral-400 focus:border-emerald-500'
               }`}
             />
@@ -343,8 +402,8 @@ export const MapLocationPickerModal: React.FC<MapLocationPickerModalProps> = ({
           </button>
         </div>
 
-        {/* Quick popular areas chips (horizontal scroll for smooth mobile tap) */}
-        <div className="px-3 sm:px-4 py-2 border-b border-neutral-800/40 flex items-center space-x-1.5 overflow-x-auto no-scrollbar shrink-0 bg-neutral-900/10">
+        {/* Quick popular areas chips */}
+        <div className="px-3 sm:px-4 py-2 border-b border-neutral-800/40 flex items-center space-x-1.5 overflow-x-auto no-scrollbar shrink-0 bg-neutral-900/20">
           <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider shrink-0 mr-1">
             Mitaa Maarufu:
           </span>
@@ -357,7 +416,7 @@ export const MapLocationPickerModal: React.FC<MapLocationPickerModalProps> = ({
                 selectedArea === area.name
                   ? 'bg-emerald-500 text-white border-emerald-500 shadow-xs'
                   : isDark
-                  ? 'bg-neutral-800/60 text-neutral-300 border-neutral-700 hover:border-emerald-500/50'
+                  ? 'bg-neutral-800/70 text-neutral-300 border-neutral-700 hover:border-emerald-500/50'
                   : 'bg-neutral-100 text-neutral-700 border-neutral-200 hover:border-emerald-400'
               }`}
             >
@@ -374,22 +433,36 @@ export const MapLocationPickerModal: React.FC<MapLocationPickerModalProps> = ({
           </div>
         )}
 
-        {/* Leaflet Map Interactive Canvas */}
-        <div className="relative flex-1 min-h-[260px] sm:min-h-[340px] w-full overflow-hidden bg-neutral-950">
-          <div ref={mapContainerRef} className="w-full h-full z-10" />
+        {/* Leaflet Map Interactive Canvas with Guaranteed Non-Zero Height */}
+        <div className="relative flex-1 min-h-[300px] sm:min-h-[380px] h-[340px] sm:h-[460px] w-full overflow-hidden bg-neutral-900">
+          {/* Map canvas with absolute fill */}
+          <div ref={mapContainerRef} className="absolute inset-0 w-full h-full z-10" />
 
           {/* Map Overlay Instruction Pill */}
-          <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 pointer-events-none px-3 py-1 rounded-full bg-black/75 backdrop-blur-md border border-white/20 text-white text-[11px] font-semibold flex items-center space-x-1.5 shadow-lg">
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 pointer-events-none px-3.5 py-1.5 rounded-full bg-black/80 backdrop-blur-md border border-white/20 text-white text-[11px] font-bold flex items-center space-x-1.5 shadow-xl">
             <span>👆</span>
             <span>Gusa au sogeza alama kuweka eneo</span>
           </div>
 
+          {/* Map Layer Switcher: Roadmap vs Satellite */}
+          <div className="absolute top-3 right-3 z-20">
+            <button
+              type="button"
+              onClick={toggleMapType}
+              className="px-3 py-1.5 rounded-xl bg-black/80 hover:bg-black/95 text-white font-bold text-[11px] backdrop-blur-md border border-white/20 flex items-center space-x-1.5 shadow-lg transition-all cursor-pointer active:scale-95"
+              title="Badilisha Muonekano wa Ramani"
+            >
+              <Layers className="w-3.5 h-3.5 text-emerald-400" />
+              <span>{mapType === 'roadmap' ? '🗺️ Mitaa' : '🛰️ Setilaiti'}</span>
+            </button>
+          </div>
+
           {/* Zoom controls */}
-          <div className="absolute bottom-4 right-4 z-20 flex flex-col space-y-1">
+          <div className="absolute bottom-4 right-4 z-20 flex flex-col space-y-1.5">
             <button
               type="button"
               onClick={() => mapInstanceRef.current?.zoomIn()}
-              className="w-8 h-8 rounded-lg bg-black/80 hover:bg-black text-white flex items-center justify-center font-bold text-base shadow border border-white/10"
+              className="w-9 h-9 rounded-xl bg-black/85 hover:bg-black text-white flex items-center justify-center font-bold text-lg shadow-lg border border-white/20 active:scale-95 transition-all cursor-pointer"
               title="Zoom In"
             >
               +
@@ -397,7 +470,7 @@ export const MapLocationPickerModal: React.FC<MapLocationPickerModalProps> = ({
             <button
               type="button"
               onClick={() => mapInstanceRef.current?.zoomOut()}
-              className="w-8 h-8 rounded-lg bg-black/80 hover:bg-black text-white flex items-center justify-center font-bold text-base shadow border border-white/10"
+              className="w-9 h-9 rounded-xl bg-black/85 hover:bg-black text-white flex items-center justify-center font-bold text-lg shadow-lg border border-white/20 active:scale-95 transition-all cursor-pointer"
               title="Zoom Out"
             >
               −
@@ -406,7 +479,7 @@ export const MapLocationPickerModal: React.FC<MapLocationPickerModalProps> = ({
         </div>
 
         {/* Footer: Selected Location Summary & Confirm Button */}
-        <div className="p-3.5 sm:p-5 border-t border-neutral-800/80 bg-neutral-900/60 shrink-0">
+        <div className="p-3.5 sm:p-5 border-t border-neutral-800/80 bg-neutral-900/80 shrink-0">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             {/* Address Display */}
             <div className="flex-1 min-w-0">

@@ -85,16 +85,13 @@ export const DarEsSalaamMap: React.FC<DarEsSalaamMapProps> = ({
       attributionControl: false
     });
 
-    // Clean, high-resolution tiles matching standard global OpenStreetMap
-    // Supports clean ocean, country borders, street names and clear geographic labels
-    const tileUrl = isDark
-      ? 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
-      : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+    // Clean, high-resolution live Google Maps roadmap tiles
+    const tileUrl = 'https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}';
 
     L.tileLayer(tileUrl, {
-      subdomains: isDark ? 'abcd' : 'abc',
+      subdomains: ['0', '1', '2', '3'],
       maxZoom: 19,
-      attribution: '&copy; OpenStreetMap contributors'
+      attribution: '&copy; Google Maps'
     }).addTo(map);
 
     // Route Polyline (Sleek glowing Emerald)
