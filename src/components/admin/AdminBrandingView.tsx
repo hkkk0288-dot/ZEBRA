@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { SplashMediaItem, SplashMediaType } from '../../types';
 import {
@@ -24,8 +24,73 @@ import {
   ExternalLink,
   Film,
   Store,
-  MapPin
+  MapPin,
+  Loader2,
+  Check,
+  AlertCircle
 } from 'lucide-react';
+import {
+  saveMediaToStorage,
+  resolveMediaUrl,
+  parseVideoSource,
+  ParsedVideoInfo
+} from '../../services/mediaStorageService';
+import { uploadVideoToCloudinary, uploadImageToCloudinary } from '../../services/cloudinaryService';
+
+// Thumbnail component for video / image splash slides with IndexedDB and YouTube resolution
+const SplashSlideThumbnail: React.FC<{ slide: SplashMediaItem }> = ({ slide }) => {
+  const [resolvedUrl, setResolvedUrl] = useState('');
+  const [parsed, setParsed] = useState<ParsedVideoInfo>({ type: 'direct', directUrl: '' });
+
+  useEffect(() => {
+    let active = true;
+    resolveMediaUrl(slide.mediaUrl).then(url => {
+      if (active) {
+        setResolvedUrl(url);
+        setParsed(parseVideoSource(url));
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [slide.mediaUrl]);
+
+  return (
+    <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-neutral-950 shrink-0 border border-neutral-300 dark:border-neutral-700">
+      {slide.type === 'video' ? (
+        parsed.type === 'youtube' ? (
+          <img
+            src={`https://img.youtube.com/vi/${parsed.videoId}/hqdefault.jpg`}
+            alt={slide.title || 'YouTube Video'}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <>
+            <video
+              src={resolvedUrl || slide.mediaUrl}
+              className="w-full h-full object-cover"
+              muted
+              playsInline
+              preload="metadata"
+            />
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center pointer-events-none">
+              <Play className="w-5 h-5 text-white fill-white" />
+            </div>
+          </>
+        )
+      ) : (
+        <img
+          src={resolvedUrl || slide.mediaUrl}
+          alt={slide.title || 'Slide'}
+          className="w-full h-full object-cover"
+        />
+      )}
+      <span className="absolute bottom-1 right-1 px-1 py-0.2 rounded bg-black/80 text-[9px] font-bold text-white">
+        {slide.type === 'video' ? (parsed.type === 'youtube' ? 'YOUTUBE' : 'VIDEO') : 'PICHA'}
+      </span>
+    </div>
+  );
+};
 
 // Preset Restaurant Logos
 const LOGO_PRESETS = [
@@ -148,6 +213,28 @@ export const AdminBrandingView: React.FC = () => {
   const [slideDuration, setSlideDuration] = useState(5);
   const [slideButtonText, setSlideButtonText] = useState('Anza Sasa ➔');
 
+  // Media upload & preview states
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isUploadingCloudinary, setIsUploadingCloudinary] = useState(false);
+  const [cloudinaryProgress, setCloudinaryProgress] = useState(0);
+  const [modalResolvedUrl, setModalResolvedUrl] = useState('');
+  const [modalVideoDuration, setModalVideoDuration] = useState<number | null>(null);
+
+  // Sync resolved media URL for modal preview
+  useEffect(() => {
+    let active = true;
+    if (slideMediaUrl) {
+      resolveMediaUrl(slideMediaUrl).then(url => {
+        if (active) setModalResolvedUrl(url);
+      });
+    } else {
+      setModalResolvedUrl('');
+    }
+    return () => {
+      active = false;
+    };
+  }, [slideMediaUrl]);
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
@@ -186,35 +273,80 @@ export const AdminBrandingView: React.FC = () => {
   };
 
   // Handle Media File upload for splash screen (Image or Video)
-  const handleMediaFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMediaFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     // Detect if video or image
     const isVid = file.type.startsWith('video/');
     setSlideType(isVid ? 'video' : 'image');
+    setUploadedFile(file);
 
-    if (file.size > 50 * 1024 * 1024) {
-      showToast('Ukubwa wa video/picha usizidi MB 50');
+    if (file.size > 80 * 1024 * 1024) {
+      showToast('Ukubwa wa video/picha usizidi MB 80');
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result as string;
-      setSlideMediaUrl(dataUrl);
-      showToast(`Faili la ${isVid ? 'video' : 'picha'} limepakiwa!`);
-    };
-    reader.readAsDataURL(file);
+    try {
+      // 1. Create immediate object URL for live playback in modal preview
+      const previewUrl = URL.createObjectURL(file);
+      setModalResolvedUrl(previewUrl);
+
+      // 2. Persist blob safely in IndexedDB (prevents localStorage quota errors)
+      const mediaId = `splash-media-${Date.now()}`;
+      const storageKey = await saveMediaToStorage(mediaId, file);
+      setSlideMediaUrl(storageKey);
+
+      showToast(`Faili la ${isVid ? 'video' : 'picha'} limepakiwa na kuhifadhiwa kikamilifu! ✅ (${(file.size / (1024 * 1024)).toFixed(1)} MB)`);
+    } catch (err) {
+      console.error('Failed to store media file:', err);
+      showToast('Hitilafu katika kupakia faili, tafadhali jaribu tena');
+    }
+  };
+
+  // Optional direct upload to Cloudinary CDN
+  const handleUploadToCloudinaryNow = async () => {
+    if (!uploadedFile) return;
+    setIsUploadingCloudinary(true);
+    setCloudinaryProgress(15);
+    try {
+      if (slideType === 'video') {
+        const res = await uploadVideoToCloudinary(uploadedFile, pct => setCloudinaryProgress(pct));
+        if (res.success && res.url) {
+          setSlideMediaUrl(res.url);
+          setModalResolvedUrl(res.url);
+          showToast('Video imepakiwa Cloudinary CDN kikamilifu! 🎬☁️');
+        } else {
+          showToast(`Cloudinary: ${res.message || 'Imehifadhiwa ndani ya IndexedDB'}`);
+        }
+      } else {
+        const res = await uploadImageToCloudinary(uploadedFile, pct => setCloudinaryProgress(pct));
+        if (res.success && res.url) {
+          setSlideMediaUrl(res.url);
+          setModalResolvedUrl(res.url);
+          showToast('Picha imepakiwa Cloudinary CDN kikamilifu! 🖼️☁️');
+        } else {
+          showToast(`Cloudinary: ${res.message || 'Imehifadhiwa ndani ya kifaa'}`);
+        }
+      }
+    } catch (err) {
+      console.warn('Cloudinary upload error:', err);
+      showToast('Hitilafu ya Cloudinary');
+    } finally {
+      setIsUploadingCloudinary(false);
+    }
   };
 
   const handleOpenAddSlide = () => {
     setEditingSlide(null);
-    setSlideType('image');
-    setSlideMediaUrl(IMAGE_PRESETS[0].url);
+    setSlideType('video');
+    setSlideMediaUrl(VIDEO_PRESETS[0].url);
+    setModalResolvedUrl(VIDEO_PRESETS[0].url);
+    setUploadedFile(null);
+    setModalVideoDuration(null);
     setSlideTitle('Karibu Zebra Restaurant Masaki');
     setSlideSubtitle('Chakula kitamu, mazingira safi, na uletewe popote Dar es Salaam');
-    setSlideDuration(5);
+    setSlideDuration(6);
     setSlideButtonText('Anza Sasa ➔');
     setIsSlideModalOpen(true);
   };
@@ -223,6 +355,9 @@ export const AdminBrandingView: React.FC = () => {
     setEditingSlide(slide);
     setSlideType(slide.type);
     setSlideMediaUrl(slide.mediaUrl);
+    setModalResolvedUrl(slide.mediaUrl);
+    setUploadedFile(null);
+    setModalVideoDuration(null);
     setSlideTitle(slide.title || '');
     setSlideSubtitle(slide.subtitle || '');
     setSlideDuration(slide.durationSeconds || 5);
@@ -237,30 +372,36 @@ export const AdminBrandingView: React.FC = () => {
       return;
     }
 
+    const durationNum = Math.max(2, Number(slideDuration) || 5);
+
     if (editingSlide) {
       updateSplashSlide(editingSlide.id, {
         type: slideType,
         mediaUrl: slideMediaUrl.trim(),
         title: slideTitle.trim(),
         subtitle: slideSubtitle.trim(),
-        durationSeconds: Math.max(2, Number(slideDuration) || 4),
-        buttonText: slideButtonText.trim()
+        durationSeconds: durationNum,
+        buttonText: slideButtonText.trim(),
+        active: true
       });
-      showToast('Slide ya Splash Screen imesasishwa! ✅');
+      showToast('Slide ya Splash Screen imesasishwa! ✅ Bofya "Tazama Splash" kuiona.');
     } else {
       addSplashSlide({
         type: slideType,
         mediaUrl: slideMediaUrl.trim(),
         title: slideTitle.trim(),
         subtitle: slideSubtitle.trim(),
-        durationSeconds: Math.max(2, Number(slideDuration) || 4),
+        durationSeconds: durationNum,
         buttonText: slideButtonText.trim(),
         active: true
       });
-      showToast('Slide mpya ya Splash Screen imeongezwa! 🎉');
+      showToast('Slide mpya ya Splash Screen imeongezwa! 🎉 Bofya "Tazama Splash" kuiona.');
     }
 
+    updateAppBranding({ splashEnabled: true });
+    sessionStorage.removeItem('zebra_splash_seen');
     setIsSlideModalOpen(false);
+    setUploadedFile(null);
   };
 
   const handleSetSinglePizzaVideo = () => {
@@ -855,30 +996,8 @@ export const AdminBrandingView: React.FC = () => {
                     {idx + 1}
                   </span>
 
-                  {/* Thumbnail */}
-                  <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-neutral-950 shrink-0 border border-neutral-300 dark:border-neutral-700">
-                    {slide.type === 'video' ? (
-                      <>
-                        <video
-                          src={slide.mediaUrl}
-                          className="w-full h-full object-cover"
-                          muted
-                        />
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                          <Play className="w-5 h-5 text-white fill-white" />
-                        </div>
-                      </>
-                    ) : (
-                      <img
-                        src={slide.mediaUrl}
-                        alt={slide.title || 'Slide'}
-                        className="w-full h-full object-cover"
-                      />
-                    )}
-                    <span className="absolute bottom-1 right-1 px-1 py-0.2 rounded bg-black/80 text-[9px] font-bold text-white">
-                      {slide.type === 'video' ? 'VIDEO' : 'PICHA'}
-                    </span>
-                  </div>
+                  {/* Thumbnail with async resolution */}
+                  <SplashSlideThumbnail slide={slide} />
 
                   {/* Content details */}
                   <div className="min-w-0 flex-1">
@@ -940,6 +1059,20 @@ export const AdminBrandingView: React.FC = () => {
                     }`}
                   >
                     {slide.active ? 'Active' : 'Hidden'}
+                  </button>
+
+                  {/* Preview Splash */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      updateAppBranding({ splashEnabled: true });
+                      sessionStorage.removeItem('zebra_splash_seen');
+                      setShowSplashPreview(true);
+                    }}
+                    className="p-1.5 rounded-lg border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-800 text-emerald-500 cursor-pointer"
+                    title="Tazama Preview ya Splash Screen Sasa"
+                  >
+                    <Eye className="w-4 h-4" />
                   </button>
 
                   {/* Edit */}
@@ -1083,13 +1216,111 @@ export const AdminBrandingView: React.FC = () => {
                   onChange={e => setSlideMediaUrl(e.target.value)}
                   placeholder={
                     slideType === 'video'
-                      ? 'https://mfano.com/video.mp4'
+                      ? 'https://mfano.com/video.mp4 au YouTube link'
                       : 'https://images.unsplash.com/...'
                   }
                   className="w-full p-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white font-mono outline-none focus:border-orange-500"
                   required
                 />
               </div>
+
+              {/* Live Preview Player inside Modal */}
+              {slideMediaUrl && (
+                <div className="rounded-2xl overflow-hidden border border-neutral-300 dark:border-neutral-700 bg-neutral-950 p-3 space-y-2">
+                  <div className="flex items-center justify-between text-[11px] text-neutral-300">
+                    <span className="font-bold flex items-center space-x-1.5">
+                      <Eye className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Uhakiki wa Moja kwa Moja (Live Preview):</span>
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-mono text-[10px] font-bold">
+                      {slideType === 'video' ? '🎬 VIDEO' : '🖼️ PICHA'}
+                    </span>
+                  </div>
+
+                  <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-black flex items-center justify-center">
+                    {slideType === 'video' ? (
+                      (() => {
+                        const parsed = parseVideoSource(modalResolvedUrl || slideMediaUrl);
+                        if (parsed.type === 'youtube' || parsed.type === 'vimeo') {
+                          return (
+                            <iframe
+                              src={parsed.embedUrl}
+                              className="w-full h-full"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              title="Preview"
+                            />
+                          );
+                        }
+                        return (
+                          <video
+                            key={modalResolvedUrl || slideMediaUrl}
+                            src={modalResolvedUrl || slideMediaUrl}
+                            controls
+                            autoPlay
+                            muted
+                            playsInline
+                            onLoadedMetadata={e => {
+                              const dur = e.currentTarget.duration;
+                              if (dur && !isNaN(dur) && isFinite(dur)) {
+                                setModalVideoDuration(Math.ceil(dur));
+                              }
+                            }}
+                            className="w-full h-full object-contain"
+                          />
+                        );
+                      })()
+                    ) : (
+                      <img
+                        src={modalResolvedUrl || slideMediaUrl}
+                        alt="Preview"
+                        className="w-full h-full object-contain"
+                      />
+                    )}
+                  </div>
+
+                  {modalVideoDuration && (
+                    <div className="flex items-center justify-between pt-1">
+                      <span className="text-[11px] text-neutral-300">
+                        ⏱️ Urefu wa video: <strong className="text-emerald-400">{modalVideoDuration}s</strong>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setSlideDuration(modalVideoDuration)}
+                        className="text-[10px] font-bold px-2 py-1 rounded-lg bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 transition-colors cursor-pointer"
+                      >
+                        Weka Muda kuwa {modalVideoDuration}s
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Cloudinary upload option if uploaded local file */}
+                  {uploadedFile && !slideMediaUrl.startsWith('https://res.cloudinary.com') && (
+                    <div className="pt-2 border-t border-neutral-800 flex items-center justify-between gap-2">
+                      <span className="text-[10px] text-neutral-400">
+                        Faili lipo kwenye Fast Storage. Je, ungependa kupakia Cloudinary CDN?
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleUploadToCloudinaryNow}
+                        disabled={isUploadingCloudinary}
+                        className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold flex items-center space-x-1 cursor-pointer disabled:opacity-50 shrink-0"
+                      >
+                        {isUploadingCloudinary ? (
+                          <>
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                            <span>{cloudinaryProgress}%</span>
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-3 h-3" />
+                            <span>Pakia Cloudinary CDN</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Preset selector */}
               <div>

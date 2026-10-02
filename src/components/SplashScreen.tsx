@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { SplashMediaItem } from '../types';
-import { X, ChevronRight, ChevronLeft, Volume2, VolumeX, Sparkles } from 'lucide-react';
+import { X, ChevronRight, ChevronLeft, Volume2, VolumeX, Sparkles, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
+import { resolveMediaUrl, parseVideoSource, ParsedVideoInfo } from '../services/mediaStorageService';
 
 interface SplashScreenProps {
   onFinish?: () => void;
@@ -16,12 +17,80 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish, isPreview 
   const [progress, setProgress] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
   const [isExiting, setIsExiting] = useState(false);
+  const [resolvedMediaUrl, setResolvedMediaUrl] = useState<string>('');
+  const [parsedVideo, setParsedVideo] = useState<ParsedVideoInfo>({ type: 'direct', directUrl: '' });
+  const [isVideoLoading, setIsVideoLoading] = useState(false);
+  const [videoError, setVideoError] = useState(false);
+  const [videoDuration, setVideoDuration] = useState<number | null>(null);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const timerRef = useRef<any>(null);
   const startTimeRef = useRef<number>(Date.now());
 
   const currentSlide: SplashMediaItem | undefined = activeSlides[currentIndex] || activeSlides[0];
+
+  // Resolve media URL (handles IndexedDB idb: references, base64 blobs, or external URLs)
+  useEffect(() => {
+    let isMounted = true;
+    if (!currentSlide) return;
+
+    setVideoError(false);
+    setVideoDuration(null);
+    if (currentSlide.type === 'video') {
+      setIsVideoLoading(true);
+    }
+
+    resolveMediaUrl(currentSlide.mediaUrl)
+      .then(url => {
+        if (!isMounted) return;
+        setResolvedMediaUrl(url);
+        const parsed = parseVideoSource(url);
+        setParsedVideo(parsed);
+      })
+      .catch(err => {
+        console.warn('Failed to resolve splash media:', err);
+        if (!isMounted) return;
+        setResolvedMediaUrl(currentSlide.mediaUrl);
+        setParsedVideo(parseVideoSource(currentSlide.mediaUrl));
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [currentSlide?.id, currentSlide?.mediaUrl, currentSlide?.type]);
+
+  // Handle Autoplay & Browser Permission for Video
+  useEffect(() => {
+    if (currentSlide?.type === 'video' && parsedVideo.type === 'direct' && videoRef.current && resolvedMediaUrl) {
+      const video = videoRef.current;
+      video.muted = isMuted;
+      video.defaultMuted = isMuted;
+      video.playsInline = true;
+
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsVideoLoading(false);
+            setVideoError(false);
+          })
+          .catch(err => {
+            console.warn('Autoplay with sound was blocked, retrying muted:', err);
+            video.muted = true;
+            setIsMuted(true);
+            video.play()
+              .then(() => {
+                setIsVideoLoading(false);
+                setVideoError(false);
+              })
+              .catch(retryErr => {
+                console.warn('Video playback failed completely:', retryErr);
+                // Video might still decode, wait for onCanPlay or onError
+              });
+          });
+      }
+    }
+  }, [resolvedMediaUrl, isMuted, currentSlide?.type, currentIndex, parsedVideo.type]);
 
   const handleComplete = () => {
     setIsExiting(true);
@@ -53,13 +122,32 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish, isPreview 
     }
   };
 
+  const toggleAudio = () => {
+    const nextMuted = !isMuted;
+    setIsMuted(nextMuted);
+    if (videoRef.current) {
+      videoRef.current.muted = nextMuted;
+      if (!nextMuted) {
+        videoRef.current.volume = 1.0;
+        videoRef.current.play().catch(() => {});
+      }
+    }
+  };
+
   // Slide duration and progress ticker
   useEffect(() => {
     if (!currentSlide) return;
 
     setProgress(0);
     startTimeRef.current = Date.now();
-    const durationMs = Math.max(2, currentSlide.durationSeconds || 4) * 1000;
+
+    // Use detected video duration or configured duration
+    let effectiveSeconds = currentSlide.durationSeconds || 5;
+    if (currentSlide.type === 'video' && videoDuration && videoDuration > 2) {
+      effectiveSeconds = Math.min(25, Math.max(effectiveSeconds, Math.ceil(videoDuration)));
+    }
+
+    const durationMs = Math.max(2, effectiveSeconds) * 1000;
     const intervalMs = 50;
 
     clearInterval(timerRef.current);
@@ -77,7 +165,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish, isPreview 
     return () => {
       clearInterval(timerRef.current);
     };
-  }, [currentIndex, currentSlide?.id]);
+  }, [currentIndex, currentSlide?.id, videoDuration]);
 
   if (!currentSlide || activeSlides.length === 0) {
     return null;
@@ -89,32 +177,125 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish, isPreview 
         isExiting ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
     >
-      {/* Background Media Container (Picture or Video) */}
+      {/* Background Media Container (Picture or Video or Embed) */}
       <div className="absolute inset-0 w-full h-full overflow-hidden bg-neutral-950">
         {currentSlide.type === 'video' ? (
-          <video
-            ref={videoRef}
-            key={currentSlide.mediaUrl}
-            src={currentSlide.mediaUrl}
-            autoPlay
-            muted={isMuted}
-            playsInline
-            loop={activeSlides.length === 1}
-            onEnded={() => {
-              if (activeSlides.length > 1) {
-                handleNext();
-              }
-            }}
-            className="w-full h-full object-cover transform scale-105 transition-all duration-700"
-          />
+          parsedVideo.type === 'youtube' ? (
+            <div className="w-full h-full relative overflow-hidden pointer-events-none">
+              <iframe
+                key={parsedVideo.embedUrl}
+                src={parsedVideo.embedUrl}
+                className="w-full h-full object-cover scale-[1.35] pointer-events-none"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                title={currentSlide.title || 'Video'}
+              />
+            </div>
+          ) : parsedVideo.type === 'vimeo' ? (
+            <div className="w-full h-full relative overflow-hidden pointer-events-none">
+              <iframe
+                key={parsedVideo.embedUrl}
+                src={parsedVideo.embedUrl}
+                className="w-full h-full object-cover scale-[1.35] pointer-events-none"
+                allow="autoplay; fullscreen"
+                allowFullScreen
+                title={currentSlide.title || 'Video'}
+              />
+            </div>
+          ) : (
+            <video
+              ref={videoRef}
+              key={resolvedMediaUrl || currentSlide.mediaUrl}
+              src={resolvedMediaUrl || currentSlide.mediaUrl}
+              autoPlay
+              muted={isMuted}
+              playsInline
+              loop={activeSlides.length === 1}
+              onWaiting={() => setIsVideoLoading(true)}
+              onCanPlay={() => {
+                setIsVideoLoading(false);
+                setVideoError(false);
+              }}
+              onPlaying={() => {
+                setIsVideoLoading(false);
+                setVideoError(false);
+              }}
+              onLoadedMetadata={e => {
+                const dur = e.currentTarget.duration;
+                if (dur && !isNaN(dur) && isFinite(dur)) {
+                  setVideoDuration(dur);
+                }
+              }}
+              onError={e => {
+                console.warn('Video failed to load in splash screen:', e);
+                setVideoError(true);
+                setIsVideoLoading(false);
+              }}
+              onEnded={() => {
+                if (activeSlides.length > 1) {
+                  handleNext();
+                }
+              }}
+              className="w-full h-full object-cover transform scale-105 transition-all duration-700"
+            />
+          )
         ) : (
           <img
-            key={currentSlide.mediaUrl}
-            src={currentSlide.mediaUrl}
+            key={resolvedMediaUrl || currentSlide.mediaUrl}
+            src={resolvedMediaUrl || currentSlide.mediaUrl}
             alt={currentSlide.title || appBranding.appName}
             className="w-full h-full object-cover transform scale-105 animate-in fade-in zoom-in-105 duration-700"
             referrerPolicy="no-referrer"
           />
+        )}
+
+        {/* Video Loading Spinner Overlay */}
+        {isVideoLoading && (
+          <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center space-y-3 z-15 backdrop-blur-xs">
+            <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
+            <span className="text-xs text-neutral-300 font-semibold tracking-wide">
+              Inapakia video ya mgahawa...
+            </span>
+          </div>
+        )}
+
+        {/* Video Error Fallback */}
+        {videoError && (
+          <div className="absolute inset-0 bg-neutral-900/90 flex flex-col items-center justify-center p-6 text-center space-y-3 z-15">
+            <div className="w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center">
+              <AlertCircle className="w-6 h-6" />
+            </div>
+            <p className="text-sm font-bold text-white max-w-xs">
+              Video haikuweza kucheza moja kwa moja
+            </p>
+            <p className="text-xs text-neutral-400 max-w-sm">
+              Hakikisha format ya video ni MP4/WebM au weka URL ya moja kwa moja kwenye Admin Branding.
+            </p>
+            <div className="flex items-center space-x-2 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setVideoError(false);
+                  setIsVideoLoading(true);
+                  if (videoRef.current) {
+                    videoRef.current.load();
+                    videoRef.current.play().catch(() => {});
+                  }
+                }}
+                className="px-4 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-xs font-bold text-white flex items-center space-x-1.5 cursor-pointer"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Jaribu Tena</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleComplete}
+                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-neutral-950 cursor-pointer"
+              >
+                Endelea kwenye App
+              </button>
+            </div>
+          </div>
         )}
 
         {/* Ambient Overlay Gradients */}
@@ -193,14 +374,24 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish, isPreview 
 
           {/* Top Actions: Audio Toggle (if video) + Skip Button */}
           <div className="flex items-center space-x-2">
-            {currentSlide.type === 'video' && (
+            {currentSlide.type === 'video' && parsedVideo.type === 'direct' && (
               <button
                 type="button"
-                onClick={() => setIsMuted(!isMuted)}
-                className="p-2 rounded-full bg-black/50 hover:bg-black/75 backdrop-blur-md border border-white/20 text-white text-xs transition-colors cursor-pointer"
-                title={isMuted ? 'Washa Sauti' : 'Zima Sauti'}
+                onClick={toggleAudio}
+                className="px-2.5 py-1.5 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md border border-white/20 text-white text-xs flex items-center space-x-1.5 transition-all cursor-pointer shadow-lg active:scale-95"
+                title={isMuted ? 'Washa Sauti (Unmute)' : 'Zima Sauti (Mute)'}
               >
-                {isMuted ? <VolumeX className="w-4 h-4 text-neutral-300" /> : <Volume2 className="w-4 h-4 text-emerald-400" />}
+                {isMuted ? (
+                  <>
+                    <VolumeX className="w-4 h-4 text-neutral-300" />
+                    <span className="text-[10px] font-bold text-neutral-300 hidden sm:inline">Sauti Imefungwa</span>
+                  </>
+                ) : (
+                  <>
+                    <Volume2 className="w-4 h-4 text-emerald-400" />
+                    <span className="text-[10px] font-bold text-emerald-400 hidden sm:inline">Sauti Imewashwa</span>
+                  </>
+                )}
               </button>
             )}
 

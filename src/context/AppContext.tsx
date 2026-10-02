@@ -225,6 +225,7 @@ interface AppContextType {
   updateSplashSlide: (id: string, updates: Partial<SplashMediaItem>) => void;
   deleteSplashSlide: (id: string) => void;
   reorderSplashSlides: (slides: SplashMediaItem[]) => void;
+  resetSplashSeen: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -619,17 +620,40 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [showSplashPreview, setShowSplashPreview] = useState(false);
 
+  // Helper to persist branding safely without QuotaExceededError or crashing
+  const safePersistBranding = (branding: AppBrandingConfig) => {
+    try {
+      // In localStorage, ensure large data URLs (> 50KB) don't choke localStorage quota
+      const cleanSlides = branding.splashSlides.map(slide => {
+        if (slide.mediaUrl && slide.mediaUrl.startsWith('data:') && slide.mediaUrl.length > 50000) {
+          return { ...slide, mediaUrl: `idb:${slide.id}` };
+        }
+        return slide;
+      });
+      const toSave = { ...branding, splashSlides: cleanSlides };
+      localStorage.setItem('zebra_app_branding', JSON.stringify(toSave));
+    } catch (e) {
+      console.warn('LocalStorage save failed, quota exceeded or storage blocked:', e);
+    }
+  };
+
+  const resetSplashSeen = () => {
+    sessionStorage.removeItem('zebra_splash_seen');
+  };
+
   const updateAppBranding = (config: Partial<AppBrandingConfig>) => {
     setAppBranding(prev => {
       const updated = { ...prev, ...config };
-      localStorage.setItem('zebra_app_branding', JSON.stringify(updated));
+      safePersistBranding(updated);
+      sessionStorage.removeItem('zebra_splash_seen');
       return updated;
     });
   };
 
   const resetAppBranding = () => {
     setAppBranding(DEFAULT_BRANDING_CONFIG);
-    localStorage.setItem('zebra_app_branding', JSON.stringify(DEFAULT_BRANDING_CONFIG));
+    safePersistBranding(DEFAULT_BRANDING_CONFIG);
+    sessionStorage.removeItem('zebra_splash_seen');
   };
 
   const addSplashSlide = (slide: Omit<SplashMediaItem, 'id' | 'orderIndex'>) => {
@@ -641,7 +665,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
       const updatedSlides = [...prev.splashSlides, newSlide];
       const updated = { ...prev, splashSlides: updatedSlides };
-      localStorage.setItem('zebra_app_branding', JSON.stringify(updated));
+      safePersistBranding(updated);
+      sessionStorage.removeItem('zebra_splash_seen');
       return updated;
     });
   };
@@ -650,7 +675,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAppBranding(prev => {
       const updatedSlides = prev.splashSlides.map(s => (s.id === id ? { ...s, ...updates } : s));
       const updated = { ...prev, splashSlides: updatedSlides };
-      localStorage.setItem('zebra_app_branding', JSON.stringify(updated));
+      safePersistBranding(updated);
+      sessionStorage.removeItem('zebra_splash_seen');
       return updated;
     });
   };
@@ -659,7 +685,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAppBranding(prev => {
       const updatedSlides = prev.splashSlides.filter(s => s.id !== id);
       const updated = { ...prev, splashSlides: updatedSlides };
-      localStorage.setItem('zebra_app_branding', JSON.stringify(updated));
+      safePersistBranding(updated);
+      sessionStorage.removeItem('zebra_splash_seen');
       return updated;
     });
   };
@@ -667,7 +694,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const reorderSplashSlides = (slides: SplashMediaItem[]) => {
     setAppBranding(prev => {
       const updated = { ...prev, splashSlides: slides };
-      localStorage.setItem('zebra_app_branding', JSON.stringify(updated));
+      safePersistBranding(updated);
+      sessionStorage.removeItem('zebra_splash_seen');
       return updated;
     });
   };
@@ -1409,7 +1437,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addSplashSlide,
         updateSplashSlide,
         deleteSplashSlide,
-        reorderSplashSlides
+        reorderSplashSlides,
+        resetSplashSeen
       }}
     >
       {children}

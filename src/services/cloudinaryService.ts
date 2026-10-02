@@ -169,6 +169,90 @@ export async function uploadImageToCloudinary(
 }
 
 /**
+ * Upload a video file directly to Cloudinary (/video/upload)
+ */
+export async function uploadVideoToCloudinary(
+  file: File,
+  onProgress?: (percent: number) => void
+): Promise<UploadResult> {
+  const config = getCloudinaryConfig();
+  const cloudName = config.cloudName.trim() || 'cy4pidvh';
+  const uploadPreset = config.uploadPreset.trim() || 'ml_default';
+
+  const uploadEndpoint = `https://api.cloudinary.com/v1_1/${cloudName}/video/upload`;
+
+  return new Promise((resolve) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', uploadPreset);
+    if (config.folder) {
+      formData.append('folder', config.folder);
+    }
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', uploadEndpoint, true);
+
+    if (xhr.upload && onProgress) {
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percentComplete = Math.round((event.loaded / event.total) * 100);
+          onProgress(percentComplete);
+        }
+      };
+    }
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          const response = JSON.parse(xhr.responseText);
+          resolve({
+            success: true,
+            url: response.secure_url || response.url,
+            secureUrl: response.secure_url,
+            publicId: response.public_id,
+            format: response.format,
+            width: response.width,
+            height: response.height,
+            message: 'Video imepakiwa Cloudinary kikamilifu! 🎬'
+          });
+          return;
+        } catch (err) {
+          console.error('Failed to parse Cloudinary video response:', err);
+        }
+      }
+
+      let errorMsg = 'Hitilafu ya kupakia video Cloudinary';
+      try {
+        const errorResponse = JSON.parse(xhr.responseText);
+        if (errorResponse.error && errorResponse.error.message) {
+          errorMsg = errorResponse.error.message;
+        }
+      } catch {
+        errorMsg = `HTTP Error ${xhr.status}: ${xhr.statusText}`;
+      }
+
+      console.warn('Cloudinary video upload warning:', errorMsg);
+
+      resolve({
+        success: false,
+        url: '',
+        message: errorMsg
+      });
+    };
+
+    xhr.onerror = () => {
+      resolve({
+        success: false,
+        url: '',
+        message: 'Mtandao umeshindwa kuunganishwa na Cloudinary'
+      });
+    };
+
+    xhr.send(formData);
+  });
+}
+
+/**
  * Generate optimized Cloudinary transformation URL
  */
 export function getOptimizedCloudinaryUrl(

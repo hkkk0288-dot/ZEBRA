@@ -62,8 +62,18 @@ const MainContent: React.FC = () => {
   const isDark = theme === 'dark';
 
   const [splashDismissed, setSplashDismissed] = React.useState(() => {
-    return sessionStorage.getItem('zebra_splash_seen') === 'true';
+    if (appBranding.splashShowOncePerSession) {
+      return sessionStorage.getItem('zebra_splash_seen') === 'true';
+    }
+    return false;
   });
+
+  // Sync splash dismissal when admin modifies splash slides or tests preview
+  React.useEffect(() => {
+    if (!sessionStorage.getItem('zebra_splash_seen') || !appBranding.splashShowOncePerSession) {
+      setSplashDismissed(false);
+    }
+  }, [appBranding.splashSlides, appBranding.splashEnabled, appBranding.splashShowOncePerSession, showSplashPreview]);
 
   const showSplash =
     (appBranding.splashEnabled && !splashDismissed && appBranding.splashSlides.length > 0) ||
