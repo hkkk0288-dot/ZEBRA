@@ -13,11 +13,12 @@ import {
   ArrowRight,
   Sparkles,
   ShoppingBag,
-  ChefHat
+  ChefHat,
+  ArrowLeft
 } from 'lucide-react';
 
 export const KitchenDisplayView: React.FC = () => {
-  const { orders, tableOrders, updateOrderStatus, setActiveTab, currency } = useApp();
+  const { orders, tableOrders, updateOrderStatus, setActiveTab, goBack, currency } = useApp();
 
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [filterType, setFilterType] = useState<'all' | 'preparing' | 'ready'>('all');
@@ -103,6 +104,16 @@ export const KitchenDisplayView: React.FC = () => {
           </button>
 
           {/* Shortcut to OSS */}
+          <button
+            type="button"
+            onClick={goBack}
+            className="px-3 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 text-xs font-bold flex items-center space-x-1.5 transition-all cursor-pointer active:scale-95 shadow-sm"
+            title="Rudi Nyuma"
+          >
+            <ArrowLeft className="w-4 h-4 text-emerald-400" />
+            <span>Rudi</span>
+          </button>
+
           <button
             type="button"
             onClick={() => setActiveTab('oss')}

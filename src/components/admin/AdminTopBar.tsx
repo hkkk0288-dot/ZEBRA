@@ -13,7 +13,8 @@ import {
   X,
   Sun,
   Moon,
-  Plus
+  Plus,
+  ArrowLeft
 } from 'lucide-react';
 import { AdminTab } from './AdminSidebar';
 import { useApp } from '../../context/AppContext';
@@ -45,7 +46,7 @@ export const AdminTopBar: React.FC<AdminTopBarProps> = ({
   onNavigateToTab,
   notificationCount = 3
 }) => {
-  const { theme, toggleTheme } = useApp();
+  const { theme, toggleTheme, setActiveTab } = useApp();
   const isDark = theme === 'dark';
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -244,6 +245,16 @@ export const AdminTopBar: React.FC<AdminTopBarProps> = ({
               </div>
             )}
           </div>
+
+          {/* Return to App / Storefront Button */}
+          <button
+            onClick={() => setActiveTab('home')}
+            className="flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-bold transition-all active:scale-98 cursor-pointer"
+            title="Rudi kwenye App ya Wateja (Storefront)"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Rudi kwenye App</span>
+          </button>
 
           {/* Quick Add Product Button */}
           <button

@@ -26,7 +26,6 @@ import { DarEsSalaamMap } from './DarEsSalaamMap';
 import { SlideBannerCarousel } from './SlideBannerCarousel';
 import { GlobalMapModal, MapLayerKey } from './GlobalMapModal';
 import { HomeMapSection } from './HomeMapSection';
-import { MapLocationPickerModal } from './MapLocationPickerModal';
 
 export const HomeFeedView: React.FC = () => {
   const {
@@ -51,15 +50,18 @@ export const HomeFeedView: React.FC = () => {
     isLoggedIn,
     activeTable,
     setShowCustomerTableModal,
-    setShowReservationModal
+    setShowReservationModal,
+    customerDeliveryLocation,
+    setCustomerDeliveryLocation,
+    setShowLocationPickerModal,
+    appBranding
   } = useApp();
 
+  const isSingle = (appBranding.restaurantMode || 'single') === 'single';
   const isDark = theme === 'dark';
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showMapModal, setShowMapModal] = useState(false);
-  const [showLocationPicker, setShowLocationPicker] = useState(false);
-  const [currentLocationName, setCurrentLocationName] = useState('Masaki Peninsula, Dar es Salaam');
   const [selectedMapLayer, setSelectedMapLayer] = useState<MapLayerKey>('tanganyika_east_africa');
 
   const handleOpenMap = (layer?: MapLayerKey) => {
@@ -141,12 +143,17 @@ export const HomeFeedView: React.FC = () => {
                 </h1>
                 <button
                   type="button"
-                  onClick={() => setShowLocationPicker(true)}
-                  className="flex items-center space-x-1 text-[11px] text-neutral-500 dark:text-neutral-400 hover:text-emerald-400 cursor-pointer transition-colors"
-                  title="Chagua eneo la kuletewa chakula kwenye ramani"
+                  onClick={() => setShowLocationPickerModal(true)}
+                  className="flex items-center space-x-1 text-[11px] text-neutral-500 dark:text-neutral-400 hover:text-emerald-400 cursor-pointer transition-colors group"
+                  title={isSingle ? "Badilisha eneo lako la kuletewa chakula" : "Chagua eneo au tawi kwenye ramani"}
                 >
-                  <MapPin className="w-3 h-3 text-amber-500" />
-                  <span className="truncate max-w-[140px] font-medium border-b border-dotted border-neutral-500">{currentLocationName}</span>
+                  <MapPin className="w-3 h-3 text-amber-500 shrink-0 group-hover:scale-110 transition-transform" />
+                  <span className="truncate max-w-[130px] font-medium border-b border-dotted border-neutral-500">
+                    {customerDeliveryLocation}
+                  </span>
+                  <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1 py-0.5 rounded border border-emerald-500/20 group-hover:bg-emerald-500/20 shrink-0">
+                    Badilisha
+                  </span>
                 </button>
               </div>
             </div>
@@ -609,17 +616,6 @@ export const HomeFeedView: React.FC = () => {
         onClose={() => setShowMapModal(false)}
         isDark={isDark}
         initialMode={selectedMapLayer}
-      />
-
-      {/* Map Location Picker Modal (Select delivery location anywhere on the map) */}
-      <MapLocationPickerModal
-        isOpen={showLocationPicker}
-        onClose={() => setShowLocationPicker(false)}
-        onSelectLocation={result => {
-          setCurrentLocationName(result.address);
-        }}
-        initialAddress={currentLocationName}
-        isDark={isDark}
       />
     </div>
   );

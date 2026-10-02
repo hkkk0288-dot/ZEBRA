@@ -31,6 +31,7 @@ export const OrderTrackingView: React.FC = () => {
     updateOrderStatus,
     currency,
     setActiveTab,
+    goBack,
     theme,
     setSelectedDish,
     addToCart,
@@ -151,17 +152,19 @@ export const OrderTrackingView: React.FC = () => {
       {/* Mobile Header (only in mobile frame) */}
       {androidFrame && (
         <div
-          className={`sticky top-0 z-20 flex items-center justify-between px-5 py-4 transition-colors ${
-            isDark ? 'bg-[#0f0f11]/90 backdrop-blur-md' : 'bg-white/90 backdrop-blur-md'
+          className={`sticky top-0 z-20 flex items-center justify-between px-4 py-3.5 transition-colors border-b ${
+            isDark ? 'bg-[#0f0f11]/95 border-neutral-800 backdrop-blur-md' : 'bg-white/95 border-neutral-200 backdrop-blur-md'
           }`}
         >
           <button
-            onClick={() => setActiveTab('home')}
-            className={`p-2 rounded-full ${
-              isDark ? 'hover:bg-neutral-800 text-neutral-200' : 'hover:bg-neutral-100 text-neutral-800'
+            onClick={goBack}
+            className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center space-x-1.5 transition-all active:scale-95 cursor-pointer ${
+              isDark ? 'bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700' : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-neutral-200'
             }`}
+            title="Rudi Nyuma"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4 text-emerald-500" />
+            <span>Rudi</span>
           </button>
 
           <div className="text-center">
@@ -189,20 +192,36 @@ export const OrderTrackingView: React.FC = () => {
         
         {/* Clean Breadcrumb & Order Status Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-neutral-800/80 pb-3 sm:pb-4 mb-4 sm:mb-6">
-          <div>
-            <div className="flex items-center space-x-2">
-              <h1 className="text-xl sm:text-2xl font-black font-display text-neutral-900 dark:text-white tracking-tight">
-                Track Order Live
-              </h1>
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-mono text-xs font-bold border border-emerald-500/30">
-                {order.orderNumber}
-              </span>
+          <div className="flex items-center space-x-3.5">
+            {!androidFrame && (
+              <button
+                onClick={goBack}
+                className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center space-x-1.5 border transition-all active:scale-95 cursor-pointer ${
+                  isDark
+                    ? 'bg-neutral-900 hover:bg-neutral-800 text-white border-neutral-800 shadow-sm'
+                    : 'bg-white hover:bg-neutral-100 text-neutral-900 border-neutral-200 shadow-xs'
+                }`}
+                title="Rudi Nyuma"
+              >
+                <ArrowLeft className="w-4 h-4 text-emerald-500" />
+                <span>Rudi</span>
+              </button>
+            )}
+            <div>
+              <div className="flex items-center space-x-2">
+                <h1 className="text-xl sm:text-2xl font-black font-display text-neutral-900 dark:text-white tracking-tight">
+                  Track Order Live
+                </h1>
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-mono text-xs font-bold border border-emerald-500/30">
+                  {order.orderNumber}
+                </span>
+              </div>
+              <p className="text-xs text-neutral-400 mt-1 flex flex-wrap items-center gap-1 sm:gap-2">
+                <span>Inafika: <strong className="text-emerald-400 font-bold">{order.rider?.currentEtaMinutes ? `${order.rider.currentEtaMinutes} mins` : '15-20 mins'}</strong></span>
+                <span className="text-neutral-600">•</span>
+                <span className="text-neutral-300 truncate max-w-xs">{order.customer?.address || 'Plot 44, Toure Drive, Masaki Peninsula'}</span>
+              </p>
             </div>
-            <p className="text-xs text-neutral-400 mt-1 flex flex-wrap items-center gap-1 sm:gap-2">
-              <span>Inafika: <strong className="text-emerald-400 font-bold">{order.rider?.currentEtaMinutes ? `${order.rider.currentEtaMinutes} mins` : '15-20 mins'}</strong></span>
-              <span className="text-neutral-600">•</span>
-              <span className="text-neutral-300 truncate max-w-xs">{order.customer?.address || 'Plot 44, Toure Drive, Masaki Peninsula'}</span>
-            </p>
           </div>
 
           {/* Action buttons: Thermal Receipt & Split Bill */}

@@ -25,6 +25,7 @@ export const CartView: React.FC = () => {
     currency,
     placeOrder,
     setActiveTab,
+    goBack,
     setSelectedDish,
     theme,
     user,
@@ -198,29 +199,31 @@ Thank you for choosing Zebra Restaurant!`;
       {/* Mobile Top Header (only in mobile frame) */}
       {androidFrame && (
         <div
-          className={`sticky top-0 z-20 flex items-center justify-between px-5 py-4 transition-colors ${
-            isDark ? 'bg-[#0f0f11]/90 backdrop-blur-md' : 'bg-white/90 backdrop-blur-md'
+          className={`sticky top-0 z-20 flex items-center justify-between px-4 py-3.5 transition-colors border-b ${
+            isDark ? 'bg-[#0f0f11]/95 border-neutral-800 backdrop-blur-md' : 'bg-white/95 border-neutral-200 backdrop-blur-md'
           }`}
         >
           <button
-            onClick={() => setActiveTab('home')}
-            className={`p-2 rounded-full ${
-              isDark ? 'hover:bg-neutral-800 text-neutral-200' : 'hover:bg-neutral-100 text-neutral-800'
+            onClick={goBack}
+            className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center space-x-1.5 transition-all active:scale-95 cursor-pointer ${
+              isDark ? 'bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700' : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-neutral-200'
             }`}
+            title="Rudi Nyuma"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4 text-emerald-500" />
+            <span>Rudi</span>
           </button>
 
-          <h1 className="text-lg font-bold font-display text-neutral-900 dark:text-white">
-            Cart
+          <h1 className="text-base font-bold font-display text-neutral-900 dark:text-white">
+            Rukwama (Cart)
           </h1>
 
           <button
             onClick={clearCart}
-            title="Clear Cart"
-            className="p-2 rounded-full text-neutral-400 hover:text-rose-500 transition-colors"
+            title="Futa Vyote"
+            className="p-2 rounded-xl text-neutral-400 hover:text-rose-500 transition-colors"
           >
-            <Trash2 className="w-5 h-5" />
+            <Trash2 className="w-4 h-4" />
           </button>
         </div>
       )}
@@ -231,13 +234,27 @@ Thank you for choosing Zebra Restaurant!`;
         {/* Full Web Breadcrumbs & Clear All Button */}
         {!androidFrame && (
           <div className="flex items-center justify-between mb-6 pb-4 border-b border-neutral-800/80">
-            <div>
-              <h1 className="text-2xl font-bold font-display text-neutral-900 dark:text-white tracking-tight">
-                Review Your Order
-              </h1>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
-                {cart.reduce((sum, item) => sum + item.quantity, 0)} items in your basket from Zebra Restaurant
-              </p>
+            <div className="flex items-center space-x-3.5">
+              <button
+                onClick={goBack}
+                className={`px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm flex items-center space-x-1.5 border transition-all active:scale-95 cursor-pointer ${
+                  isDark
+                    ? 'bg-neutral-900 hover:bg-neutral-800 text-white border-neutral-800 shadow-sm'
+                    : 'bg-white hover:bg-neutral-100 text-neutral-900 border-neutral-200 shadow-xs'
+                }`}
+                title="Rudi Nyuma kwenye Menu"
+              >
+                <ArrowLeft className="w-4 h-4 text-emerald-500" />
+                <span>Rudi Menu</span>
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold font-display text-neutral-900 dark:text-white tracking-tight">
+                  Review Your Order
+                </h1>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
+                  {cart.reduce((sum, item) => sum + item.quantity, 0)} items in your basket from Zebra Restaurant
+                </p>
+              </div>
             </div>
 
             <button

@@ -37,6 +37,7 @@ export const AuthView: React.FC = () => {
     logout,
     user,
     setActiveTab,
+    goBack,
     androidFrame,
     authRedirectMessage,
     pendingAction
@@ -335,11 +336,12 @@ export const AuthView: React.FC = () => {
       {/* Top Header Navigation (Back to Home / Title) */}
       <div className="w-full max-w-md flex items-center justify-between mb-4 z-10">
         <button
-          onClick={() => setActiveTab('home')}
-          className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-[#18181c] hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white transition-all text-xs font-semibold cursor-pointer"
+          onClick={goBack}
+          className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-[#18181c] hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white transition-all text-xs font-semibold cursor-pointer active:scale-95 shadow-sm"
+          title="Rudi Nyuma"
         >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Rudi Nyumbani</span>
+          <ArrowLeft className="w-4 h-4 text-emerald-400" />
+          <span>Rudi</span>
         </button>
 
         {isLoggedIn && (

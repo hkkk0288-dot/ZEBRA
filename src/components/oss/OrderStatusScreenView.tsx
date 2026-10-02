@@ -12,6 +12,7 @@ import {
   Utensils,
   CheckCircle2,
   ArrowRight,
+  ArrowLeft,
   Plus,
   Search,
   Users,
@@ -52,7 +53,7 @@ const INITIAL_TOKENS: OssTokenItem[] = [
 ];
 
 export const OrderStatusScreenView: React.FC = () => {
-  const { menuItems, currency, orders, setActiveTab, activeTable } = useApp();
+  const { menuItems, currency, orders, setActiveTab, goBack, activeTable } = useApp();
 
   const [tokens, setTokens] = useState<OssTokenItem[]>(INITIAL_TOKENS);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -242,21 +243,32 @@ export const OrderStatusScreenView: React.FC = () => {
     >
       {/* Top Banner Header */}
       <div className="px-4 sm:px-6 py-3.5 bg-gradient-to-r from-[#121926] via-[#101520] to-[#121926] border-b border-neutral-800 flex flex-wrap items-center justify-between gap-3 shrink-0 shadow-lg">
-        <div>
-          <div className="flex items-center space-x-2.5">
-            <div className="w-8 h-8 rounded-xl bg-teal-500 text-neutral-950 font-black flex items-center justify-center text-base shadow-md shadow-teal-500/30">
-              📺
+        <div className="flex items-center space-x-3">
+          <button
+            type="button"
+            onClick={goBack}
+            className="px-3 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-white font-bold text-xs flex items-center space-x-1.5 transition-all cursor-pointer active:scale-95 shadow-sm shrink-0"
+            title="Rudi Nyuma kwenye Menu"
+          >
+            <ArrowLeft className="w-4 h-4 text-emerald-400" />
+            <span>Rudi</span>
+          </button>
+          <div>
+            <div className="flex items-center space-x-2.5">
+              <div className="w-8 h-8 rounded-xl bg-teal-500 text-neutral-950 font-black flex items-center justify-center text-base shadow-md shadow-teal-500/30">
+                📺
+              </div>
+              <h1 className="text-lg sm:text-xl font-black font-display tracking-tight text-white">
+                Order Status Screen (OSS)
+              </h1>
+              <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-extrabold text-[10px] border border-emerald-500/30 animate-pulse">
+                LIVE TV QUEUE
+              </span>
             </div>
-            <h1 className="text-lg sm:text-xl font-black font-display tracking-tight text-white">
-              Order Status Screen (OSS)
-            </h1>
-            <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-extrabold text-[10px] border border-emerald-500/30 animate-pulse">
-              LIVE TV QUEUE
-            </span>
+            <p className="text-xs text-neutral-400 mt-0.5">
+              Customers can see their order's current progress in real-time by the token number in OSS Screen from the table or waiting line.
+            </p>
           </div>
-          <p className="text-xs text-neutral-400 mt-0.5">
-            Customers can see their order's current progress in real-time by the token number in OSS Screen from the table or waiting line.
-          </p>
         </div>
 
         {/* Live Controls */}

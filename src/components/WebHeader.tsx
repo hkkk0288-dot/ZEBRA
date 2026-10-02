@@ -19,7 +19,8 @@ import {
   Globe2,
   Tv,
   Store,
-  Sparkles
+  Sparkles,
+  ArrowLeft
 } from 'lucide-react';
 import { formatPrice } from '../utils/formatters';
 import { LuckySpinWheelModal } from './LuckySpinWheelModal';
@@ -28,6 +29,9 @@ export const WebHeader: React.FC = () => {
   const {
     activeTab,
     setActiveTab,
+    goBack,
+    canGoBack,
+    customerDeliveryLocation,
     cart,
     orders,
     user,
@@ -43,6 +47,7 @@ export const WebHeader: React.FC = () => {
     setShowCustomerTableModal,
     setShowReservationModal,
     setShowGlobalMapModal,
+    setShowLocationPickerModal,
     openLocationOrMapModal,
     loyaltyPoints,
     appBranding
@@ -92,42 +97,68 @@ export const WebHeader: React.FC = () => {
       {/* Main Navigation Bar */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-3.5">
         <div className="flex items-center justify-between gap-1.5 sm:gap-4">
-          {/* Logo & Brand */}
-          <div
-            onClick={() => setActiveTab('home')}
-            className="flex items-center space-x-2 sm:space-x-3 cursor-pointer shrink-0"
-          >
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-emerald-500 to-amber-500 flex items-center justify-center text-base sm:text-xl shadow-md shadow-emerald-500/20 overflow-hidden border border-white/10 shrink-0">
-              {appBranding.logoUrl ? (
-                <img
-                  src={appBranding.logoUrl}
-                  alt={appBranding.appName}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span>{appBranding.logoEmoji || '🦓'}</span>
-              )}
-            </div>
-            <div>
-              <div className="flex items-center space-x-1 sm:space-x-1.5">
-                <span className="font-display font-extrabold text-sm sm:text-lg lg:text-xl tracking-tight text-neutral-900 dark:text-white whitespace-nowrap">
-                  {appBranding.appName}
-                </span>
-                <span className="text-[8px] sm:text-[10px] font-bold bg-amber-500/20 text-amber-500 px-1 py-0.5 rounded shrink-0">
-                  DAR
-                </span>
-              </div>
+          <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
+            {/* Global Web Back Button when not on home screen */}
+            {activeTab !== 'home' && (
               <button
                 type="button"
-                onClick={openLocationOrMapModal}
-                className="text-[9px] sm:text-[11px] text-neutral-500 dark:text-neutral-400 flex items-center space-x-1 hover:text-emerald-400 transition-colors cursor-pointer group"
-                title={isSingle ? "Badilisha eneo lako la delivery kwenye ramani" : "Tazama Ramani ya Matawi"}
+                onClick={goBack}
+                className="flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800/90 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-100 border border-neutral-300 dark:border-neutral-700 font-bold text-xs shadow-xs transition-all active:scale-95 cursor-pointer shrink-0"
+                title="Rudi Nyuma (Back)"
               >
-                <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-emerald-500 shrink-0 group-hover:scale-110 transition-transform" />
-                <span className="whitespace-nowrap border-b border-dotted border-neutral-400/60 group-hover:border-emerald-400">
-                  {isSingle ? 'Eneo la Delivery (Ramani)' : 'Masaki & Slipway (Matawi)'}
-                </span>
+                <ArrowLeft className="w-4 h-4 text-emerald-500" />
+                <span className="hidden xs:inline">Rudi</span>
               </button>
+            )}
+
+            {/* Logo & Brand */}
+            <div
+              onClick={() => setActiveTab('home')}
+              className="flex items-center space-x-2 sm:space-x-3 cursor-pointer shrink-0"
+            >
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-emerald-500 to-amber-500 flex items-center justify-center text-base sm:text-xl shadow-md shadow-emerald-500/20 overflow-hidden border border-white/10 shrink-0">
+                {appBranding.logoUrl ? (
+                  <img
+                    src={appBranding.logoUrl}
+                    alt={appBranding.appName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span>{appBranding.logoEmoji || '🦓'}</span>
+                )}
+              </div>
+              <div>
+                <div className="flex items-center space-x-1 sm:space-x-1.5">
+                  <span className="font-display font-extrabold text-sm sm:text-lg lg:text-xl tracking-tight text-neutral-900 dark:text-white whitespace-nowrap">
+                    {appBranding.appName}
+                  </span>
+                  <span className="text-[8px] sm:text-[10px] font-bold bg-amber-500/20 text-amber-500 px-1 py-0.5 rounded shrink-0">
+                    DAR
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (isSingle) {
+                      setShowLocationPickerModal(true);
+                    } else {
+                      setShowGlobalMapModal(true);
+                    }
+                  }}
+                  className="text-[9px] sm:text-[11px] text-neutral-500 dark:text-neutral-400 flex items-center space-x-1 hover:text-emerald-400 transition-colors cursor-pointer group"
+                  title={isSingle ? "Badilisha eneo lako la delivery kwenye ramani" : "Tazama Ramani ya Matawi"}
+                >
+                  <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-emerald-500 shrink-0 group-hover:scale-110 transition-transform" />
+                  <span className="truncate max-w-[120px] sm:max-w-[180px] border-b border-dotted border-neutral-400/60 group-hover:border-emerald-400 font-medium">
+                    {isSingle ? customerDeliveryLocation : 'Masaki & Slipway (Matawi)'}
+                  </span>
+                  {isSingle && (
+                    <span className="text-[8px] sm:text-[9px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1 py-0.5 rounded border border-emerald-500/20 group-hover:bg-emerald-500/20 shrink-0">
+                      Badilisha
+                    </span>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
 

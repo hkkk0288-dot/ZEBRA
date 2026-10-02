@@ -152,6 +152,15 @@ interface AppContextType {
   setShowLocationPickerModal: (open: boolean) => void;
   openLocationOrMapModal: () => void;
 
+  // Navigation History & Back action
+  goBack: () => void;
+  canGoBack: boolean;
+  tabHistory: NavigationTab[];
+
+  // Customer Delivery Location
+  customerDeliveryLocation: string;
+  setCustomerDeliveryLocation: (location: string, coords?: [number, number]) => void;
+
   // Thermal Receipt / KOT Modal
   showThermalReceiptModal: boolean;
   setShowThermalReceiptModal: (open: boolean) => void;
@@ -239,7 +248,50 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Navigation & Authentication states
-  const [activeTab, setActiveTab] = useState<NavigationTab>('home');
+  const [activeTab, setActiveTabState] = useState<NavigationTab>('home');
+  const [tabHistory, setTabHistory] = useState<NavigationTab[]>(['home']);
+
+  const setActiveTab = (tab: NavigationTab) => {
+    setActiveTabState(current => {
+      if (current !== tab) {
+        setTabHistory(prev => [...prev, tab]);
+      }
+      return tab;
+    });
+  };
+
+  const goBack = () => {
+    setTabHistory(prev => {
+      if (prev.length > 1) {
+        const next = [...prev];
+        next.pop(); // remove current active tab
+        const prevTab = next[next.length - 1];
+        setActiveTabState(prevTab);
+        return next;
+      } else {
+        setActiveTabState('home');
+        return ['home'];
+      }
+    });
+  };
+
+  const canGoBack = activeTab !== 'home' || tabHistory.length > 1;
+
+  // Customer Delivery Location state (Remembered for Single & Multi restaurant modes)
+  const [customerDeliveryLocation, setCustomerDeliveryLocationState] = useState<string>(() => {
+    const saved = localStorage.getItem('zebra_delivery_location');
+    if (saved) return saved;
+    return 'Masaki Peninsula, Dar es Salaam';
+  });
+
+  const setCustomerDeliveryLocation = (loc: string, coords?: [number, number]) => {
+    setCustomerDeliveryLocationState(loc);
+    localStorage.setItem('zebra_delivery_location', loc);
+    if (coords) {
+      localStorage.setItem('zebra_delivery_coords', JSON.stringify(coords));
+    }
+  };
+
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
     const saved = localStorage.getItem('zebra_logged_in');
@@ -1309,6 +1361,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         showLocationPickerModal,
         setShowLocationPickerModal,
         openLocationOrMapModal,
+        goBack,
+        canGoBack,
+        tabHistory,
+        customerDeliveryLocation,
+        setCustomerDeliveryLocation,
         showThermalReceiptModal,
         setShowThermalReceiptModal,
         receiptTableOrder,

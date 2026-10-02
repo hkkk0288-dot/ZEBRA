@@ -28,12 +28,16 @@ import { OrderStatusScreenView } from './components/oss/OrderStatusScreenView';
 import { KitchenDisplayView } from './components/kds/KitchenDisplayView';
 import { PwaInstallBanner } from './components/PwaInstallBanner';
 import { SplashScreen } from './components/SplashScreen';
-import { Smartphone, Monitor, ShieldCheck, User, LogIn, Store, Tv } from 'lucide-react';
+import { Smartphone, Monitor, ShieldCheck, User, LogIn, Store, Tv, ArrowLeft } from 'lucide-react';
 
 const MainContent: React.FC = () => {
   const {
     activeTab,
     setActiveTab,
+    goBack,
+    canGoBack,
+    customerDeliveryLocation,
+    setCustomerDeliveryLocation,
     theme,
     androidFrame,
     setAndroidFrame,
@@ -124,6 +128,18 @@ const MainContent: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-1.5 sm:space-x-3 shrink-0">
+            {/* Back Button in Mockup Toolbar if not on home */}
+            {canGoBack && activeTab !== 'home' && (
+              <button
+                onClick={goBack}
+                className="flex items-center space-x-1 px-2.5 sm:px-3 py-1 rounded-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/40 text-[11px] font-bold transition-all active:scale-95 cursor-pointer shadow-xs"
+                title="Rudi Nyuma (Back)"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Rudi</span>
+              </button>
+            )}
+
             {/* Direct access to POS & OSS */}
             <button
               onClick={() => setActiveTab(activeTab === 'pos' ? 'home' : 'pos')}
@@ -256,7 +272,11 @@ const MainContent: React.FC = () => {
           isOpen={showLocationPickerModal}
           onClose={() => setShowLocationPickerModal(false)}
           isDark={isDark}
-          onSelectLocation={() => setShowLocationPickerModal(false)}
+          initialAddress={customerDeliveryLocation}
+          onSelectLocation={result => {
+            setCustomerDeliveryLocation(result.address, result.coords);
+            setShowLocationPickerModal(false);
+          }}
         />
 
         {/* Splash Screen (Picha au Video - Moja au Zaidi) */}
@@ -340,7 +360,11 @@ const MainContent: React.FC = () => {
         isOpen={showLocationPickerModal}
         onClose={() => setShowLocationPickerModal(false)}
         isDark={isDark}
-        onSelectLocation={() => setShowLocationPickerModal(false)}
+        initialAddress={customerDeliveryLocation}
+        onSelectLocation={result => {
+          setCustomerDeliveryLocation(result.address, result.coords);
+          setShowLocationPickerModal(false);
+        }}
       />
 
       {/* PWA Install Banner */}

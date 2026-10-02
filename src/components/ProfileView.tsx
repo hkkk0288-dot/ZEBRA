@@ -19,7 +19,8 @@ import {
   ChevronRight,
   Award,
   Calendar,
-  Sparkles
+  Sparkles,
+  ArrowLeft
 } from 'lucide-react';
 import { formatPrice } from '../utils/formatters';
 import { MapLocationPickerModal } from './MapLocationPickerModal';
@@ -41,6 +42,7 @@ export const ProfileView: React.FC = () => {
     theme,
     currency,
     setActiveTab,
+    goBack,
     setActiveOrder,
     isLoggedIn,
     logout,
@@ -205,13 +207,28 @@ export const ProfileView: React.FC = () => {
 
       {/* Header Section */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold font-display text-neutral-900 dark:text-white tracking-tight">
-            Akaunti Yangu
-          </h1>
-          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
-            Dhibiti wasifu wako, anwani za usafirishaji na oda zako
-          </p>
+        <div className="flex items-center space-x-3">
+          <button
+            type="button"
+            onClick={goBack}
+            className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center space-x-1.5 border transition-all active:scale-95 cursor-pointer ${
+              isDark
+                ? 'bg-neutral-900 hover:bg-neutral-800 text-white border-neutral-800 shadow-sm'
+                : 'bg-white hover:bg-neutral-100 text-neutral-900 border-neutral-200 shadow-xs'
+            }`}
+            title="Rudi Nyuma"
+          >
+            <ArrowLeft className="w-4 h-4 text-emerald-500" />
+            <span>Rudi</span>
+          </button>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold font-display text-neutral-900 dark:text-white tracking-tight">
+              Akaunti Yangu
+            </h1>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
+              Dhibiti wasifu wako, anwani za usafirishaji na oda zako
+            </p>
+          </div>
         </div>
 
         {/* Small Admin Dashboard Switch */}
