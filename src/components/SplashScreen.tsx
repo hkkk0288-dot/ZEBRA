@@ -210,7 +210,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish, isPreview 
               autoPlay
               muted={isMuted}
               playsInline
-              loop={activeSlides.length === 1}
+              loop={false}
               onWaiting={() => setIsVideoLoading(true)}
               onCanPlay={() => {
                 setIsVideoLoading(false);
@@ -232,9 +232,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish, isPreview 
                 setIsVideoLoading(false);
               }}
               onEnded={() => {
-                if (activeSlides.length > 1) {
-                  handleNext();
-                }
+                handleNext();
               }}
               className="w-full h-full object-cover transform scale-105 transition-all duration-700"
             />
@@ -297,35 +295,32 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish, isPreview 
             </div>
           </div>
         )}
-
-        {/* Ambient Overlay Gradients */}
-        <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-neutral-950/80 pointer-events-none" />
-        <div className="absolute inset-0 bg-radial from-transparent via-neutral-950/30 to-neutral-950/90 pointer-events-none" />
       </div>
 
-      {/* Tap Zones for Quick Navigation (Left to go back, Right to go next) */}
-      <div className="absolute inset-0 z-10 flex">
-        <div
-          onClick={handlePrev}
-          className="w-1/3 h-full cursor-pointer active:bg-white/5 transition-colors"
-          title="Nyuma"
-        />
-        <div className="w-1/3 h-full" />
+      {/* Tap Zones for Quick Navigation (Left to go back, Right to go next/complete) */}
+      <div className="absolute inset-0 z-10 flex cursor-pointer">
+        {activeSlides.length > 1 && (
+          <div
+            onClick={handlePrev}
+            className="w-1/3 h-full cursor-pointer active:bg-white/5 transition-colors"
+            title="Nyuma"
+          />
+        )}
         <div
           onClick={handleNext}
-          className="w-1/3 h-full cursor-pointer active:bg-white/5 transition-colors"
-          title="Mbele"
+          className={`${activeSlides.length > 1 ? 'w-2/3' : 'w-full'} h-full cursor-pointer active:bg-white/5 transition-colors`}
+          title="Endelea"
         />
       </div>
 
-      {/* Top Header Bar: Progress Bars + App Logo + Controls */}
-      <div className="relative z-20 pt-4 px-4 sm:px-6 w-full max-w-4xl mx-auto space-y-3">
-        {/* Segmented Progress Bars (if multiple slides or single slide) */}
-        <div className="flex items-center space-x-1.5 w-full">
+      {/* Top Floating Controls: Story Progress Bars, Audio Toggle & Discreet Skip */}
+      <div className="relative z-20 pt-4 sm:pt-6 px-4 sm:px-6 w-full max-w-4xl mx-auto flex flex-col space-y-3 pointer-events-none">
+        {/* Segmented Progress Bars (if multiple slides or single slide progress) */}
+        <div className="flex items-center space-x-1.5 w-full pointer-events-auto">
           {activeSlides.map((slide, idx) => (
             <div
               key={slide.id}
-              className="flex-1 h-1 sm:h-1.5 rounded-full overflow-hidden bg-white/25 backdrop-blur-xs cursor-pointer"
+              className="flex-1 h-1 sm:h-1.5 rounded-full overflow-hidden bg-white/25 backdrop-blur-xs cursor-pointer shadow-xs"
               onClick={() => {
                 setCurrentIndex(idx);
                 setProgress(0);
@@ -347,133 +342,50 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish, isPreview 
           ))}
         </div>
 
-        {/* Brand Banner & Skip Controls */}
-        <div className="flex items-center justify-between pt-1">
-          {/* Logo & App Name */}
-          <div className="flex items-center space-x-2.5">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 to-amber-500 flex items-center justify-center text-lg sm:text-xl shadow-lg shadow-emerald-500/30 overflow-hidden border border-white/20 shrink-0">
-              {appBranding.logoUrl ? (
-                <img
-                  src={appBranding.logoUrl}
-                  alt={appBranding.appName}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span>{appBranding.logoEmoji || '🦓'}</span>
-              )}
-            </div>
-            <div>
-              <h1 className="font-display font-black text-sm sm:text-base text-white tracking-tight drop-shadow-md">
-                {appBranding.appName}
-              </h1>
-              <p className="text-[10px] sm:text-xs text-amber-300 font-medium drop-shadow-xs">
-                {appBranding.tagline}
-              </p>
-            </div>
-          </div>
-
-          {/* Top Actions: Audio Toggle (if video) + Skip Button */}
-          <div className="flex items-center space-x-2">
-            {currentSlide.type === 'video' && parsedVideo.type === 'direct' && (
-              <button
-                type="button"
-                onClick={toggleAudio}
-                className="px-2.5 py-1.5 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md border border-white/20 text-white text-xs flex items-center space-x-1.5 transition-all cursor-pointer shadow-lg active:scale-95"
-                title={isMuted ? 'Washa Sauti (Unmute)' : 'Zima Sauti (Mute)'}
-              >
-                {isMuted ? (
-                  <>
-                    <VolumeX className="w-4 h-4 text-neutral-300" />
-                    <span className="text-[10px] font-bold text-neutral-300 hidden sm:inline">Sauti Imefungwa</span>
-                  </>
-                ) : (
-                  <>
-                    <Volume2 className="w-4 h-4 text-emerald-400" />
-                    <span className="text-[10px] font-bold text-emerald-400 hidden sm:inline">Sauti Imewashwa</span>
-                  </>
-                )}
-              </button>
-            )}
-
+        {/* Floating Top Controls: Sound toggle & Skip Button */}
+        <div className="flex items-center justify-between pointer-events-auto">
+          {/* Audio toggle button for videos */}
+          {currentSlide.type === 'video' ? (
             <button
               type="button"
-              onClick={handleComplete}
-              className="px-3.5 py-1.5 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md border border-white/20 text-white font-bold text-xs flex items-center space-x-1 transition-all cursor-pointer active:scale-95 shadow-lg"
+              onClick={toggleAudio}
+              className="px-3 py-1.5 rounded-full bg-black/40 hover:bg-black/70 backdrop-blur-md text-white flex items-center space-x-1.5 text-xs font-semibold border border-white/20 shadow-lg cursor-pointer transition-all active:scale-95"
+              title={isMuted ? 'Washa Sauti' : 'Zima Sauti'}
             >
-              <span>{currentSlide.buttonText || (isPreview ? 'Funga Preview' : 'Ruka (Skip)')}</span>
-              <X className="w-3.5 h-3.5 ml-0.5" />
+              {isMuted ? (
+                <>
+                  <VolumeX className="w-3.5 h-3.5 text-neutral-300" />
+                  <span className="text-[11px] text-neutral-300">Gusa kuwasha sauti</span>
+                </>
+              ) : (
+                <>
+                  <Volume2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="text-[11px] text-emerald-400">Sauti Ipo</span>
+                </>
+              )}
             </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Content: Slide Title, Subtitle, Slide Count, and CTA */}
-      <div className="relative z-20 pb-8 sm:pb-12 px-5 sm:px-8 w-full max-w-4xl mx-auto space-y-4">
-        {/* Slide Counter badge */}
-        <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-500/25 border border-emerald-400/40 text-emerald-300 text-[11px] font-bold backdrop-blur-md">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>
-            {currentSlide.type === 'video' ? '🎬 Video' : '🖼️ Picha'} • {currentIndex + 1} / {activeSlides.length}
-          </span>
-        </div>
-
-        {/* Slide Title & Subtitle */}
-        <div className="space-y-2">
-          {currentSlide.title && (
-            <h2 className="text-2xl sm:text-4xl md:text-5xl font-black font-display text-white tracking-tight leading-tight drop-shadow-lg">
-              {currentSlide.title}
-            </h2>
-          )}
-          {currentSlide.subtitle && (
-            <p className="text-xs sm:text-base text-neutral-200 max-w-2xl leading-relaxed drop-shadow-md">
-              {currentSlide.subtitle}
-            </p>
-          )}
-        </div>
-
-        {/* Bottom Interactive Bar */}
-        <div className="flex items-center justify-between pt-2 gap-3">
-          {/* Arrow navigation indicators for multiple slides */}
-          {activeSlides.length > 1 ? (
-            <div className="flex items-center space-x-2">
-              <button
-                type="button"
-                onClick={handlePrev}
-                disabled={currentIndex === 0}
-                className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center text-white disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
-                title="Slide Iliyotangulia"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                type="button"
-                onClick={handleNext}
-                className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center text-white transition-all cursor-pointer"
-                title="Slide Inayofuata"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
           ) : (
             <div />
           )}
 
-          {/* Big CTA Button */}
+          {/* Discreet Minimal Skip Button */}
           <button
             type="button"
-            onClick={currentIndex === activeSlides.length - 1 ? handleComplete : handleNext}
-            className="px-6 sm:px-8 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-neutral-950 font-black text-xs sm:text-sm flex items-center space-x-2 shadow-xl shadow-emerald-500/30 transition-all cursor-pointer active:scale-95 ml-auto"
+            onClick={handleComplete}
+            className="px-3.5 py-1.5 rounded-full bg-black/40 hover:bg-black/70 backdrop-blur-md text-white text-xs font-bold flex items-center space-x-1.5 border border-white/20 shadow-lg cursor-pointer transition-all active:scale-95 hover:border-white/40"
+            title="Ruka (Skip)"
           >
-            <span>
-              {currentIndex === activeSlides.length - 1
-                ? isPreview
-                  ? 'Kamilisha Preview'
-                  : 'Anza Sasa (Order Now)'
-                : 'Inayofuata ➔'}
-            </span>
-            <ChevronRight className="w-4 h-4 stroke-[3]" />
+            <span>Ruka</span>
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
+      </div>
+
+      {/* Subtle bottom indicator */}
+      <div className="relative z-20 pb-4 px-4 w-full text-center pointer-events-none">
+        <span className="text-[10px] text-white/50 tracking-wider">
+          Gusa popote kuendelea • {currentIndex + 1}/{activeSlides.length}
+        </span>
       </div>
     </div>
   );

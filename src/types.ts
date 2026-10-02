@@ -294,12 +294,26 @@ export interface SplashMediaItem {
 
 export type RestaurantOperationMode = 'single' | 'multi';
 
+export interface RestaurantBranch {
+  id: string;
+  name: string;
+  area: string;
+  address: string;
+  phone: string;
+  hours: string;
+  tag?: string;
+  lat: number;
+  lng: number;
+  active: boolean;
+}
+
 export interface AppBrandingConfig {
   logoUrl?: string; // Custom uploaded or preset image URL
   logoEmoji?: string; // e.g. "🦓" fallback
   appName: string; // "Zebra Restaurant"
   tagline: string; // "Masaki Peninsula, Dar es Salaam"
   restaurantMode?: RestaurantOperationMode; // 'single' (Mgahawa Mmoja) | 'multi' (Matawi Mengi)
+  branches?: RestaurantBranch[];
   splashEnabled: boolean;
   splashSlides: SplashMediaItem[];
   splashAutoSkip: boolean; // whether to automatically advance when timer ends

@@ -544,12 +544,64 @@ export const DEFAULT_SPLASH_SLIDES = [
   }
 ];
 
+export const DEFAULT_BRANCHES = [
+  {
+    id: 'branch-1',
+    name: 'Zebra Central Masaki Kitchen',
+    area: 'Masaki Peninsula, Dar es Salaam',
+    address: 'Plot 44, Toure Drive, Masaki Peninsula',
+    phone: '+255 712 345 678',
+    hours: '10:00 - 00:00',
+    tag: 'HQ Kitchen & Seafood Grill',
+    lat: -6.7538,
+    lng: 39.2780,
+    active: true
+  },
+  {
+    id: 'branch-2',
+    name: 'Zebra Oysterbay Pizza & Grill',
+    area: 'Oysterbay, Dar es Salaam',
+    address: 'Plot 12, Haile Selassie Road',
+    phone: '+255 744 883 291',
+    hours: '11:00 - 23:30',
+    tag: 'Woodfired Pizza & BBQ',
+    lat: -6.7725,
+    lng: 39.2650,
+    active: true
+  },
+  {
+    id: 'branch-3',
+    name: 'Zebra Slipway Ocean Waterfront',
+    area: 'Msasani Slipway, Dar es Salaam',
+    address: 'Msasani Pier, Slipway Centre',
+    phone: '+255 754 112 334',
+    hours: '12:00 - 01:00',
+    tag: 'Ocean Terrace & Cocktails',
+    lat: -6.7582,
+    lng: 39.2685,
+    active: true
+  },
+  {
+    id: 'branch-4',
+    name: 'Zebra BBQ Hub Kariakoo',
+    area: 'Kariakoo, Dar es Salaam',
+    address: 'China Plaza & Uhuru St, Kariakoo',
+    phone: '+255 682 994 002',
+    hours: '08:00 - 23:00',
+    tag: 'Fast Delivery • City Center',
+    lat: -6.8195,
+    lng: 39.2730,
+    active: true
+  }
+];
+
 export const DEFAULT_BRANDING_CONFIG = {
   logoUrl: '',
   logoEmoji: '🦓',
   appName: 'Zebra Restaurant',
   tagline: 'Masaki Peninsula, Dar es Salaam',
   restaurantMode: 'single' as const,
+  branches: DEFAULT_BRANCHES,
   splashEnabled: true,
   splashSlides: DEFAULT_SPLASH_SLIDES,
   splashAutoSkip: true,

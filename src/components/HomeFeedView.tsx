@@ -58,6 +58,10 @@ export const HomeFeedView: React.FC = () => {
   } = useApp();
 
   const isSingle = (appBranding.restaurantMode || 'single') === 'single';
+  const isMulti = appBranding.restaurantMode === 'multi';
+  const activeBranches = (appBranding.branches || []).filter(b => b.active !== false);
+  const showBranchMap = isMulti && activeBranches.length > 0;
+
   const isDark = theme === 'dark';
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
@@ -537,11 +541,14 @@ export const HomeFeedView: React.FC = () => {
           </div>
         )}
 
-        {/* Global & Dar es Salaam Map Section */}
-        <HomeMapSection
-          onOpenFullMap={handleOpenMap}
-          isDark={isDark}
-        />
+        {/* Branch Map Section - Visible if admin set Multi-Branch AND has at least 1 branch configured; hidden if Single or no branches */}
+        {showBranchMap && (
+          <HomeMapSection
+            onOpenFullMap={handleOpenMap}
+            isDark={isDark}
+            branches={activeBranches}
+          />
+        )}
 
         {/* Empty Search / Category state */}
         {filteredItems.length === 0 && (

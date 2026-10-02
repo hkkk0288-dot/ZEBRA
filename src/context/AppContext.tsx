@@ -612,7 +612,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const saved = localStorage.getItem('zebra_app_branding');
     if (saved) {
       try {
-        return { ...DEFAULT_BRANDING_CONFIG, ...JSON.parse(saved) };
+        const parsed = JSON.parse(saved);
+        return {
+          ...DEFAULT_BRANDING_CONFIG,
+          ...parsed,
+          branches: parsed.branches !== undefined ? parsed.branches : DEFAULT_BRANDING_CONFIG.branches
+        };
       } catch {}
     }
     return DEFAULT_BRANDING_CONFIG;

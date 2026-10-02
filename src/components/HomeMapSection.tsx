@@ -5,18 +5,22 @@ import {
   Navigation,
   Clock,
   Sparkles,
-  MapPin
+  MapPin,
+  Store
 } from 'lucide-react';
 import { InteractiveLiveMap, MapPreset } from './InteractiveLiveMap';
+import { RestaurantBranch } from '../types';
 
 interface HomeMapSectionProps {
   onOpenFullMap: (initialPreset?: MapPreset) => void;
   isDark: boolean;
+  branches?: RestaurantBranch[];
 }
 
 export const HomeMapSection: React.FC<HomeMapSectionProps> = ({
   onOpenFullMap,
-  isDark
+  isDark,
+  branches = []
 }) => {
   return (
     <section className="w-full my-6 sm:my-8">
@@ -30,20 +34,20 @@ export const HomeMapSection: React.FC<HomeMapSectionProps> = ({
         {/* Header Bar */}
         <div className="p-4 sm:p-5 border-b border-neutral-800/70 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center space-x-3">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 to-blue-600 text-white flex items-center justify-center text-xl shadow-lg shadow-emerald-500/20 shrink-0">
-              🗺️
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-600 text-white flex items-center justify-center text-xl shadow-lg shadow-emerald-500/20 shrink-0">
+              🏪
             </div>
             <div>
               <div className="flex items-center space-x-2">
                 <h2 className="text-base sm:text-xl font-bold font-display text-neutral-900 dark:text-white">
-                  Ramani Halisi ya Moja kwa Moja (Live Interactive Maps)
+                  Ramani ya Matawi ya Mgahawa (Live Branches Map)
                 </h2>
                 <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-[10px] border border-emerald-500/30">
-                  Current GPS
+                  {branches.length} {branches.length === 1 ? 'Tawi' : 'Matawi'}
                 </span>
               </div>
               <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
-                Ramani ya Ziwa Tanganyika & Afrika Mashariki, Mikocheni Mitaani, Morogoro na Tanzania
+                Tazama vituo vya jikoni na maeneo ya matawi ya Zebra Restaurant Dar es Salaam
               </p>
             </div>
           </div>
@@ -51,9 +55,9 @@ export const HomeMapSection: React.FC<HomeMapSectionProps> = ({
           <div className="flex items-center space-x-2 w-full sm:w-auto justify-end">
             <button
               type="button"
-              onClick={() => onOpenFullMap('tanganyika_east_africa')}
+              onClick={() => onOpenFullMap('mikocheni_street')}
               className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold flex items-center space-x-1.5 transition-all cursor-pointer shadow-md shadow-emerald-500/25 active:scale-95 shrink-0"
-              title="Fungua Ramani Kamili ya Skrini Kubwa"
+              title="Fungua Ramani Kamili ya Matawi"
             >
               <Maximize2 className="w-3.5 h-3.5" />
               <span>Skrini Kubwa (Fullscreen)</span>
@@ -64,9 +68,10 @@ export const HomeMapSection: React.FC<HomeMapSectionProps> = ({
         {/* Live Interactive Leaflet Map right on the page */}
         <div className="p-3 sm:p-5">
           <InteractiveLiveMap
-            initialPreset="tanganyika_east_africa"
+            initialPreset="mikocheni_street"
             className="h-[420px] sm:h-[520px]"
             isDark={isDark}
+            branches={branches}
             onSelectLocation={loc => {
               // Location selected
             }}

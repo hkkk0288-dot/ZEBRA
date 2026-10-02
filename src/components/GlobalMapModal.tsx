@@ -29,11 +29,13 @@ export const GlobalMapModal: React.FC<GlobalMapModalProps> = ({
   isOpen,
   onClose,
   isDark,
-  initialMode = 'tanganyika_east_africa',
+  initialMode = 'mikocheni_street',
   onOpenLocationPicker
 }) => {
   const { appBranding, setShowLocationPickerModal } = useApp();
-  const isSingle = (appBranding.restaurantMode || 'single') === 'single';
+  const isMulti = appBranding.restaurantMode === 'multi';
+  const activeBranches = (appBranding.branches || []).filter(b => b.active !== false);
+  const showBranchMap = isMulti && activeBranches.length > 0;
 
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [activePreset, setActivePreset] = useState<MapPreset>(initialMode);
@@ -41,40 +43,7 @@ export const GlobalMapModal: React.FC<GlobalMapModalProps> = ({
 
   if (!isOpen) return null;
 
-  const branches = [
-    {
-      id: 'masaki',
-      name: 'Masaki Central HQ',
-      area: 'Toure Dr, Masaki Peninsula',
-      phone: '+255 712 345 678',
-      hours: '10:00 - 00:00',
-      tag: 'Main Hub • Peninsula'
-    },
-    {
-      id: 'kariakoo',
-      name: 'Kariakoo Express Hub',
-      area: 'Uhuru St & China Plaza',
-      phone: '+255 744 883 291',
-      hours: '08:00 - 23:00',
-      tag: 'Fast Delivery • City'
-    },
-    {
-      id: 'oysterbay',
-      name: 'Oysterbay Gourmet Grill',
-      area: 'Haile Selassie Rd',
-      phone: '+255 755 112 233',
-      hours: '11:00 - 00:00',
-      tag: 'BBQ & Smash Burgers'
-    },
-    {
-      id: 'slipway',
-      name: 'Slipway Waterfront',
-      area: 'Msasani Bay Waterfront',
-      phone: '+255 788 990 011',
-      hours: '12:00 - 01:00',
-      tag: 'Ocean Seafood & Drinks'
-    }
-  ];
+  const branches = activeBranches;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-2 sm:p-4">
@@ -163,36 +132,70 @@ export const GlobalMapModal: React.FC<GlobalMapModalProps> = ({
         </div>
 
         {/* Modal Map Body - 100% Live Interactive Map */}
-        <div className="p-2 sm:p-4 space-y-3 flex-1 flex flex-col min-h-0 overflow-y-auto">
-          <InteractiveLiveMap
-            initialPreset={initialMode}
-            className={`w-full ${isFullscreen ? 'h-[calc(100vh-200px)] min-h-[500px]' : 'h-[460px] sm:h-[540px]'}`}
-            isDark={isDark}
-            onSelectLocation={loc => setSelectedBranch(loc.id)}
-          />
-
-          {/* Kitchen Branch Badges */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
-            {branches.map(b => (
-              <div
-                key={b.id}
-                onClick={() => setSelectedBranch(b.id)}
-                className={`p-2.5 rounded-2xl border text-xs cursor-pointer transition-all ${
-                  selectedBranch === b.id
-                    ? 'bg-emerald-500/20 border-emerald-500 text-white'
-                    : 'bg-neutral-900/70 border-neutral-800/80 hover:border-neutral-700 text-neutral-300'
-                }`}
+        {!showBranchMap ? (
+          <div className="p-10 text-center space-y-4 my-auto">
+            <div className="w-16 h-16 rounded-full bg-amber-500/20 text-amber-400 mx-auto flex items-center justify-center text-3xl">
+              🏪
+            </div>
+            <h3 className="font-bold text-lg text-neutral-900 dark:text-white">
+              Ramani ya Matawi Haipatikani
+            </h3>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 max-w-md mx-auto">
+              Mfumo umewekwa kwenye hali ya <strong>Single Restaurant</strong> au admin hajaweka tawi lolote. Wateja wanachagua eneo lao la kuletewa chakula (Delivery Location).
+            </p>
+            <div className="flex items-center justify-center space-x-3 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  setShowLocationPickerModal(true);
+                }}
+                className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-neutral-950 font-bold text-xs transition-all cursor-pointer"
               >
-                <div className="flex items-center justify-between text-[10px] mb-0.5">
-                  <span className="font-bold text-emerald-400">{b.tag}</span>
-                  <span className="text-neutral-400">{b.hours}</span>
-                </div>
-                <div className="font-bold text-white truncate">{b.name}</div>
-                <div className="text-[11px] text-neutral-400 truncate mt-0.5">{b.area}</div>
-              </div>
-            ))}
+                Chagua Eneo la Delivery
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-bold text-xs transition-all cursor-pointer"
+              >
+                Funga
+              </button>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="p-2 sm:p-4 space-y-3 flex-1 flex flex-col min-h-0 overflow-y-auto">
+            <InteractiveLiveMap
+              initialPreset={initialMode}
+              className={`w-full ${isFullscreen ? 'h-[calc(100vh-200px)] min-h-[500px]' : 'h-[460px] sm:h-[540px]'}`}
+              isDark={isDark}
+              branches={branches}
+              onSelectLocation={loc => setSelectedBranch(loc.id)}
+            />
+
+            {/* Kitchen Branch Badges */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+              {branches.map(b => (
+                <div
+                  key={b.id}
+                  onClick={() => setSelectedBranch(b.id)}
+                  className={`p-2.5 rounded-2xl border text-xs cursor-pointer transition-all ${
+                    selectedBranch === b.id
+                      ? 'bg-emerald-500/20 border-emerald-500 text-white'
+                      : 'bg-neutral-900/70 border-neutral-800/80 hover:border-neutral-700 text-neutral-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-[10px] mb-0.5">
+                    <span className="font-bold text-emerald-400">{b.tag}</span>
+                    <span className="text-neutral-400">{b.hours}</span>
+                  </div>
+                  <div className="font-bold text-white truncate">{b.name}</div>
+                  <div className="text-[11px] text-neutral-400 truncate mt-0.5">{b.area}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

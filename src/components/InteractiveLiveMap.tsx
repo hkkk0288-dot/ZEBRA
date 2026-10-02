@@ -16,6 +16,7 @@ import {
   Info,
   ChevronRight
 } from 'lucide-react';
+import { RestaurantBranch } from '../types';
 
 export type MapPreset =
   | 'tanganyika_east_africa'
@@ -228,6 +229,7 @@ interface InteractiveLiveMapProps {
   initialPreset?: MapPreset;
   className?: string;
   isDark?: boolean;
+  branches?: RestaurantBranch[];
   onSelectLocation?: (location: KeyLocation) => void;
 }
 
@@ -235,6 +237,7 @@ export const InteractiveLiveMap: React.FC<InteractiveLiveMapProps> = ({
   initialPreset = 'tanganyika_east_africa',
   className = 'h-[480px] sm:h-[560px]',
   isDark = true,
+  branches,
   onSelectLocation
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -333,7 +336,22 @@ export const InteractiveLiveMap: React.FC<InteractiveLiveMapProps> = ({
 
     markersGroupRef.current.clearLayers();
 
-    KEY_LOCATIONS.forEach(loc => {
+    // Map restaurant branches to key locations if provided
+    const branchKeyLocations: KeyLocation[] = (branches || [])
+      .filter(b => b.active !== false)
+      .map(b => ({
+        id: b.id,
+        name: b.name,
+        category: b.tag || 'Tawi la Mgahawa (Branch)',
+        coords: [b.lat, b.lng] as [number, number],
+        description: `${b.address} • Simu: ${b.phone} • Masaa: ${b.hours}`,
+        color: '#10b981',
+        icon: '🦓'
+      }));
+
+    const allLocations = [...branchKeyLocations, ...KEY_LOCATIONS.filter(k => !branchKeyLocations.some(b => b.id === k.id))];
+
+    allLocations.forEach(loc => {
       const isSelected = selectedLocation?.id === loc.id;
 
       const html = `
@@ -394,7 +412,7 @@ export const InteractiveLiveMap: React.FC<InteractiveLiveMapProps> = ({
 
       marker.addTo(markersGroupRef.current!);
     });
-  }, [selectedLocation, onSelectLocation]);
+  }, [selectedLocation, onSelectLocation, branches]);
 
   useEffect(() => {
     renderMarkers();

@@ -54,6 +54,9 @@ export const WebHeader: React.FC = () => {
   } = useApp();
 
   const isSingle = (appBranding.restaurantMode || 'single') === 'single';
+  const isMulti = appBranding.restaurantMode === 'multi';
+  const activeBranches = (appBranding.branches || []).filter(b => b.active !== false);
+  const showBranchMap = isMulti && activeBranches.length > 0;
   const isDark = theme === 'dark';
   const [showLuckyWheel, setShowLuckyWheel] = useState(false);
 
@@ -139,20 +142,20 @@ export const WebHeader: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => {
-                    if (isSingle) {
-                      setShowLocationPickerModal(true);
-                    } else {
+                    if (showBranchMap) {
                       setShowGlobalMapModal(true);
+                    } else {
+                      setShowLocationPickerModal(true);
                     }
                   }}
                   className="text-[9px] sm:text-[11px] text-neutral-500 dark:text-neutral-400 flex items-center space-x-1 hover:text-emerald-400 transition-colors cursor-pointer group"
-                  title={isSingle ? "Badilisha eneo lako la delivery kwenye ramani" : "Tazama Ramani ya Matawi"}
+                  title={showBranchMap ? "Tazama Ramani ya Matawi" : "Badilisha eneo lako la delivery kwenye ramani"}
                 >
                   <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-emerald-500 shrink-0 group-hover:scale-110 transition-transform" />
                   <span className="truncate max-w-[120px] sm:max-w-[180px] border-b border-dotted border-neutral-400/60 group-hover:border-emerald-400 font-medium">
-                    {isSingle ? customerDeliveryLocation : 'Masaki & Slipway (Matawi)'}
+                    {showBranchMap ? `${activeBranches.length} Matawi (Dar)` : customerDeliveryLocation}
                   </span>
-                  {isSingle && (
+                  {!showBranchMap && (
                     <span className="text-[8px] sm:text-[9px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1 py-0.5 rounded border border-emerald-500/20 group-hover:bg-emerald-500/20 shrink-0">
                       Badilisha
                     </span>
@@ -350,15 +353,17 @@ export const WebHeader: React.FC = () => {
               </button>
             )}
 
-            {/* Global & Dar es Salaam Map button */}
-            <button
-              onClick={openLocationOrMapModal}
-              className="flex items-center space-x-1 px-2 sm:px-2.5 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 dark:text-blue-400 border border-blue-500/30 text-xs font-bold transition-all cursor-pointer"
-              title={isSingle ? "Chagua au badilisha eneo lako la delivery" : "Fungua Ramani ya Matawi"}
-            >
-              <Globe2 className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{isSingle ? 'Eneo Langu' : 'Ramani'}</span>
-            </button>
+            {/* Live Branch Map button (Only visible if admin configured Multi-Branch AND branches exist) */}
+            {showBranchMap && (
+              <button
+                onClick={() => setShowGlobalMapModal(true)}
+                className="flex items-center space-x-1 px-2 sm:px-2.5 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 dark:text-blue-400 border border-blue-500/30 text-xs font-bold transition-all cursor-pointer"
+                title="Fungua Ramani ya Matawi"
+              >
+                <Globe2 className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Ramani ya Matawi</span>
+              </button>
+            )}
 
             {/* Table Reservation Button */}
             <button

@@ -85,46 +85,67 @@ export const WebFooter: React.FC = () => {
             </div>
           </div>
 
-          {/* Col 3: Branches & Kitchen Hubs */}
-          <div className="space-y-3">
-            <h4 className="text-sm font-bold text-neutral-900 dark:text-white uppercase tracking-wider flex items-center space-x-1.5">
-              <MapPin className="w-4 h-4 text-amber-500" />
-              <span>Kitchen Branches</span>
-            </h4>
+          {/* Col 3: Branches or Single Restaurant Location */}
+          {appBranding.restaurantMode === 'multi' && (appBranding.branches || []).filter(b => b.active !== false).length > 0 ? (
+            <div className="space-y-3">
+              <h4 className="text-sm font-bold text-neutral-900 dark:text-white uppercase tracking-wider flex items-center space-x-1.5">
+                <MapPin className="w-4 h-4 text-amber-500" />
+                <span>Kitchen Branches</span>
+              </h4>
 
-            <ul className="space-y-2 text-xs text-neutral-400">
-              <li className="flex items-start space-x-2">
-                <span className="text-emerald-500 mt-0.5">📍</span>
-                <div>
-                  <strong className="text-neutral-200">Masaki Central Hub:</strong>
-                  <p>Toure Drive, Masaki Peninsula</p>
-                </div>
-              </li>
-              <li className="flex items-start space-x-2">
-                <span className="text-emerald-500 mt-0.5">📍</span>
-                <div>
-                  <strong className="text-neutral-200">Oysterbay Grill:</strong>
-                  <p>Haile Selassie Road</p>
-                </div>
-              </li>
-              <li className="flex items-start space-x-2">
-                <span className="text-emerald-500 mt-0.5">📍</span>
-                <div>
-                  <strong className="text-neutral-200">Slipway Beach Kitchen:</strong>
-                  <p>Msasani Peninsula Waterfront</p>
-                </div>
-              </li>
-            </ul>
+              <ul className="space-y-2 text-xs text-neutral-400">
+                {(appBranding.branches || []).filter(b => b.active !== false).slice(0, 4).map(branch => (
+                  <li key={branch.id} className="flex items-start space-x-2">
+                    <span className="text-emerald-500 mt-0.5">📍</span>
+                    <div>
+                      <strong className="text-neutral-200">{branch.name}:</strong>
+                      <p>{branch.address}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
 
-            <button
-              type="button"
-              onClick={() => setShowGlobalMapModal(true)}
-              className="mt-3 w-full py-2 px-3 rounded-xl bg-blue-500/15 hover:bg-blue-500/25 border border-blue-500/30 text-blue-400 text-xs font-bold flex items-center justify-center space-x-2 transition-all cursor-pointer"
-            >
-              <span>🌍</span>
-              <span>Tazama Ramani ya Dunia & Dar</span>
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={() => setShowGlobalMapModal(true)}
+                className="mt-3 w-full py-2 px-3 rounded-xl bg-blue-500/15 hover:bg-blue-500/25 border border-blue-500/30 text-blue-400 text-xs font-bold flex items-center justify-center space-x-2 transition-all cursor-pointer"
+              >
+                <span>🌍</span>
+                <span>Tazama Ramani ya Matawi</span>
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <h4 className="text-sm font-bold text-neutral-900 dark:text-white uppercase tracking-wider flex items-center space-x-1.5">
+                <MapPin className="w-4 h-4 text-emerald-500" />
+                <span>Eneo la Mgahawa</span>
+              </h4>
+
+              <div className="space-y-2 text-xs text-neutral-400">
+                <div className="flex items-start space-x-2">
+                  <span className="text-emerald-500 mt-0.5">📍</span>
+                  <div>
+                    <strong className="text-neutral-200">{appBranding.appName} HQ:</strong>
+                    <p>{appBranding.tagline || 'Masaki Peninsula, Dar es Salaam'}</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-2">
+                  <span className="text-emerald-500 mt-0.5">⏱️</span>
+                  <div>
+                    <strong className="text-neutral-200">Masaa ya Kazi:</strong>
+                    <p>Kila Siku: 10:00 Asubuhi - 12:00 Usiku</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-2">
+                  <span className="text-emerald-500 mt-0.5">📞</span>
+                  <div>
+                    <strong className="text-neutral-200">Simu ya Mgahawa:</strong>
+                    <p>+255 712 345 678 / +255 744 883 291</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Col 4: Quick Links & Hours */}
           <div className="space-y-3">
