@@ -34,6 +34,7 @@ export const GlobalMapModal: React.FC<GlobalMapModalProps> = ({
 }) => {
   const { appBranding, setShowLocationPickerModal } = useApp();
   const isMulti = appBranding.restaurantMode === 'multi';
+  const isSingle = (appBranding.restaurantMode || 'single') === 'single';
   const activeBranches = (appBranding.branches || []).filter(b => b.active !== false);
   const showBranchMap = isMulti && activeBranches.length > 0;
 

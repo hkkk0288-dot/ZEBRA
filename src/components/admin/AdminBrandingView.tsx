@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { SplashMediaItem, SplashMediaType } from '../../types';
+import { SplashMediaItem, SplashMediaType, RestaurantBranch } from '../../types';
+import { DEFAULT_BRANCHES } from '../../data/mockData';
 import {
   Palette,
   Image as ImageIcon,
@@ -496,9 +497,121 @@ export const AdminBrandingView: React.FC = () => {
     updateAppBranding({ restaurantMode: mode });
     showToast(
       mode === 'single'
-        ? 'Imewekwa: Single Restaurant (Mteja anabadilisha location yake tuu ya kuletewa chakula) 🍽️'
-        : 'Imewekwa: Multi-Restaurant (Wateja wanaona na kuchagua matawi yote) 🌐'
+        ? 'Imewekwa: Single Restaurant (Mteja anabadilisha location yake tuu ya kuletewa chakula, ramani ya matawi imefichwa) 🍽️'
+        : 'Imewekwa: Multi-Restaurant (Wateja wanaona na kuchagua matawi yote kwenye ramani) 🌐'
     );
+  };
+
+  // Branch management state for Multi-Branch Mode
+  const [isBranchModalOpen, setIsBranchModalOpen] = useState(false);
+  const [editingBranch, setEditingBranch] = useState<RestaurantBranch | null>(null);
+  const [branchName, setBranchName] = useState('');
+  const [branchArea, setBranchArea] = useState('');
+  const [branchAddress, setBranchAddress] = useState('');
+  const [branchPhone, setBranchPhone] = useState('');
+  const [branchHours, setBranchHours] = useState('10:00 - 00:00');
+  const [branchTag, setBranchTag] = useState('');
+  const [branchLat, setBranchLat] = useState<number>(-6.7538);
+  const [branchLng, setBranchLng] = useState<number>(39.2780);
+
+  const branches = appBranding.branches || DEFAULT_BRANCHES;
+
+  const handleOpenAddBranch = () => {
+    setEditingBranch(null);
+    setBranchName('');
+    setBranchArea('Masaki Peninsula');
+    setBranchAddress('');
+    setBranchPhone('+255 712 345 678');
+    setBranchHours('10:00 - 00:00');
+    setBranchTag('Kitchen Hub • Fresh Meals');
+    setBranchLat(-6.7538);
+    setBranchLng(39.2780);
+    setIsBranchModalOpen(true);
+  };
+
+  const handleOpenEditBranch = (b: RestaurantBranch) => {
+    setEditingBranch(b);
+    setBranchName(b.name);
+    setBranchArea(b.area);
+    setBranchAddress(b.address);
+    setBranchPhone(b.phone);
+    setBranchHours(b.hours);
+    setBranchTag(b.tag || '');
+    setBranchLat(b.lat);
+    setBranchLng(b.lng);
+    setIsBranchModalOpen(true);
+  };
+
+  const handleSaveBranch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!branchName.trim()) {
+      showToast('Tafadhali weka jina la tawi');
+      return;
+    }
+
+    const currentBranches = appBranding.branches || DEFAULT_BRANCHES;
+    let updated: RestaurantBranch[];
+
+    if (editingBranch) {
+      updated = currentBranches.map(b =>
+        b.id === editingBranch.id
+          ? {
+              ...b,
+              name: branchName.trim(),
+              area: branchArea.trim(),
+              address: branchAddress.trim(),
+              phone: branchPhone.trim(),
+              hours: branchHours.trim(),
+              tag: branchTag.trim(),
+              lat: Number(branchLat) || -6.7538,
+              lng: Number(branchLng) || 39.2780
+            }
+          : b
+      );
+      showToast(`Tawi "${branchName}" limesasishwa! ✅`);
+    } else {
+      const newBranch: RestaurantBranch = {
+        id: `branch-${Date.now()}`,
+        name: branchName.trim(),
+        area: branchArea.trim(),
+        address: branchAddress.trim(),
+        phone: branchPhone.trim(),
+        hours: branchHours.trim(),
+        tag: branchTag.trim(),
+        lat: Number(branchLat) || -6.7538,
+        lng: Number(branchLng) || 39.2780,
+        active: true
+      };
+      updated = [...currentBranches, newBranch];
+      showToast(`Tawi jipya "${branchName}" limeongezwa! 🎉`);
+    }
+
+    updateAppBranding({ branches: updated });
+    setIsBranchModalOpen(false);
+  };
+
+  const handleDeleteBranch = (id: string) => {
+    const currentBranches = appBranding.branches || DEFAULT_BRANCHES;
+    const updated = currentBranches.filter(b => b.id !== id);
+    updateAppBranding({ branches: updated });
+    showToast('Tawi limefutwa! 🗑️');
+  };
+
+  const handleToggleBranchActive = (id: string) => {
+    const currentBranches = appBranding.branches || DEFAULT_BRANCHES;
+    const updated = currentBranches.map(b => (b.id === id ? { ...b, active: !b.active } : b));
+    updateAppBranding({ branches: updated });
+    showToast('Hali ya tawi imebadilishwa! 🔄');
+  };
+
+  const handleResetDefaultBranches = () => {
+    updateAppBranding({ branches: DEFAULT_BRANCHES });
+    showToast('Matawi 4 ya mfano yamerudishwa! 🏢');
+  };
+
+  const handleClearAllBranches = () => {
+    updateAppBranding({ branches: [] });
+    showToast('Matawi yote yameondolewa! Ramani haitaonekana. 🚫');
   };
 
   const handleResetSplashSeen = () => {
@@ -642,6 +755,166 @@ export const AdminBrandingView: React.FC = () => {
             </span>
           </button>
         </div>
+
+        {/* Branch Management Subsection (Visible only when Multi-Branch is selected) */}
+        {appBranding.restaurantMode === 'multi' ? (
+          <div className="pt-4 border-t border-neutral-100 dark:border-neutral-800 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h4 className="font-extrabold text-sm text-neutral-900 dark:text-white flex items-center space-x-2">
+                  <span>🏪 Matawi ya Mgahawa (Live Kitchen Hubs & Branches)</span>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-500 font-bold text-xs">
+                    {branches.length} {branches.length === 1 ? 'Tawi' : 'Matawi'}
+                  </span>
+                </h4>
+                <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-0.5">
+                  Matawi haya ndiyo yanayoonekana kwenye Ramani ya Matawi. Ukiondoa yote, ramani itafichwa kiotomatiki.
+                </p>
+              </div>
+
+              <div className="flex items-center space-x-2 flex-wrap gap-y-2">
+                <button
+                  type="button"
+                  onClick={handleOpenAddBranch}
+                  className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-neutral-950 font-black text-xs flex items-center space-x-1.5 shadow-md shadow-emerald-600/20 active:scale-95 transition-all cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                  <span>Ongeza Tawi Jipya</span>
+                </button>
+
+                {branches.length === 0 ? (
+                  <button
+                    type="button"
+                    onClick={handleResetDefaultBranches}
+                    className="px-3 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 font-bold text-xs flex items-center space-x-1 transition-all cursor-pointer"
+                    title="Rudisha matawi 4 ya mfano"
+                  >
+                    <RotateCcw className="w-3 h-3 text-amber-500" />
+                    <span>Rudisha Matawi (4)</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleClearAllBranches}
+                    className="px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 font-bold text-xs flex items-center space-x-1 transition-all cursor-pointer"
+                    title="Ondoa matawi yote ili kujaribu mfumo bila matawi"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    <span>Ondoa Yote (Jaribu Bila Tawi)</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Status Alert for Multi-Branch and Branches count */}
+            {branches.length > 0 ? (
+              <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-start space-x-2.5 text-xs text-emerald-700 dark:text-emerald-400">
+                <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="font-bold">Ramani ya Matawi INAONEKANA kwa wateja!</strong>
+                  <p className="text-[11px] opacity-90 mt-0.5">
+                    Wateja wataona kitufe cha Ramani ya Matawi kwenye Header, Footer, na sehemu ya Ramani ya Matawi kwenye ukurasa wa mwanzo.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-start space-x-2.5 text-xs text-amber-700 dark:text-amber-400">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="font-bold">HAKUNA TAWI LILILOWEKWA: Ramani ya Matawi IMEFICHWA kwa wateja!</strong>
+                  <p className="text-[11px] opacity-90 mt-0.5">
+                    Kwa sababu hakuna tawi lililowekwa, wateja hawatoona ramani ya matawi popote kwenye app. Bofya "Ongeza Tawi Jipya" au "Rudisha Matawi (4)" ili ramani ionekane.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* List of Branches */}
+            {branches.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                {branches.map(branch => (
+                  <div
+                    key={branch.id}
+                    className={`p-4 rounded-2xl border transition-all ${
+                      branch.active !== false
+                        ? 'bg-neutral-50/70 dark:bg-neutral-900/40 border-neutral-200 dark:border-neutral-800'
+                        : 'bg-neutral-100/50 dark:bg-neutral-900/10 border-dashed border-neutral-300 dark:border-neutral-700 opacity-60'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-extrabold text-sm text-neutral-900 dark:text-white truncate">
+                            {branch.name}
+                          </span>
+                          {branch.active !== false ? (
+                            <span className="px-1.5 py-0.5 rounded text-[9px] font-black bg-emerald-500/20 text-emerald-500 uppercase shrink-0">
+                              Active
+                            </span>
+                          ) : (
+                            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-neutral-500/20 text-neutral-400 uppercase shrink-0">
+                              Inactive
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-neutral-500 dark:text-neutral-400 truncate mt-0.5">
+                          📍 {branch.address} ({branch.area})
+                        </p>
+                        <p className="text-[11px] text-neutral-400 truncate">
+                          📞 {branch.phone} • ⏱️ {branch.hours}
+                        </p>
+                        <div className="mt-1 flex items-center space-x-2 text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
+                          <span>🌐 [{branch.lat.toFixed(4)}, {branch.lng.toFixed(4)}]</span>
+                          {branch.tag && <span className="text-neutral-400">• {branch.tag}</span>}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-1 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => handleToggleBranchActive(branch.id)}
+                          className={`p-1.5 rounded-xl border text-xs font-bold transition-colors cursor-pointer ${
+                            branch.active !== false
+                              ? 'border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/10'
+                              : 'border-neutral-500/30 text-neutral-400 hover:bg-neutral-500/10'
+                          }`}
+                          title={branch.active !== false ? 'Zima tawi hili' : 'Washa tawi hili'}
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEditBranch(branch)}
+                          className="p-1.5 rounded-xl border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-300 transition-colors cursor-pointer"
+                          title="Hariri tawi"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteBranch(branch.id)}
+                          className="p-1.5 rounded-xl border border-rose-500/30 text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                          title="Futa tawi"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="pt-3 border-t border-neutral-100 dark:border-neutral-800">
+            <div className="p-3 rounded-2xl bg-neutral-100 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 text-xs text-neutral-600 dark:text-neutral-400 flex items-start space-x-2">
+              <span className="text-base">🍽️</span>
+              <p className="leading-relaxed">
+                <strong>Hali ya Single Restaurant inatumika:</strong> Ramani ya matawi imefichwa (haionekani kwa wateja). Wateja wanapewa ramani ya kuchagua au kubadilisha eneo lao la kuletewa chakula (Delivery Location) tu wanapoagiza.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* SECTION 1: LOGO YA APP (APP LOGO) */}
@@ -1458,6 +1731,196 @@ export const AdminBrandingView: React.FC = () => {
                   className="flex-1 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-black shadow-md shadow-orange-600/20 active:scale-95 transition-all"
                 >
                   {editingSlide ? 'Hifadhi Mabadiliko' : 'Ongeza Slide Hii'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: ONGEZA / HARIRI TAWI LA MGAHAWA (ADD / EDIT BRANCH) */}
+      {isBranchModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-lg bg-white dark:bg-[#151518] rounded-3xl border border-neutral-200 dark:border-neutral-800 p-5 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-neutral-100 dark:border-neutral-800">
+              <div className="flex items-center space-x-2">
+                <span className="p-2 rounded-xl bg-emerald-500/15 text-emerald-500">
+                  <Store className="w-4 h-4" />
+                </span>
+                <div>
+                  <h3 className="font-extrabold text-base text-neutral-900 dark:text-white">
+                    {editingBranch ? 'Hariri Tawi la Mgahawa' : 'Ongeza Tawi Jipya la Mgahawa'}
+                  </h3>
+                  <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
+                    Weka taarifa za tawi litakaloonekana kwenye ramani ya matawi
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsBranchModalOpen(false)}
+                className="p-1.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveBranch} className="space-y-3.5 text-xs">
+              {/* Branch Name */}
+              <div>
+                <label className="block text-neutral-700 dark:text-neutral-300 font-bold mb-1">
+                  Jina la Tawi (Branch Name) *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={branchName}
+                  onChange={e => setBranchName(e.target.value)}
+                  placeholder="Mfano: Zebra Mikocheni Gourmet"
+                  className="w-full p-2.5 rounded-xl bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-white font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+                />
+              </div>
+
+              {/* Area & Address */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-neutral-700 dark:text-neutral-300 font-bold mb-1">
+                    Eneo (Area)
+                  </label>
+                  <input
+                    type="text"
+                    value={branchArea}
+                    onChange={e => setBranchArea(e.target.value)}
+                    placeholder="Mfano: Mikocheni A"
+                    className="w-full p-2.5 rounded-xl bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-white font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+                  />
+                </div>
+                <div>
+                  <label className="block text-neutral-700 dark:text-neutral-300 font-bold mb-1">
+                    Anwani ya Mtaa (Address)
+                  </label>
+                  <input
+                    type="text"
+                    value={branchAddress}
+                    onChange={e => setBranchAddress(e.target.value)}
+                    placeholder="Mfano: Mwai Kibaki Rd, Shoppers"
+                    className="w-full p-2.5 rounded-xl bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-white font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+                  />
+                </div>
+              </div>
+
+              {/* Phone & Hours */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-neutral-700 dark:text-neutral-300 font-bold mb-1">
+                    Namba ya Simu
+                  </label>
+                  <input
+                    type="text"
+                    value={branchPhone}
+                    onChange={e => setBranchPhone(e.target.value)}
+                    placeholder="+255 712 345 678"
+                    className="w-full p-2.5 rounded-xl bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-white font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+                  />
+                </div>
+                <div>
+                  <label className="block text-neutral-700 dark:text-neutral-300 font-bold mb-1">
+                    Masaa ya Kazi (Hours)
+                  </label>
+                  <input
+                    type="text"
+                    value={branchHours}
+                    onChange={e => setBranchHours(e.target.value)}
+                    placeholder="10:00 - 00:00"
+                    className="w-full p-2.5 rounded-xl bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-white font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+                  />
+                </div>
+              </div>
+
+              {/* Tag / Category */}
+              <div>
+                <label className="block text-neutral-700 dark:text-neutral-300 font-bold mb-1">
+                  Tag / Sifa Kuu ya Tawi (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={branchTag}
+                  onChange={e => setBranchTag(e.target.value)}
+                  placeholder="Mfano: Woodfired Pizza • BBQ • Family Dining"
+                  className="w-full p-2.5 rounded-xl bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-white font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+                />
+              </div>
+
+              {/* Coordinates (Latitude & Longitude) */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-neutral-700 dark:text-neutral-300 font-bold">
+                    Coordinates za Ramani (GPS Lat / Lng):
+                  </label>
+                  <span className="text-[10px] text-emerald-500 font-bold">Kwa ajili ya Pin kwenye Ramani</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <span className="text-[10px] text-neutral-400 block mb-0.5">Latitude (Lat)</span>
+                    <input
+                      type="number"
+                      step="any"
+                      value={branchLat}
+                      onChange={e => setBranchLat(parseFloat(e.target.value))}
+                      className="w-full p-2 rounded-xl bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-white font-mono text-xs"
+                    />
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-neutral-400 block mb-0.5">Longitude (Lng)</span>
+                    <input
+                      type="number"
+                      step="any"
+                      value={branchLng}
+                      onChange={e => setBranchLng(parseFloat(e.target.value))}
+                      className="w-full p-2 rounded-xl bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-white font-mono text-xs"
+                    />
+                  </div>
+                </div>
+
+                {/* Quick Presets for Dar es Salaam Areas */}
+                <div className="mt-2 flex items-center space-x-1.5 flex-wrap gap-y-1">
+                  <span className="text-[10px] text-neutral-400 mr-1">Maeneo ya Haraka:</span>
+                  {[
+                    { name: 'Masaki', lat: -6.7538, lng: 39.2780 },
+                    { name: 'Oysterbay', lat: -6.7725, lng: 39.2650 },
+                    { name: 'Slipway', lat: -6.7582, lng: 39.2685 },
+                    { name: 'Kariakoo', lat: -6.8195, lng: 39.2730 },
+                    { name: 'Mikocheni', lat: -6.7725, lng: 39.2485 }
+                  ].map(preset => (
+                    <button
+                      key={preset.name}
+                      type="button"
+                      onClick={() => {
+                        setBranchLat(preset.lat);
+                        setBranchLng(preset.lng);
+                      }}
+                      className="px-2 py-0.5 rounded-lg bg-neutral-200 dark:bg-neutral-800 hover:bg-emerald-500/20 hover:text-emerald-400 text-[10px] font-bold text-neutral-700 dark:text-neutral-300 transition-colors"
+                    >
+                      {preset.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Submit Buttons */}
+              <div className="flex items-center space-x-2 pt-3 border-t border-neutral-200 dark:border-neutral-800">
+                <button
+                  type="button"
+                  onClick={() => setIsBranchModalOpen(false)}
+                  className="flex-1 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 font-bold"
+                >
+                  Ghairi
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-neutral-950 font-black shadow-md shadow-emerald-600/20 active:scale-95 transition-all"
+                >
+                  {editingBranch ? 'Hifadhi Mabadiliko' : 'Weka Tawi Jipya'}
                 </button>
               </div>
             </form>
