@@ -231,25 +231,6 @@ export const SlideBannerCarousel: React.FC<SlideBannerCarouselProps> = ({
           </button>
         </>
       )}
-
-      {/* Carousel Pagination Dots */}
-      {activeBanners.length > 1 && (
-        <div className="absolute bottom-2 sm:bottom-2.5 left-1/2 -translate-x-1/2 z-20 flex items-center space-x-1.5 bg-black/40 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full backdrop-blur-md border border-white/10">
-          {activeBanners.map((b, idx) => (
-            <button
-              key={b.id}
-              onClick={() => {
-                setDirection(idx > currentIndex ? 'right' : 'left');
-                setCurrentIndex(idx);
-              }}
-              aria-label={`Go to slide ${idx + 1}`}
-              className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                idx === currentIndex ? 'w-6 bg-amber-400' : 'w-1.5 bg-white/40 hover:bg-white/80'
-              }`}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 };
