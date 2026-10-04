@@ -213,6 +213,7 @@ export const AdminBrandingView: React.FC = () => {
   const [slideSubtitle, setSlideSubtitle] = useState('');
   const [slideDuration, setSlideDuration] = useState(5);
   const [slideButtonText, setSlideButtonText] = useState('Anza Sasa ➔');
+  const [slideFitMode, setSlideFitMode] = useState<'fit' | 'cover'>('fit');
 
   // Media upload & preview states
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -349,6 +350,7 @@ export const AdminBrandingView: React.FC = () => {
     setSlideSubtitle('Chakula kitamu, mazingira safi, na uletewe popote Dar es Salaam');
     setSlideDuration(6);
     setSlideButtonText('Anza Sasa ➔');
+    setSlideFitMode('fit');
     setIsSlideModalOpen(true);
   };
 
@@ -363,6 +365,7 @@ export const AdminBrandingView: React.FC = () => {
     setSlideSubtitle(slide.subtitle || '');
     setSlideDuration(slide.durationSeconds || 5);
     setSlideButtonText(slide.buttonText || 'Anza Sasa ➔');
+    setSlideFitMode(slide.fitMode || 'fit');
     setIsSlideModalOpen(true);
   };
 
@@ -383,6 +386,7 @@ export const AdminBrandingView: React.FC = () => {
         subtitle: slideSubtitle.trim(),
         durationSeconds: durationNum,
         buttonText: slideButtonText.trim(),
+        fitMode: slideFitMode,
         active: true
       });
       showToast('Slide ya Splash Screen imesasishwa! ✅ Bofya "Tazama Splash" kuiona.');
@@ -394,6 +398,7 @@ export const AdminBrandingView: React.FC = () => {
         subtitle: slideSubtitle.trim(),
         durationSeconds: durationNum,
         buttonText: slideButtonText.trim(),
+        fitMode: slideFitMode,
         active: true
       });
       showToast('Slide mpya ya Splash Screen imeongezwa! 🎉 Bofya "Tazama Splash" kuiona.');
@@ -415,6 +420,7 @@ export const AdminBrandingView: React.FC = () => {
       subtitle: 'Zebra Restaurant Masaki - Ladha halisi ya tanuru la kuni na viungo safi',
       durationSeconds: 6,
       buttonText: 'Anza Sasa ➔',
+      fitMode: 'fit',
       active: true
     };
     updateAppBranding({ splashSlides: [slide], splashEnabled: true });
@@ -431,6 +437,7 @@ export const AdminBrandingView: React.FC = () => {
       subtitle: 'Viburudisho vya asili na juisi freshi kwa ajili yako',
       durationSeconds: 5,
       buttonText: 'Agiza Vinywaji ➔',
+      fitMode: 'fit',
       active: true
     };
     updateAppBranding({ splashSlides: [slide], splashEnabled: true });
@@ -447,6 +454,7 @@ export const AdminBrandingView: React.FC = () => {
       subtitle: 'Peninsula Toure Drive - Mazingira tulivu, huduma bora na chakula kitamu',
       durationSeconds: 5,
       buttonText: 'Fungua Menyu ➔',
+      fitMode: 'fit',
       active: true
     };
     updateAppBranding({ splashSlides: [slide], splashEnabled: true });
@@ -464,6 +472,7 @@ export const AdminBrandingView: React.FC = () => {
         subtitle: 'Ladha halisi inayopikwa papo hapo jikoni kwetu Masaki',
         durationSeconds: 5,
         buttonText: 'Mbele ➔',
+        fitMode: 'fit',
         active: true
       },
       {
@@ -475,6 +484,7 @@ export const AdminBrandingView: React.FC = () => {
         subtitle: 'Imeandaliwa kwa viungo asilia na mboga mboga freshi',
         durationSeconds: 5,
         buttonText: 'Mbele ➔',
+        fitMode: 'fit',
         active: true
       },
       {
@@ -486,6 +496,7 @@ export const AdminBrandingView: React.FC = () => {
         subtitle: 'Madereva wa boda-boda wapo tayari kufikisha oda yako ya moto',
         durationSeconds: 5,
         buttonText: 'Anza Kuagiza Sasa ➔',
+        fitMode: 'fit',
         active: true
       }
     ];
@@ -1281,6 +1292,9 @@ export const AdminBrandingView: React.FC = () => {
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-orange-500/15 text-orange-500 border border-orange-500/20 shrink-0">
                         ⏱️ {slide.durationSeconds}s
                       </span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-500 border border-emerald-500/20 shrink-0">
+                        {slide.fitMode === 'cover' ? '🗖 Cover' : '⛶ Fit'}
+                      </span>
                     </div>
 
                     <p className="text-[11px] text-neutral-500 dark:text-neutral-400 truncate mt-0.5">
@@ -1450,6 +1464,46 @@ export const AdminBrandingView: React.FC = () => {
                   >
                     <Video className="w-4 h-4" />
                     <span>🎬 Video (MP4 / WebM)</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Fitting Mode: Fit (Contain) vs Cover */}
+              <div>
+                <label className="block text-neutral-700 dark:text-neutral-300 font-bold mb-1.5">
+                  Mfumo wa Kufiti Skrini (Screen Fit Mode):
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setSlideFitMode('fit')}
+                    className={`py-2.5 px-3 rounded-2xl border text-xs font-bold flex flex-col items-center justify-center space-y-1 transition-all cursor-pointer ${
+                      slideFitMode === 'fit'
+                        ? 'bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/20'
+                        : 'bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300'
+                    }`}
+                  >
+                    <span className="font-extrabold flex items-center space-x-1">
+                      <span>⛶</span>
+                      <span>Fit (Onyesha Yote)</span>
+                    </span>
+                    <span className="text-[10px] opacity-85 text-center">Inaonekana yote bila kukatwa</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setSlideFitMode('cover')}
+                    className={`py-2.5 px-3 rounded-2xl border text-xs font-bold flex flex-col items-center justify-center space-y-1 transition-all cursor-pointer ${
+                      slideFitMode === 'cover'
+                        ? 'bg-orange-600 text-white border-orange-600 shadow-md shadow-orange-600/20'
+                        : 'bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300'
+                    }`}
+                  >
+                    <span className="font-extrabold flex items-center space-x-1">
+                      <span>🗖</span>
+                      <span>Cover (Jaza Skrini)</span>
+                    </span>
+                    <span className="text-[10px] opacity-85 text-center">Inajaza kioo kizima</span>
                   </button>
                 </div>
               </div>
@@ -1685,33 +1739,74 @@ export const AdminBrandingView: React.FC = () => {
               {/* Live Preview Box inside form */}
               {slideMediaUrl && (
                 <div className="pt-2">
-                  <label className="block text-neutral-500 font-semibold mb-1">
-                    Hakiki Media (Preview):
-                  </label>
-                  <div className="w-full h-32 rounded-2xl overflow-hidden bg-black relative border border-neutral-300 dark:border-neutral-700">
+                  <div className="flex items-center justify-between mb-1 text-xs">
+                    <label className="text-neutral-700 dark:text-neutral-300 font-bold">
+                      Hakiki Mwonekano Halisi wa Slide:
+                    </label>
+                    <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                      {slideFitMode === 'fit' ? '⛶ Fit (Hakuna Kinachokatwa)' : '🗖 Cover (Full Bleed)'}
+                    </span>
+                  </div>
+                  <div className="w-full h-40 rounded-2xl overflow-hidden bg-neutral-950 relative border border-neutral-300 dark:border-neutral-700 flex items-center justify-center">
+                    {/* Ambient blurred backdrop */}
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                      {slideType === 'video' ? (
+                        <video
+                          src={modalResolvedUrl || slideMediaUrl}
+                          className="w-full h-full object-cover blur-md opacity-35 scale-105"
+                          muted
+                          playsInline
+                        />
+                      ) : (
+                        <img
+                          src={modalResolvedUrl || slideMediaUrl}
+                          alt=""
+                          className="w-full h-full object-cover blur-md opacity-35 scale-105"
+                        />
+                      )}
+                    </div>
+
                     {slideType === 'video' ? (
                       <video
-                        src={slideMediaUrl}
+                        src={modalResolvedUrl || slideMediaUrl}
                         autoPlay
                         muted
                         loop
                         playsInline
-                        className="w-full h-full object-cover"
+                        className={`relative z-10 m-auto transition-all ${
+                          slideFitMode === 'cover'
+                            ? 'w-full h-full object-cover'
+                            : 'w-full h-full max-w-full max-h-full object-contain'
+                        }`}
                       />
                     ) : (
                       <img
-                        src={slideMediaUrl}
+                        src={modalResolvedUrl || slideMediaUrl}
                         alt="Preview"
-                        className="w-full h-full object-cover"
+                        className={`relative z-10 m-auto transition-all ${
+                          slideFitMode === 'cover'
+                            ? 'w-full h-full object-cover'
+                            : 'w-full h-full max-w-full max-h-full object-contain'
+                        }`}
                       />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-2.5">
-                      <p className="font-extrabold text-white text-xs truncate">
-                        {slideTitle || 'Preview Title'}
+
+                    {/* Overlay with title, subtitle, and CTA button */}
+                    <div className="absolute inset-0 z-20 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-3 pointer-events-none">
+                      <p className="font-extrabold text-white text-xs sm:text-sm drop-shadow truncate">
+                        {slideTitle || 'Kichwa cha Habari cha Slide'}
                       </p>
-                      <p className="text-[10px] text-neutral-300 truncate">
-                        {slideSubtitle || 'Preview Subtitle'}
+                      <p className="text-[10px] text-neutral-300 line-clamp-1 drop-shadow mt-0.5">
+                        {slideSubtitle || 'Maelezo mafupi ya slide yataonekana hapa chini...'}
                       </p>
+                      <div className="flex items-center space-x-2 pt-2">
+                        <span className="px-3 py-1 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-neutral-950 font-black text-[10px] shadow-sm">
+                          {slideButtonText || 'Anza Sasa ➔'}
+                        </span>
+                        <span className="text-[9px] text-white/60">
+                          ⏱️ {slideDuration}s
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>

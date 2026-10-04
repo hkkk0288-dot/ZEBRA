@@ -516,7 +516,8 @@ export const DEFAULT_SPLASH_SLIDES = [
     title: 'Karibu Zebra Restaurant Masaki',
     subtitle: 'Chakula bora cha kisasa na vinywaji vitamu, kinatayarishwa kwa upendo na uzoefu',
     durationSeconds: 5,
-    buttonText: 'Ruka ➔',
+    buttonText: 'Anza Sasa ➔',
+    fitMode: 'fit' as const,
     active: true,
     orderIndex: 0
   },
@@ -528,6 +529,7 @@ export const DEFAULT_SPLASH_SLIDES = [
     subtitle: 'Mishkaki ya moto, biryani safi na mbavu za kuchoma Dar es Salaam',
     durationSeconds: 4,
     buttonText: 'Endelea ➔',
+    fitMode: 'fit' as const,
     active: true,
     orderIndex: 1
   },
@@ -538,7 +540,8 @@ export const DEFAULT_SPLASH_SLIDES = [
     title: 'Uletewe Popote Dar Ndani ya Dakika 30',
     subtitle: 'Oda mtandaoni au mezani ukitumia simu yako bila foleni au usumbufu',
     durationSeconds: 5,
-    buttonText: 'Anza Sasa ➔',
+    buttonText: 'Agiza Vinywaji ➔',
+    fitMode: 'fit' as const,
     active: true,
     orderIndex: 2
   }

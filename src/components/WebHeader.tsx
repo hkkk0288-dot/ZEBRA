@@ -20,7 +20,9 @@ import {
   Tv,
   Store,
   Sparkles,
-  ArrowLeft
+  ArrowLeft,
+  ChevronDown,
+  LogOut
 } from 'lucide-react';
 import { formatPrice } from '../utils/formatters';
 import { LuckySpinWheelModal } from './LuckySpinWheelModal';
@@ -59,6 +61,7 @@ export const WebHeader: React.FC = () => {
   const showBranchMap = isMulti && activeBranches.length > 0;
   const isDark = theme === 'dark';
   const [showLuckyWheel, setShowLuckyWheel] = useState(false);
+  const [showStaffDropdown, setShowStaffDropdown] = useState(false);
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   const cartTotal = cart.reduce((sum, item) => sum + item.totalPrice, 0);
@@ -165,16 +168,16 @@ export const WebHeader: React.FC = () => {
             </div>
           </div>
 
-          {/* Desktop Search Bar */}
-          <div className="hidden md:flex flex-1 max-w-md mx-4">
+          {/* Desktop Search Bar - Compact & Responsive */}
+          <div className="hidden md:flex flex-1 max-w-[180px] xl:max-w-xs mx-2 xl:mx-3">
             <div className="relative w-full">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-400" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Search pizza, burger, biryani, mishkaki..."
-                className={`w-full pl-10 pr-4 py-2 rounded-2xl text-xs outline-none border transition-all ${
+                placeholder="Tafuta chakula..."
+                className={`w-full pl-8 pr-3 py-1.5 rounded-xl text-xs outline-none border transition-all ${
                   isDark
                     ? 'bg-neutral-900/90 border-neutral-700 text-white placeholder-neutral-500 focus:border-emerald-500'
                     : 'bg-neutral-100 border-neutral-300 text-neutral-900 placeholder-neutral-400 focus:border-emerald-500 focus:bg-white'
@@ -183,19 +186,19 @@ export const WebHeader: React.FC = () => {
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-neutral-400 hover:text-white"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-neutral-400 hover:text-white"
                 >
-                  Clear
+                  ✕
                 </button>
               )}
             </div>
           </div>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden lg:flex items-center space-x-1 text-sm font-semibold">
+          <div className="hidden lg:flex items-center space-x-1 text-xs font-semibold">
             <button
               onClick={() => setActiveTab('home')}
-              className={`px-3.5 py-2 rounded-xl transition-colors ${
+              className={`px-2.5 py-1.5 rounded-xl transition-colors cursor-pointer ${
                 activeTab === 'home'
                   ? 'text-emerald-500 font-bold bg-emerald-500/10'
                   : 'text-neutral-600 dark:text-neutral-300 hover:text-emerald-500'
@@ -204,209 +207,224 @@ export const WebHeader: React.FC = () => {
               Menu
             </button>
 
-            {/* OSS Screen (Accessible to all: table & waiting line customers) */}
-            <button
-              onClick={() => setActiveTab('oss')}
-              className={`px-3 py-1.5 rounded-xl transition-colors flex items-center space-x-1.5 text-xs font-bold cursor-pointer ${
-                activeTab === 'oss'
-                  ? 'bg-emerald-500 text-neutral-950 shadow-sm font-extrabold'
-                  : 'bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 border border-emerald-500/30'
-              }`}
-              title="Order Status Screen (Token TV Display kwa Wateja wa Mezani na Mstari)"
-            >
-              <Tv className="w-3.5 h-3.5 text-emerald-400" />
-              <span>OSS Screen</span>
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            </button>
+            {/* Combined Staff / POS Dropdown - replaces 4 wide buttons with 1 clean dropdown */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowStaffDropdown(prev => !prev)}
+                className={`px-2.5 py-1.5 rounded-xl transition-all flex items-center space-x-1 text-xs font-bold cursor-pointer ${
+                  activeTab === 'pos' || activeTab === 'oss' || activeTab === 'waiter' || activeTab === 'admin'
+                    ? 'bg-emerald-500 text-neutral-950 font-extrabold shadow-sm'
+                    : 'bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700'
+                }`}
+                title="POS, OSS, Waiter na Admin Tools"
+              >
+                <Store className="w-3.5 h-3.5 text-emerald-500" />
+                <span>POS & Skrini</span>
+                <ChevronDown className="w-3 h-3 text-neutral-400" />
+              </button>
 
-            {/* POS Terminal */}
-            <button
-              onClick={() => setActiveTab('pos')}
-              className={`px-3 py-1.5 rounded-xl transition-colors flex items-center space-x-1.5 text-xs font-bold cursor-pointer ${
-                activeTab === 'pos'
-                  ? 'bg-teal-500 text-white shadow-sm shadow-teal-500/30'
-                  : 'bg-teal-500/15 text-teal-400 hover:bg-teal-500/25 border border-teal-500/30'
-              }`}
-              title="Point of Sale (POS Terminal)"
-            >
-              <Store className="w-3.5 h-3.5" />
-              <span>POS Terminal</span>
-            </button>
+              {showStaffDropdown && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setShowStaffDropdown(false)}
+                  />
+                  <div className="absolute left-0 mt-2 w-52 rounded-2xl bg-white dark:bg-[#18181b] border border-neutral-200 dark:border-neutral-800 shadow-2xl p-1.5 z-50 text-xs animate-in fade-in zoom-in-95">
+                    <button
+                      onClick={() => {
+                        setActiveTab('oss');
+                        setShowStaffDropdown(false);
+                      }}
+                      className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left transition-colors cursor-pointer ${
+                        activeTab === 'oss'
+                          ? 'bg-emerald-500/15 text-emerald-500 font-bold'
+                          : 'hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-800 dark:text-neutral-200'
+                      }`}
+                    >
+                      <Tv className="w-4 h-4 text-emerald-500 shrink-0" />
+                      <div>
+                        <div className="font-bold flex items-center space-x-1">
+                          <span>OSS Screen</span>
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                        </div>
+                        <div className="text-[10px] text-neutral-400">Token TV Display mezani</div>
+                      </div>
+                    </button>
 
+                    <button
+                      onClick={() => {
+                        setActiveTab('pos');
+                        setShowStaffDropdown(false);
+                      }}
+                      className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left transition-colors cursor-pointer ${
+                        activeTab === 'pos'
+                          ? 'bg-teal-500/15 text-teal-400 font-bold'
+                          : 'hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-800 dark:text-neutral-200'
+                      }`}
+                    >
+                      <Store className="w-4 h-4 text-teal-400 shrink-0" />
+                      <div>
+                        <div className="font-bold">POS Terminal</div>
+                        <div className="text-[10px] text-neutral-400">Counter & Cashier POS</div>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setActiveTab('waiter');
+                        setShowStaffDropdown(false);
+                      }}
+                      className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left transition-colors cursor-pointer ${
+                        activeTab === 'waiter'
+                          ? 'bg-amber-500/15 text-amber-500 font-bold'
+                          : 'hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-800 dark:text-neutral-200'
+                      }`}
+                    >
+                      <UtensilsCrossed className="w-4 h-4 text-amber-400 shrink-0" />
+                      <div>
+                        <div className="font-bold">Waiter POS</div>
+                        <div className="text-[10px] text-neutral-400">Wahudumu na Meza</div>
+                      </div>
+                    </button>
+
+                    <div className="my-1 border-t border-neutral-100 dark:border-neutral-800" />
+
+                    <button
+                      onClick={() => {
+                        setActiveTab('admin');
+                        setShowStaffDropdown(false);
+                      }}
+                      className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left transition-colors cursor-pointer ${
+                        activeTab === 'admin'
+                          ? 'bg-orange-500/15 text-orange-500 font-bold'
+                          : 'hover:bg-neutral-100 dark:hover:bg-neutral-800 text-orange-500'
+                      }`}
+                    >
+                      <ShieldCheck className="w-4 h-4 text-orange-500 shrink-0" />
+                      <div>
+                        <div className="font-bold">Admin Dashboard</div>
+                        <div className="text-[10px] text-neutral-400">Usimamizi na Mipangilio</div>
+                      </div>
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Favorites */}
             <button
               onClick={() => setActiveTab('favorites')}
-              className={`px-3.5 py-2 rounded-xl transition-colors flex items-center space-x-1.5 ${
+              className={`p-2 xl:px-2.5 xl:py-1.5 rounded-xl transition-colors flex items-center space-x-1 cursor-pointer ${
                 activeTab === 'favorites'
                   ? 'text-emerald-500 font-bold bg-emerald-500/10'
                   : 'text-neutral-600 dark:text-neutral-300 hover:text-emerald-500'
               }`}
+              title="Vyakula Ulivyovipenda"
             >
-              <Heart className="w-4 h-4" />
-              <span>Favorites</span>
+              <Heart className="w-3.5 h-3.5 text-rose-500" />
+              <span className="hidden xl:inline text-xs">Favorites</span>
               {user.favoriteItemIds.length > 0 && (
-                <span className="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full">
+                <span className="bg-rose-500 text-white text-[9px] px-1.5 py-0.2 rounded-full font-bold">
                   {user.favoriteItemIds.length}
                 </span>
               )}
             </button>
 
-            {/* Authenticated Navigation Items: Only visible when logged in */}
+            {/* Track Orders & Profile (if logged in) */}
             {isLoggedIn ? (
               <>
                 <button
                   onClick={() => setActiveTab('orders')}
-                  className={`px-3.5 py-2 rounded-xl transition-colors flex items-center space-x-1.5 ${
+                  className={`p-2 xl:px-2.5 xl:py-1.5 rounded-xl transition-colors flex items-center space-x-1 cursor-pointer ${
                     activeTab === 'orders'
                       ? 'text-emerald-500 font-bold bg-emerald-500/10'
                       : 'text-neutral-600 dark:text-neutral-300 hover:text-emerald-500'
                   }`}
+                  title="Fuatilia Oda Yako"
                 >
-                  <Clock className="w-4 h-4" />
-                  <span>Track Orders</span>
+                  <Clock className="w-3.5 h-3.5 text-amber-500" />
+                  <span className="hidden xl:inline text-xs">Orders</span>
                   {activeOrdersCount > 0 && (
                     <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
                   )}
                 </button>
 
-            <button
-              onClick={() => setActiveTab('waiter')}
-              className={`px-3 py-1.5 rounded-xl transition-colors flex items-center space-x-1.5 text-xs font-bold ${
-                activeTab === 'waiter'
-                  ? 'bg-amber-500 text-neutral-950 shadow-sm'
-                  : 'bg-amber-500/15 text-amber-500 hover:bg-amber-500/25'
-              }`}
-              title="Waiter & Floor POS"
-            >
-              <UtensilsCrossed className="w-3.5 h-3.5" />
-              <span>Waiter POS</span>
-            </button>
-
-                <button
-                  onClick={() => setActiveTab('admin')}
-                  className={`px-3 py-1.5 rounded-xl transition-colors flex items-center space-x-1.5 text-xs font-bold ${
-                    activeTab === 'admin'
-                      ? 'bg-orange-600 text-white shadow-sm'
-                      : 'bg-orange-500/15 text-orange-600 dark:text-orange-400 hover:bg-orange-500/25'
-                  }`}
-                  title="Admin Dashboard"
-                >
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Admin</span>
-                </button>
-
                 <button
                   onClick={() => setActiveTab('profile')}
-                  className={`px-3.5 py-2 rounded-xl transition-colors flex items-center space-x-1.5 ${
+                  className={`px-2.5 py-1.5 rounded-xl transition-colors flex items-center space-x-1 cursor-pointer ${
                     activeTab === 'profile'
                       ? 'text-emerald-500 font-bold bg-emerald-500/10'
                       : 'text-neutral-600 dark:text-neutral-300 hover:text-emerald-500'
                   }`}
+                  title="Akaunti Yangu"
                 >
-                  <User className="w-4 h-4" />
-                  <span>{user.name.split(' ')[0] || 'My Account'}</span>
+                  <User className="w-3.5 h-3.5 text-emerald-500" />
+                  <span className="truncate max-w-[70px] text-xs">{user.name.split(' ')[0] || 'Akaunti'}</span>
                 </button>
 
                 <button
                   onClick={logout}
                   title="Toka kwenye akaunti"
-                  className="px-3 py-1.5 rounded-xl text-xs font-semibold text-neutral-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                  className="p-1.5 xl:px-2.5 xl:py-1.5 rounded-xl text-xs font-semibold text-neutral-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
                 >
-                  Toka
+                  <LogOut className="w-3.5 h-3.5 xl:hidden" />
+                  <span className="hidden xl:inline">Toka</span>
                 </button>
               </>
             ) : (
-              /* When not logged in: only show Log In / Regista */
               <button
                 onClick={() => setActiveTab('auth')}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
-                  activeTab === 'auth'
-                    ? 'bg-amber-500 text-neutral-950 shadow-md shadow-amber-500/30'
-                    : 'bg-amber-500/15 border border-amber-500/40 text-amber-400 hover:bg-amber-500 hover:text-neutral-950'
-                }`}
+                className="px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center space-x-1 bg-amber-500/15 border border-amber-500/40 text-amber-400 hover:bg-amber-500 hover:text-neutral-950 cursor-pointer"
               >
                 <LogIn className="w-3.5 h-3.5" />
-                <span>Log In / Regista</span>
+                <span>Ingia</span>
               </button>
             )}
           </div>
 
-          {/* Quick Actions (Table, Currency, Theme, Cart, Menu) */}
-          <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+          {/* Quick Actions (Table, Currency, Theme, Cart) - GUARANTEED TO FIT AND ALWAYS VISIBLE */}
+          <div className="flex items-center space-x-1 sm:space-x-1.5 shrink-0">
             {/* Table / QR Dine-In Indicator */}
             {activeTable ? (
               <button
                 onClick={() => setShowCustomerTableModal(true)}
-                className="px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-600 dark:text-emerald-400 text-[10px] sm:text-xs font-bold flex items-center space-x-1 hover:bg-emerald-500/30 transition-all cursor-pointer"
-                title="Upo mezani. Bofya kuona maelezo au kupiga kengele ya mhudumu"
+                className="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center space-x-1 hover:bg-emerald-500/30 transition-all cursor-pointer shrink-0"
+                title="Upo mezani. Bofya kuona maelezo"
               >
                 <UtensilsCrossed className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                <span className="truncate max-w-[70px] sm:max-w-none">{activeTable.name}</span>
+                <span className="truncate max-w-[65px]">{activeTable.name}</span>
               </button>
             ) : (
               <button
                 onClick={() => setShowCustomerTableModal(true)}
-                className="hidden sm:flex items-center space-x-1 px-2.5 py-1.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 text-xs font-bold transition-all cursor-pointer"
+                className="flex items-center space-x-1 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 text-xs font-bold transition-all cursor-pointer shrink-0"
                 title="Umeketi mezani? Bofya kuingiza namba ya meza au kuchanganua QR"
               >
                 <QrCode className="w-3.5 h-3.5 text-emerald-500" />
-                <span>Mezani</span>
+                <span className="hidden sm:inline">Mezani</span>
               </button>
             )}
 
-            {/* Live Branch Map button (Only visible if admin configured Multi-Branch AND branches exist) */}
-            {showBranchMap && (
-              <button
-                onClick={() => setShowGlobalMapModal(true)}
-                className="flex items-center space-x-1 px-2 sm:px-2.5 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 dark:text-blue-400 border border-blue-500/30 text-xs font-bold transition-all cursor-pointer"
-                title="Fungua Ramani ya Matawi"
-              >
-                <Globe2 className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Ramani ya Matawi</span>
-              </button>
-            )}
-
-            {/* Table Reservation Button */}
+            {/* Table Reservation Button (Weka Meza) - Visible on xl+ */}
             <button
               onClick={() => setShowReservationModal(true)}
-              className="hidden md:flex items-center space-x-1 px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/30 text-xs font-bold transition-all cursor-pointer"
+              className="hidden xl:flex items-center space-x-1 px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/30 text-xs font-bold transition-all cursor-pointer shrink-0"
               title="Weka nafasi ya meza mapema"
             >
               <Calendar className="w-3.5 h-3.5 text-amber-500" />
               <span>Weka Meza</span>
             </button>
 
-            {/* Loyalty points pill if logged in */}
-            {isLoggedIn && (
-              <div
-                onClick={() => setActiveTab('profile')}
-                className="hidden xl:flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 text-xs font-bold cursor-pointer hover:bg-emerald-500/20 transition-all"
-                title="Zebra VIP Points & Rewards"
-              >
-                <span>💎</span>
-                <span>{loyaltyPoints} pts</span>
-              </div>
-            )}
-
-            {/* Lucky Spin Wheel Button - shown on tablet/desktop to save mobile header space */}
-            <button
-              type="button"
-              onClick={() => setShowLuckyWheel(true)}
-              className="hidden sm:flex items-center space-x-1 px-2 sm:px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-400 border border-amber-500/30 text-xs font-bold transition-all cursor-pointer"
-              title="Zungusha Gurudumu la Bahati"
-            >
-              <span>🎡</span>
-              <span className="hidden sm:inline">Bahati</span>
-            </button>
-
             {/* Currency Switcher */}
             <button
               onClick={() => setCurrency(currency === 'USD' ? 'TZS' : 'USD')}
-              className={`text-[10px] sm:text-xs font-bold px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg sm:rounded-xl border transition-colors ${
+              className={`text-xs font-bold px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-xl border transition-colors shrink-0 cursor-pointer ${
                 isDark
                   ? 'bg-neutral-800 border-neutral-700 text-neutral-200 hover:bg-neutral-700'
                   : 'bg-neutral-100 border-neutral-300 text-neutral-800 hover:bg-neutral-200'
               }`}
-              title="Switch currency"
+              title="Badili Sarafu (Switch currency)"
             >
               {currency === 'USD' ? '$ USD' : 'TZS'}
             </button>
@@ -414,20 +432,20 @@ export const WebHeader: React.FC = () => {
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl border transition-colors ${
+              className={`p-1.5 sm:p-2 rounded-xl border transition-colors shrink-0 cursor-pointer ${
                 isDark
                   ? 'bg-neutral-800 border-neutral-700 text-amber-400 hover:bg-neutral-700'
                   : 'bg-neutral-100 border-neutral-300 text-amber-600 hover:bg-neutral-200'
               }`}
               title="Toggle Dark / Light Mode"
             >
-              {isDark ? <Sun className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Moon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+              {isDark ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
             </button>
 
-            {/* Cart Button - ALWAYS VISIBLE */}
+            {/* Cart Button - ALWAYS 100% VISIBLE AND FULLY FITTING */}
             <button
               onClick={() => setActiveTab('cart')}
-              className="flex items-center space-x-1.5 bg-emerald-500 hover:bg-emerald-600 text-white p-1.5 sm:px-3.5 sm:py-2 rounded-lg sm:rounded-2xl shadow-md shadow-emerald-500/30 transition-transform active:scale-95 shrink-0"
+              className="flex items-center space-x-1.5 bg-emerald-500 hover:bg-emerald-600 text-white px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl sm:rounded-2xl shadow-md shadow-emerald-500/30 transition-transform active:scale-95 shrink-0 cursor-pointer"
               title="View Cart"
             >
               <div className="relative">
@@ -438,7 +456,7 @@ export const WebHeader: React.FC = () => {
                   </span>
                 )}
               </div>
-              <span className="text-xs font-bold hidden sm:inline">
+              <span className="text-xs font-bold whitespace-nowrap">
                 {cartCount === 0 ? 'Cart' : formatPrice(cartTotal, currency)}
               </span>
             </button>

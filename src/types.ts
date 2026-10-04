@@ -288,6 +288,7 @@ export interface SplashMediaItem {
   subtitle?: string;
   durationSeconds: number; // e.g. 4 seconds
   buttonText?: string;
+  fitMode?: 'fit' | 'cover'; // 'fit' (contains full media without cropping) | 'cover'
   active: boolean;
   orderIndex: number;
 }
