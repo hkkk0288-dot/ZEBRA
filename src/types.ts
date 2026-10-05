@@ -321,3 +321,20 @@ export interface AppBrandingConfig {
   splashShowOncePerSession: boolean;
 }
 
+export type AppLanguage = 'sw' | 'en';
+
+export interface ScratchReward {
+  id: string;
+  title: string;
+  swahiliTitle: string;
+  description: string;
+  swahiliDescription: string;
+  code: string;
+  discountPercentage?: number;
+  discountAmountTZS?: number;
+  freeItemName?: string;
+  icon: string;
+}
+
+
+

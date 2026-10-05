@@ -22,7 +22,10 @@ import {
   Sparkles,
   ArrowLeft,
   ChevronDown,
-  LogOut
+  LogOut,
+  Volume2,
+  VolumeX,
+  Gift
 } from 'lucide-react';
 import { formatPrice } from '../utils/formatters';
 import { LuckySpinWheelModal } from './LuckySpinWheelModal';
@@ -52,6 +55,13 @@ export const WebHeader: React.FC = () => {
     setShowLocationPickerModal,
     openLocationOrMapModal,
     loyaltyPoints,
+    language,
+    toggleLanguage,
+    soundEnabled,
+    toggleSound,
+    setShowScratchModal,
+    openRiderTracker,
+    t,
     appBranding
   } = useApp();
 
@@ -414,6 +424,51 @@ export const WebHeader: React.FC = () => {
             >
               <Calendar className="w-3.5 h-3.5 text-amber-500" />
               <span>Weka Meza</span>
+            </button>
+
+            {/* Live Rider Tracker button */}
+            <button
+              onClick={() => openRiderTracker()}
+              className="hidden lg:flex items-center space-x-1 px-2.5 py-1.5 rounded-xl bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 border border-teal-500/30 text-xs font-bold transition-all cursor-pointer shrink-0"
+              title="Fuatilia dereva wako kwenye ramani (Live GPS Tracker)"
+            >
+              <span>🛵</span>
+              <span>Tracker</span>
+            </button>
+
+            {/* Scratch & Win Gift Card */}
+            <button
+              onClick={() => setShowScratchModal(true)}
+              className="p-1.5 sm:p-2 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-500 hover:bg-amber-500/25 transition-colors shrink-0 cursor-pointer"
+              title="Kadi ya Zawadi ya Kujikuna (Scratch & Win Card)"
+            >
+              <Gift className="w-3.5 h-3.5 text-amber-400" />
+            </button>
+
+            {/* Language Switcher (SWA / ENG) */}
+            <button
+              onClick={toggleLanguage}
+              className={`text-xs font-bold px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-xl border transition-colors shrink-0 cursor-pointer ${
+                isDark
+                  ? 'bg-neutral-800 border-neutral-700 text-neutral-200 hover:bg-neutral-700'
+                  : 'bg-neutral-100 border-neutral-300 text-neutral-800 hover:bg-neutral-200'
+              }`}
+              title="Badili Lugha / Switch Language"
+            >
+              {language === 'sw' ? '🇹🇿 SWA' : '🇬🇧 ENG'}
+            </button>
+
+            {/* Sound Chimes Toggle */}
+            <button
+              onClick={toggleSound}
+              className={`p-1.5 sm:p-2 rounded-xl border transition-colors shrink-0 cursor-pointer ${
+                soundEnabled
+                  ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-500'
+                  : 'bg-neutral-800/40 border-neutral-700 text-neutral-500'
+              }`}
+              title={soundEnabled ? 'Sauti za jikoni na kengele zimewashwa' : 'Sauti zimezimwa'}
+            >
+              {soundEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
             </button>
 
             {/* Currency Switcher */}

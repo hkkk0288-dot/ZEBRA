@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Heart, Share2, Star, Trash2, Plus, Minus, Check, ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Heart, Share2, Star, Trash2, Plus, Minus, Check, ChevronLeft, ChevronRight, Image as ImageIcon, Sparkles } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { IngredientOption, SizeOption } from '../types';
 import { formatPrice } from '../utils/formatters';
@@ -23,7 +23,7 @@ interface FoodDetailModalContentProps {
 }
 
 const FoodDetailModalContent: React.FC<FoodDetailModalContentProps> = ({ selectedDish }) => {
-  const { setSelectedDish, addToCart, toggleFavorite, isFavorite, currency, theme, isLoggedIn } = useApp();
+  const { setSelectedDish, addToCart, toggleFavorite, isFavorite, currency, theme, isLoggedIn, menuItems } = useApp();
 
   const isDark = theme === 'dark';
 
@@ -351,6 +351,63 @@ const FoodDetailModalContent: React.FC<FoodDetailModalContentProps> = ({ selecte
                 </div>
               </div>
             )}
+
+            {/* Smart Food Pairing Recommendations */}
+            {(() => {
+              const pairings = menuItems
+                .filter(m => {
+                  if (m.id === selectedDish.id) return false;
+                  if (selectedDish.category === 'drinks') {
+                    return m.category === 'pizza' || m.category === 'burgers';
+                  }
+                  return m.category === 'drinks' || m.category === 'sides';
+                })
+                .slice(0, 2);
+
+              if (pairings.length === 0) return null;
+
+              return (
+                <div className="mb-4 p-3.5 rounded-2xl bg-neutral-100 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 space-y-2">
+                  <div className="flex items-center space-x-1.5 text-xs font-bold text-neutral-800 dark:text-neutral-200">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                    <span>Wateja Wanaoagiza Hiki Pia Huongeza:</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {pairings.map(pair => (
+                      <div
+                        key={pair.id}
+                        className="p-2 rounded-xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 flex flex-col justify-between"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <img
+                            src={pair.image}
+                            alt={pair.name}
+                            className="w-10 h-10 rounded-lg object-cover shrink-0"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[11px] font-bold text-neutral-900 dark:text-white truncate">
+                              {pair.name}
+                            </p>
+                            <p className="text-[10px] text-emerald-500 font-semibold">
+                              {formatPrice(pair.price, currency)}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            addToCart(pair, pair.sizes[0], [], 1);
+                          }}
+                          className="mt-1.5 w-full py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500 text-emerald-600 hover:text-white dark:text-emerald-400 dark:hover:text-neutral-950 font-bold text-[10px] transition-all cursor-pointer"
+                        >
+                          + Ongeza
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Special Instructions */}
             <div className="mb-4">

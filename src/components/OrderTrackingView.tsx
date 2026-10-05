@@ -17,7 +17,9 @@ import {
   ShieldCheck,
   LogIn,
   Printer,
-  Users
+  Users,
+  Gift,
+  Sparkles
 } from 'lucide-react';
 import { OrderStatus } from '../types';
 import confetti from 'canvas-confetti';
@@ -39,7 +41,9 @@ export const OrderTrackingView: React.FC = () => {
     isLoggedIn,
     setAuthMode,
     openThermalReceipt,
-    openSplitBill
+    openSplitBill,
+    openRiderTracker,
+    setShowScratchModal
   } = useApp();
 
   const isDark = theme === 'dark';
@@ -358,6 +362,55 @@ export const OrderTrackingView: React.FC = () => {
                 <span className="font-bold text-base text-emerald-500 font-display">
                   {formatPrice(order.total, currency)}
                 </span>
+              </div>
+            </div>
+
+            {/* Quick Action Hub: Thermal Receipt, Live Rider Tracker, Scratch & Win, Split Bill */}
+            <div
+              className={`p-4 rounded-3xl border space-y-2.5 ${
+                isDark ? 'bg-neutral-900/60 border-neutral-800' : 'bg-white border-neutral-200 shadow-sm'
+              }`}
+            >
+              <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider block">
+                Huduma za Haraka za Oda Hii:
+              </span>
+
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => openThermalReceipt(null, order)}
+                  className="p-2.5 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 border border-emerald-500/25 flex items-center justify-center space-x-1.5 text-xs font-bold transition-all cursor-pointer"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>Risiti & WhatsApp</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => openRiderTracker(order)}
+                  className="p-2.5 rounded-2xl bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 border border-teal-500/25 flex items-center justify-center space-x-1.5 text-xs font-bold transition-all cursor-pointer"
+                >
+                  <span>🛵</span>
+                  <span>Fuatilia Dereva</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowScratchModal(true)}
+                  className="p-2.5 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/25 flex items-center justify-center space-x-1.5 text-xs font-bold transition-all cursor-pointer"
+                >
+                  <Gift className="w-3.5 h-3.5" />
+                  <span>Kadi ya Zawadi</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => openSplitBill(null, order)}
+                  className="p-2.5 rounded-2xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/25 flex items-center justify-center space-x-1.5 text-xs font-bold transition-all cursor-pointer"
+                >
+                  <Users className="w-3.5 h-3.5" />
+                  <span>Gawana Bili</span>
+                </button>
               </div>
             </div>
           </div>

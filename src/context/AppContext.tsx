@@ -21,8 +21,10 @@ import {
   WaiterCall,
   TableReservation,
   SplashMediaItem,
-  AppBrandingConfig
+  AppBrandingConfig,
+  AppLanguage
 } from '../types';
+import { getTranslation } from '../services/translations';
 import {
   DEFAULT_USER,
   GUEST_USER,
@@ -50,10 +52,22 @@ import { mongikeService } from '../services/mongikeService';
 import {
   playKitchenOrderBell,
   playWaiterCallChime,
-  playPaymentSuccessChime
+  playPaymentSuccessChime,
+  isSoundEnabled,
+  setSoundEnabled
 } from '../utils/soundEffects';
 
 interface AppContextType {
+  // Language & Localization
+  language: AppLanguage;
+  setLanguage: (l: AppLanguage) => void;
+  toggleLanguage: () => void;
+  t: (key: string, fallback?: string) => string;
+
+  // Sound chimes
+  soundEnabled: boolean;
+  toggleSound: () => void;
+
   theme: 'dark' | 'light';
   toggleTheme: () => void;
   currency: 'USD' | 'TZS';
@@ -177,9 +191,20 @@ interface AppContextType {
 
   // Loyalty Rewards
   loyaltyPoints: number;
+  addLoyaltyPoints: (pts: number) => void;
   redeemLoyaltyDiscount: boolean;
   setRedeemLoyaltyDiscount: (redeem: boolean) => void;
   loyaltyDiscountAmount: number;
+
+  // Scratch and Win Modal
+  showScratchModal: boolean;
+  setShowScratchModal: (open: boolean) => void;
+
+  // Live Rider Tracker Modal
+  showRiderTrackerModal: boolean;
+  setShowRiderTrackerModal: (open: boolean) => void;
+  trackingOrder: Order | null;
+  openRiderTracker: (order?: Order | null) => void;
 
   activeTab: NavigationTab;
   setActiveTab: (tab: NavigationTab) => void;
@@ -231,6 +256,31 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Language state & Internationalization (Swahili default)
+  const [language, setLanguageState] = useState<AppLanguage>(() => {
+    const saved = localStorage.getItem('zebra_language');
+    return (saved === 'en' || saved === 'sw') ? (saved as AppLanguage) : 'sw';
+  });
+
+  const setLanguage = (lang: AppLanguage) => {
+    setLanguageState(lang);
+    localStorage.setItem('zebra_language', lang);
+  };
+
+  const toggleLanguage = () => {
+    setLanguage(language === 'sw' ? 'en' : 'sw');
+  };
+
+  const t = (key: string, fallback?: string) => getTranslation(language, key, fallback);
+
+  // Sound effects enabled toggle
+  const [soundEnabled, setSoundEnabledState] = useState<boolean>(() => isSoundEnabled());
+  const toggleSound = () => {
+    const next = !soundEnabled;
+    setSoundEnabledState(next);
+    setSoundEnabled(next);
+  };
+
   // Theme state: default dark as requested ("premium dark food-themed and light theme design")
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const saved = localStorage.getItem('zebra_theme');
@@ -606,6 +656,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Loyalty Rewards
   const [redeemLoyaltyDiscount, setRedeemLoyaltyDiscount] = useState(false);
+  const addLoyaltyPoints = (pts: number) => {
+    updateUser({ loyaltyPoints: (user.loyaltyPoints || 450) + pts });
+  };
+
+  // Scratch and Win Modal
+  const [showScratchModal, setShowScratchModal] = useState<boolean>(false);
+
+  // Live Rider Tracker Modal
+  const [showRiderTrackerModal, setShowRiderTrackerModal] = useState<boolean>(false);
+  const [trackingOrder, setTrackingOrder] = useState<Order | null>(null);
+  const openRiderTracker = (order?: Order | null) => {
+    if (order) {
+      setTrackingOrder(order);
+    } else if (orders.length > 0) {
+      setTrackingOrder(orders[0]);
+    }
+    setShowRiderTrackerModal(true);
+  };
 
   // App Branding & Splash Screen State
   const [appBranding, setAppBranding] = useState<AppBrandingConfig>(() => {
@@ -1410,9 +1478,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         splitBillOnlineOrder,
         openSplitBill,
         loyaltyPoints,
+        addLoyaltyPoints,
         redeemLoyaltyDiscount,
         setRedeemLoyaltyDiscount,
         loyaltyDiscountAmount,
+        showScratchModal,
+        setShowScratchModal,
+        showRiderTrackerModal,
+        setShowRiderTrackerModal,
+        trackingOrder,
+        openRiderTracker,
+        language,
+        setLanguage,
+        toggleLanguage,
+        t,
+        soundEnabled,
+        toggleSound,
         activeTab,
         setActiveTab,
         authMode,

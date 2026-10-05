@@ -28,6 +28,10 @@ import { OrderStatusScreenView } from './components/oss/OrderStatusScreenView';
 import { KitchenDisplayView } from './components/kds/KitchenDisplayView';
 import { PwaInstallBanner } from './components/PwaInstallBanner';
 import { SplashScreen } from './components/SplashScreen';
+import { ThermalReceiptModal } from './components/ThermalReceiptModal';
+import { SplitBillModal } from './components/SplitBillModal';
+import { LiveRiderTrackerModal } from './components/LiveRiderTrackerModal';
+import { ScratchCardModal } from './components/ScratchCardModal';
 import { Smartphone, Monitor, ShieldCheck, User, LogIn, Store, Tv, ArrowLeft } from 'lucide-react';
 
 const MainContent: React.FC = () => {
@@ -54,6 +58,19 @@ const MainContent: React.FC = () => {
     setShowGlobalMapModal,
     showLocationPickerModal,
     setShowLocationPickerModal,
+    showThermalReceiptModal,
+    setShowThermalReceiptModal,
+    receiptTableOrder,
+    receiptOnlineOrder,
+    showSplitBillModal,
+    setShowSplitBillModal,
+    splitBillTableOrder,
+    splitBillOnlineOrder,
+    showRiderTrackerModal,
+    setShowRiderTrackerModal,
+    trackingOrder,
+    showScratchModal,
+    setShowScratchModal,
     appBranding,
     showSplashPreview,
     setShowSplashPreview
@@ -289,6 +306,41 @@ const MainContent: React.FC = () => {
           }}
         />
 
+        {/* Thermal POS Receipt Modal */}
+        {showThermalReceiptModal && (
+          <ThermalReceiptModal
+            tableOrder={receiptTableOrder}
+            onlineOrder={receiptOnlineOrder}
+            onClose={() => setShowThermalReceiptModal(false)}
+          />
+        )}
+
+        {/* Split Bill Modal */}
+        {showSplitBillModal && (
+          <SplitBillModal
+            tableOrder={splitBillTableOrder}
+            onlineOrder={splitBillOnlineOrder}
+            onClose={() => setShowSplitBillModal(false)}
+          />
+        )}
+
+        {/* Live Rider Tracker Modal */}
+        {showRiderTrackerModal && (
+          <LiveRiderTrackerModal
+            order={trackingOrder}
+            isOpen={showRiderTrackerModal}
+            onClose={() => setShowRiderTrackerModal(false)}
+          />
+        )}
+
+        {/* Scratch and Win Card Modal */}
+        {showScratchModal && (
+          <ScratchCardModal
+            isOpen={showScratchModal}
+            onClose={() => setShowScratchModal(false)}
+          />
+        )}
+
         {/* Splash Screen (Picha au Video - Moja au Zaidi) */}
         {showSplash && (
           <SplashScreen
@@ -376,6 +428,41 @@ const MainContent: React.FC = () => {
           setShowLocationPickerModal(false);
         }}
       />
+
+      {/* Thermal POS Receipt Modal */}
+      {showThermalReceiptModal && (
+        <ThermalReceiptModal
+          tableOrder={receiptTableOrder}
+          onlineOrder={receiptOnlineOrder}
+          onClose={() => setShowThermalReceiptModal(false)}
+        />
+      )}
+
+      {/* Split Bill Modal */}
+      {showSplitBillModal && (
+        <SplitBillModal
+          tableOrder={splitBillTableOrder}
+          onlineOrder={splitBillOnlineOrder}
+          onClose={() => setShowSplitBillModal(false)}
+        />
+      )}
+
+      {/* Live Rider Tracker Modal */}
+      {showRiderTrackerModal && (
+        <LiveRiderTrackerModal
+          order={trackingOrder}
+          isOpen={showRiderTrackerModal}
+          onClose={() => setShowRiderTrackerModal(false)}
+        />
+      )}
+
+      {/* Scratch and Win Card Modal */}
+      {showScratchModal && (
+        <ScratchCardModal
+          isOpen={showScratchModal}
+          onClose={() => setShowScratchModal(false)}
+        />
+      )}
 
       {/* PWA Install Banner */}
       <PwaInstallBanner />

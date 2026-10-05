@@ -63,6 +63,17 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
     window.print();
   };
 
+  const handleShareWhatsApp = () => {
+    let text = `*ZEBRA RESTAURANT & LOUNGE MASAKI*\nPlot 44, Toure Drive, Masaki Peninsula, Dar es Salaam\nTel: +255 712 345 678 | TIN: 142-990-881\n\n*RISITI YA ODA / INVOICE*\nOda: *#${orderNumber}*\nMeza/Eneo: *${tableNumber}*\nTarehe: ${dateStr} ${timestamp}\n\n*ORODHA YA VYAKULA:*\n`;
+    items.forEach(i => {
+      text += `• [${i.qty}x] ${i.name} - ${formatPrice(i.total, 'TZS')}\n`;
+      if (i.notes) text += `   _(${i.notes})_\n`;
+    });
+    text += `\n*JUMLA KUU (TOTAL): ${formatPrice(totalAmountTZS, 'TZS')}*\nLipa Namba M-Pesa / Tigo: *445566*\nAsante sana kwa kuchagua Zebra Restaurant Masaki! 🦓🍽️`;
+    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+  };
+
   const handleCopyText = () => {
     let text = '';
     if (receiptType === 'kot') {
@@ -280,10 +291,11 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="p-4 bg-white dark:bg-[#16161a] border-t border-neutral-100 dark:border-neutral-800 flex items-center justify-between gap-2">
+        <div className="p-3 sm:p-4 bg-white dark:bg-[#16161a] border-t border-neutral-100 dark:border-neutral-800 flex items-center justify-between gap-2">
           <button
             onClick={handleCopyText}
-            className="flex-1 py-2.5 px-3 rounded-2xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 font-bold text-xs flex items-center justify-center space-x-1.5 transition-colors cursor-pointer"
+            className="flex-1 py-2.5 px-2.5 rounded-2xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 font-bold text-xs flex items-center justify-center space-x-1.5 transition-colors cursor-pointer"
+            title="Nakili maandishi ya risiti"
           >
             {copied ? (
               <>
@@ -293,17 +305,27 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
             ) : (
               <>
                 <Copy className="w-3.5 h-3.5 text-neutral-500" />
-                <span>Nakili Risiti</span>
+                <span>Nakili</span>
               </>
             )}
           </button>
 
           <button
+            onClick={handleShareWhatsApp}
+            className="flex-1 py-2.5 px-2.5 rounded-2xl bg-[#25D366]/15 hover:bg-[#25D366]/25 text-[#25D366] font-bold text-xs flex items-center justify-center space-x-1.5 transition-all border border-[#25D366]/30 cursor-pointer"
+            title="Tuma Risiti WhatsApp"
+          >
+            <Share2 className="w-3.5 h-3.5 text-[#25D366]" />
+            <span>WhatsApp</span>
+          </button>
+
+          <button
             onClick={handlePrint}
-            className="flex-1 py-2.5 px-3 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs flex items-center justify-center space-x-1.5 transition-all shadow-md shadow-emerald-500/20 cursor-pointer"
+            className="flex-1 py-2.5 px-2.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs flex items-center justify-center space-x-1.5 transition-all shadow-md shadow-emerald-500/20 cursor-pointer"
+            title="Chapisha kwenye printer ya keshia"
           >
             <Printer className="w-4 h-4" />
-            <span>Chapisha (Thermal 80mm)</span>
+            <span>Print</span>
           </button>
         </div>
 
