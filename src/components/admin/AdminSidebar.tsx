@@ -39,6 +39,7 @@ export type AdminTab =
   | 'vouchers'
   | 'banners'
   | 'branding'
+  | 'themes'
   | 'users'
   | 'analytics'
   | 'help'
@@ -114,7 +115,8 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     {
       group: 'Appearance & Brand',
       items: [
-        { id: 'branding', label: 'Logo & Splash Screen', icon: Palette },
+        { id: 'themes', label: 'Rangi & Mandhari (Theme)', icon: Palette },
+        { id: 'branding', label: 'Logo & Splash Screen', icon: Sparkles },
         { id: 'settings', label: 'Settings', icon: Settings },
         { id: 'help', label: 'Help', icon: HelpCircle }
       ]
@@ -177,17 +179,18 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                       onSelectTab(item.id as AdminTab);
                       if (onCloseMobile) onCloseMobile();
                     }}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                       isActive
-                        ? 'bg-neutral-100 dark:bg-neutral-800/90 text-neutral-900 dark:text-white shadow-xs'
+                        ? 'text-white shadow-sm font-bold'
                         : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 hover:text-neutral-900 dark:hover:text-neutral-200'
                     }`}
+                    style={isActive ? { backgroundColor: 'var(--brand-primary, #f59e0b)' } : undefined}
                   >
                     <div className="flex items-center space-x-2.5 min-w-0">
                       <Icon
                         className={`w-4 h-4 shrink-0 ${
                           isActive
-                            ? 'text-neutral-900 dark:text-white'
+                            ? 'text-white'
                             : 'text-neutral-400 dark:text-neutral-500'
                         }`}
                       />
@@ -198,7 +201,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                       <span
                         className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
                           isActive
-                            ? 'bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-white'
+                            ? 'bg-black/25 text-white'
                             : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400'
                         }`}
                       >

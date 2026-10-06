@@ -17,6 +17,7 @@ import { AdminAnalyticsView } from './admin/AdminAnalyticsView';
 import { AdminHelpView } from './admin/AdminHelpView';
 import { AdminSettingsView } from './admin/AdminSettingsView';
 import { AdminBrandingView } from './admin/AdminBrandingView';
+import { AdminThemeColorsView } from './admin/AdminThemeColorsView';
 import { WaiterView } from './waiter/WaiterView';
 import { PosTerminalView } from './pos/PosTerminalView';
 import { OrderStatusScreenView } from './oss/OrderStatusScreenView';

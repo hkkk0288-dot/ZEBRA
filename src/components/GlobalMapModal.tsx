@@ -10,10 +10,14 @@ import {
   ChevronRight,
   Clock,
   Phone,
-  ArrowLeft
+  ArrowLeft,
+  LayoutGrid,
+  SlidersHorizontal,
+  Store
 } from 'lucide-react';
 import { InteractiveLiveMap, MapPreset } from './InteractiveLiveMap';
 import { useApp } from '../context/AppContext';
+import { RestaurantBranch } from '../types';
 
 export type MapLayerKey = MapPreset;
 
@@ -29,7 +33,7 @@ export const GlobalMapModal: React.FC<GlobalMapModalProps> = ({
   isOpen,
   onClose,
   isDark,
-  initialMode = 'mikocheni_street',
+  initialMode = 'dar_es_salaam',
   onOpenLocationPicker
 }) => {
   const { appBranding, setShowLocationPickerModal } = useApp();
@@ -39,60 +43,66 @@ export const GlobalMapModal: React.FC<GlobalMapModalProps> = ({
   const showBranchMap = isMulti && activeBranches.length > 0;
 
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
-  const [activePreset, setActivePreset] = useState<MapPreset>(initialMode);
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
+  const [isListView, setIsListView] = useState<boolean>(false);
+  const [targetedLocation, setTargetedLocation] = useState<RestaurantBranch | null>(null);
 
   if (!isOpen) return null;
 
   const branches = activeBranches;
 
+  const handleBranchSelect = (b: RestaurantBranch) => {
+    setSelectedBranch(b.id);
+    setTargetedLocation(b);
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-2 sm:p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-0 sm:p-3 md:p-4">
       <div
-        className={`w-full rounded-3xl border shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ${
+        className={`w-full h-full sm:h-auto sm:max-w-6xl sm:max-h-[96vh] rounded-none sm:rounded-3xl border sm:border-neutral-800 shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ${
           isFullscreen
-            ? 'fixed inset-2 max-w-none max-h-none h-[calc(100vh-16px)]'
-            : 'max-w-6xl max-h-[95vh]'
+            ? 'fixed inset-0 sm:inset-1 max-w-none max-h-none h-full sm:h-[calc(100vh-8px)] rounded-none'
+            : ''
         } ${
           isDark
-            ? 'bg-[#10131a] border-neutral-800 text-white'
+            ? 'bg-[#0d1017] border-neutral-800 text-white'
             : 'bg-white border-neutral-200 text-neutral-900'
         }`}
       >
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-3 sm:px-6 py-2.5 sm:py-3 border-b border-neutral-800/80 shrink-0 gap-2">
+        <div className="flex items-center justify-between px-3 sm:px-6 py-2 sm:py-3 border-b border-neutral-800/80 shrink-0 gap-2 bg-neutral-950/80 backdrop-blur-md">
           <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
-            {/* Back Button (Prominent Rudi Button) */}
+            {/* Back Button */}
             <button
               type="button"
               onClick={onClose}
               className="px-2.5 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white font-bold text-xs flex items-center space-x-1.5 transition-all cursor-pointer active:scale-95 shrink-0 border border-neutral-700 shadow-sm"
               title="Rudi Nyuma (Back)"
             >
-              <ArrowLeft className="w-4 h-4 text-emerald-400" />
+              <ArrowLeft className="w-4 h-4 text-amber-400" />
               <span>Rudi</span>
             </button>
 
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-lg sm:text-xl shrink-0">
-              🗺️
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center text-lg sm:text-xl shrink-0">
+              🍗
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center space-x-1.5">
-                <h3 className="font-bold text-xs sm:text-base font-display truncate">
-                  {isSingle ? 'Eneo la Mgahawa & Ramani' : 'Ramani ya Matawi (Live Branches)'}
+                <h3 className="font-extrabold text-xs sm:text-base font-display truncate">
+                  {isSingle ? 'Eneo la Mgahawa & Ramani' : 'Ramani ya Matawi ya Kookoos'}
                 </h3>
-                <span className="hidden md:inline-flex px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-[10px] border border-emerald-500/30">
-                  {isSingle ? 'Single Restaurant' : 'Multi-Hub'}
+                <span className="hidden xs:inline-flex px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 font-bold text-[10px] border border-amber-500/30">
+                  {branches.length} Matawi
                 </span>
               </div>
-              <p className="text-[10px] sm:text-xs text-neutral-400 truncate max-w-[200px] sm:max-w-md">
-                {isSingle ? 'Kookoos Mwenge HQ & Eneo la kuletewa chakula' : 'Matawi 8 ya Kookoos: Mwenge, Sinza, Kariakoo, Tegeta, Masana, Bahari Beach, Kigamboni na Masaki'}
+              <p className="text-[10px] sm:text-xs text-neutral-400 truncate max-w-[180px] xs:max-w-xs sm:max-w-md">
+                {isSingle ? 'Kookoos Mwenge HQ & Eneo la kuletewa chakula' : 'Matawi 8 ya Kookoos Dar es Salaam'}
               </p>
             </div>
           </div>
 
           <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
-            {/* Switch to customer delivery location picker */}
+            {/* Delivery address button */}
             <button
               type="button"
               onClick={() => {
@@ -108,6 +118,16 @@ export const GlobalMapModal: React.FC<GlobalMapModalProps> = ({
             >
               <MapPin className="w-3.5 h-3.5" />
               <span className="hidden xs:inline">Eneo Langu</span>
+            </button>
+
+            {/* Toggle view: Carousel vs Full List */}
+            <button
+              type="button"
+              onClick={() => setIsListView(!isListView)}
+              className="p-1.5 sm:p-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors flex items-center justify-center cursor-pointer"
+              title={isListView ? 'Tazama Ramani Kubwa' : 'Tazama Orodha Kamili'}
+            >
+              {isListView ? <SlidersHorizontal className="w-4 h-4 text-amber-400" /> : <LayoutGrid className="w-4 h-4 text-neutral-300" />}
             </button>
 
             {/* Fullscreen toggle */}
@@ -132,7 +152,7 @@ export const GlobalMapModal: React.FC<GlobalMapModalProps> = ({
           </div>
         </div>
 
-        {/* Modal Map Body - 100% Live Interactive Map */}
+        {/* Modal Map Body */}
         {!showBranchMap ? (
           <div className="p-10 text-center space-y-4 my-auto">
             <div className="w-16 h-16 rounded-full bg-amber-500/20 text-amber-400 mx-auto flex items-center justify-center text-3xl">
@@ -142,7 +162,7 @@ export const GlobalMapModal: React.FC<GlobalMapModalProps> = ({
               Ramani ya Matawi Haipatikani
             </h3>
             <p className="text-xs text-neutral-500 dark:text-neutral-400 max-w-md mx-auto">
-              Mfumo umewekwa kwenye hali ya <strong>Single Restaurant</strong> au admin hajaweka tawi lolote. Wateja wanachagua eneo lao la kuletewa chakula (Delivery Location).
+              Mfumo umewekwa kwenye hali ya <strong>Single Restaurant</strong> au admin hajaweka tawi lolote.
             </p>
             <div className="flex items-center justify-center space-x-3 pt-2">
               <button
@@ -151,7 +171,7 @@ export const GlobalMapModal: React.FC<GlobalMapModalProps> = ({
                   onClose();
                   setShowLocationPickerModal(true);
                 }}
-                className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-neutral-950 font-bold text-xs transition-all cursor-pointer"
+                className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-neutral-950 font-bold text-xs transition-all cursor-pointer"
               >
                 Chagua Eneo la Delivery
               </button>
@@ -165,36 +185,107 @@ export const GlobalMapModal: React.FC<GlobalMapModalProps> = ({
             </div>
           </div>
         ) : (
-          <div className="p-2 sm:p-4 space-y-3 flex-1 flex flex-col min-h-0 overflow-y-auto">
-            <InteractiveLiveMap
-              initialPreset={initialMode}
-              className={`w-full ${isFullscreen ? 'h-[calc(100vh-200px)] min-h-[500px]' : 'h-[460px] sm:h-[540px]'}`}
-              isDark={isDark}
-              branches={branches}
-              onSelectLocation={loc => setSelectedBranch(loc.id)}
-            />
-
-            {/* Kitchen Branch Badges */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
-              {branches.map(b => (
-                <div
-                  key={b.id}
-                  onClick={() => setSelectedBranch(b.id)}
-                  className={`p-2.5 rounded-2xl border text-xs cursor-pointer transition-all ${
-                    selectedBranch === b.id
-                      ? 'bg-emerald-500/20 border-emerald-500 text-white'
-                      : 'bg-neutral-900/70 border-neutral-800/80 hover:border-neutral-700 text-neutral-300'
-                  }`}
-                >
-                  <div className="flex items-center justify-between text-[10px] mb-0.5">
-                    <span className="font-bold text-emerald-400">{b.tag}</span>
-                    <span className="text-neutral-400">{b.hours}</span>
-                  </div>
-                  <div className="font-bold text-white truncate">{b.name}</div>
-                  <div className="text-[11px] text-neutral-400 truncate mt-0.5">{b.area}</div>
-                </div>
-              ))}
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
+            {/* The Live Interactive Map Viewport (Takes full available space on mobile!) */}
+            <div className="flex-1 w-full min-h-[300px] relative overflow-hidden">
+              <InteractiveLiveMap
+                initialPreset={initialMode}
+                className="w-full h-full"
+                isDark={isDark}
+                branches={branches}
+                onSelectLocation={loc => {
+                  const b = branches.find(item => item.id === loc.id);
+                  if (b) setSelectedBranch(b.id);
+                }}
+              />
             </div>
+
+            {/* Bottom Controls / Branch Viewer */}
+            {isListView ? (
+              /* Expandable List View */
+              <div className="shrink-0 max-h-[45vh] overflow-y-auto p-3 bg-neutral-950/95 border-t border-neutral-800/80 space-y-2">
+                <div className="flex items-center justify-between pb-1">
+                  <span className="text-xs font-bold text-neutral-200">Matawi Yote ya Dar es Salaam:</span>
+                  <button
+                    type="button"
+                    onClick={() => setIsListView(false)}
+                    className="text-[11px] text-amber-400 font-bold hover:underline"
+                  >
+                    Funga Orodha ➔
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
+                  {branches.map(b => (
+                    <div
+                      key={b.id}
+                      onClick={() => handleBranchSelect(b)}
+                      className={`p-2.5 rounded-2xl border text-xs cursor-pointer transition-all ${
+                        selectedBranch === b.id
+                          ? 'bg-amber-500/20 border-amber-500 text-white shadow-md'
+                          : 'bg-neutral-900/80 border-neutral-800/80 hover:border-neutral-700 text-neutral-300'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between text-[10px] mb-0.5">
+                        <span className="font-extrabold text-amber-400">{b.tag || 'Tawi'}</span>
+                        <span className="text-neutral-400">{b.hours}</span>
+                      </div>
+                      <div className="font-extrabold text-white truncate text-xs">{b.name}</div>
+                      <div className="text-[11px] text-neutral-400 truncate mt-0.5">{b.area}</div>
+                      <div className="text-[10px] text-neutral-500 font-mono mt-1">{b.phone}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              /* Sleek Mobile Horizontal Swipe Carousel (Takes only ~95px, gives 85%+ screen to map!) */
+              <div className="shrink-0 p-2 sm:p-2.5 bg-neutral-950/95 border-t border-neutral-800/90 backdrop-blur-md">
+                <div className="flex items-center justify-between px-1 mb-1.5 text-[11px]">
+                  <span className="font-bold text-neutral-300 flex items-center space-x-1.5">
+                    <span className="text-amber-400">🍗</span>
+                    <span>Matawi ya Kookoos ({branches.length})</span>
+                    <span className="text-neutral-500 text-[10px] hidden xs:inline">• Telezesha kidole kuona yote</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setIsListView(true)}
+                    className="text-[10px] font-bold text-amber-400 hover:text-amber-300 flex items-center space-x-1"
+                  >
+                    <span>Orodha Yote</span>
+                    <ChevronRight className="w-3 h-3" />
+                  </button>
+                </div>
+
+                <div className="flex items-center space-x-2 overflow-x-auto no-scrollbar py-0.5">
+                  {branches.map(b => {
+                    const isSelected = selectedBranch === b.id;
+                    return (
+                      <div
+                        key={b.id}
+                        onClick={() => handleBranchSelect(b)}
+                        className={`w-[220px] sm:w-[260px] p-2 sm:p-2.5 rounded-2xl border text-xs shrink-0 cursor-pointer transition-all active:scale-95 ${
+                          isSelected
+                            ? 'bg-amber-500/20 border-amber-500 text-white shadow-lg ring-1 ring-amber-500/40'
+                            : 'bg-neutral-900/90 border-neutral-800/90 hover:border-neutral-700 text-neutral-300'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between text-[10px] mb-1">
+                          <span className="font-extrabold text-amber-400 truncate max-w-[120px]">
+                            {b.tag || 'Tawi'}
+                          </span>
+                          <span className="text-neutral-400 font-mono text-[9px]">{b.hours}</span>
+                        </div>
+                        <div className="font-extrabold text-white text-xs truncate flex items-center space-x-1">
+                          <span>{b.name}</span>
+                        </div>
+                        <div className="text-[11px] text-neutral-400 truncate mt-0.5">
+                          {b.area}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

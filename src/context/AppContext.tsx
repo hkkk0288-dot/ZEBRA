@@ -22,7 +22,9 @@ import {
   TableReservation,
   SplashMediaItem,
   AppBrandingConfig,
-  AppLanguage
+  AppLanguage,
+  ThemeColorPreset,
+  AdminThemeStyle
 } from '../types';
 import { getTranslation } from '../services/translations';
 import {
@@ -251,6 +253,12 @@ interface AppContextType {
   deleteSplashSlide: (id: string) => void;
   reorderSplashSlides: (slides: SplashMediaItem[]) => void;
   resetSplashSeen: () => void;
+  setSystemThemeColor: (
+    color: string,
+    preset?: ThemeColorPreset,
+    secondaryColor?: string,
+    adminThemeStyle?: AdminThemeStyle
+  ) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -748,6 +756,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         tagline: String(branding.tagline || 'Proudly Tanzanian Fried Chicken • Dar es Salaam'),
         logoEmoji: String(branding.logoEmoji || '🍗'),
         logoUrl: typeof branding.logoUrl === 'string' ? branding.logoUrl : undefined,
+        themeColor: branding.themeColor || '#f59e0b',
+        themePreset: branding.themePreset || 'amber',
+        themeSecondaryColor: branding.themeSecondaryColor || '#ea580c',
+        adminThemeStyle: branding.adminThemeStyle || 'dark',
         restaurantMode: branding.restaurantMode === 'multi' ? ('multi' as const) : ('single' as const),
         branches: Array.isArray(branding.branches) ? branding.branches : [],
         splashEnabled: Boolean(branding.splashEnabled),
@@ -760,6 +772,96 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (e) {
       console.warn('LocalStorage save failed, quota exceeded or storage blocked:', e instanceof Error ? e.message : 'storage error');
     }
+  };
+
+  const hexToRgb = (hex: string): string => {
+    const clean = hex.replace('#', '');
+    if (clean.length === 3) {
+      const r = parseInt(clean[0] + clean[0], 16);
+      const g = parseInt(clean[1] + clean[1], 16);
+      const b = parseInt(clean[2] + clean[2], 16);
+      return `${r}, ${g}, ${b}`;
+    }
+    if (clean.length === 6) {
+      const r = parseInt(clean.substring(0, 2), 16);
+      const g = parseInt(clean.substring(2, 4), 16);
+      const b = parseInt(clean.substring(4, 6), 16);
+      return `${r}, ${g}, ${b}`;
+    }
+    return '245, 158, 11';
+  };
+
+  const adjustColorBrightness = (hex: string, percent: number): string => {
+    let clean = hex.replace('#', '');
+    if (clean.length === 3) {
+      clean = clean.split('').map(c => c + c).join('');
+    }
+    const num = parseInt(clean, 16);
+    const amt = Math.round(2.55 * percent);
+    const R = Math.min(255, Math.max(0, (num >> 16) + amt));
+    const G = Math.min(255, Math.max(0, ((num >> 8) & 0x00ff) + amt));
+    const B = Math.min(255, Math.max(0, (num & 0x0000ff) + amt));
+    return `#${((1 << 24) + (R << 16) + (G << 8) + B).toString(16).slice(1)}`;
+  };
+
+  // Dynamically apply primary theme color across the whole system (mobile, desktop web, admin panel)
+  useEffect(() => {
+    const primary = appBranding.themeColor || '#f59e0b';
+    const secondary = appBranding.themeSecondaryColor || adjustColorBrightness(primary, -15);
+    const primaryRgb = hexToRgb(primary);
+    const secondaryRgb = hexToRgb(secondary);
+    const hoverColor = adjustColorBrightness(primary, -12);
+
+    const root = document.documentElement;
+    root.style.setProperty('--brand-primary', primary);
+    root.style.setProperty('--brand-primary-rgb', primaryRgb);
+    root.style.setProperty('--brand-primary-hover', hoverColor);
+    root.style.setProperty('--brand-primary-light', `rgba(${primaryRgb}, 0.15)`);
+    root.style.setProperty('--brand-primary-border', `rgba(${primaryRgb}, 0.35)`);
+    root.style.setProperty('--brand-primary-shadow', `rgba(${primaryRgb}, 0.35)`);
+    root.style.setProperty('--brand-secondary', secondary);
+    root.style.setProperty('--brand-secondary-rgb', secondaryRgb);
+
+    // Admin theme tone
+    const adminStyle = appBranding.adminThemeStyle || 'dark';
+    if (adminStyle === 'midnight') {
+      root.style.setProperty('--brand-admin-bg', '#09090b');
+    } else if (adminStyle === 'brand_tint') {
+      root.style.setProperty('--brand-admin-bg', `rgba(${primaryRgb}, 0.08)`);
+    } else if (adminStyle === 'light') {
+      root.style.setProperty('--brand-admin-bg', '#f8fafc');
+    } else {
+      root.style.setProperty('--brand-admin-bg', '#121215');
+    }
+
+    root.dataset.themeColor = appBranding.themePreset || 'amber';
+    root.dataset.adminTheme = adminStyle;
+
+    // Update browser theme-color meta tag for mobile devices (Chrome/Safari top bar)
+    let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (!metaThemeColor) {
+      metaThemeColor = document.createElement('meta');
+      metaThemeColor.setAttribute('name', 'theme-color');
+      document.head.appendChild(metaThemeColor);
+    }
+    metaThemeColor.setAttribute('content', primary);
+  }, [appBranding.themeColor, appBranding.themePreset, appBranding.themeSecondaryColor, appBranding.adminThemeStyle]);
+
+  const setSystemThemeColor = (
+    color: string,
+    preset?: ThemeColorPreset,
+    secondaryColor?: string,
+    adminThemeStyle?: AdminThemeStyle
+  ) => {
+    const updated: AppBrandingConfig = {
+      ...appBranding,
+      themeColor: color,
+      themePreset: preset || 'custom',
+      ...(secondaryColor ? { themeSecondaryColor: secondaryColor } : {}),
+      ...(adminThemeStyle ? { adminThemeStyle } : {})
+    };
+    setAppBranding(updated);
+    safePersistBranding(updated);
   };
 
   const resetSplashSeen = () => {
@@ -1576,7 +1678,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateSplashSlide,
         deleteSplashSlide,
         reorderSplashSlides,
-        resetSplashSeen
+        resetSplashSeen,
+        setSystemThemeColor
       }}
     >
       {children}

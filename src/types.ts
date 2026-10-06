@@ -308,11 +308,30 @@ export interface RestaurantBranch {
   active: boolean;
 }
 
+export type ThemeColorPreset =
+  | 'amber'   // 🍗 Kookoos Golden Amber (#f59e0b)
+  | 'emerald' // 🌿 Safari Emerald Green (#10b981)
+  | 'orange'  // 🍊 Sunset Crisp Orange (#ea580c)
+  | 'rose'    // 🌶️ Peri-Peri Hot Red / Ruby (#e11d48)
+  | 'blue'    // 🌊 Marine Ocean Blue (#0284c7)
+  | 'purple'  // 👑 Royal Velvet Purple (#7c3aed)
+  | 'teal'    // 💎 Tropical Coastal Teal (#0d9488)
+  | 'cyan'    // 🏝️ Tropical Coastal Cyan (#06b6d4)
+  | 'gold'    // ☕ Espresso Caramel Gold (#d97706)
+  | 'slate'   // 🖤 Midnight Obsidian & Crimson (#dc2626)
+  | 'custom'; // 🎨 Custom Hex Color
+
+export type AdminThemeStyle = 'dark' | 'midnight' | 'brand_tint' | 'light';
+
 export interface AppBrandingConfig {
   logoUrl?: string; // Custom uploaded or preset image URL
   logoEmoji?: string; // e.g. "🍗" fallback
   appName: string; // "Kookoos"
   tagline: string; // "Proudly Tanzanian Fried Chicken • Dar es Salaam"
+  themeColor?: string; // e.g. "#f59e0b", "#10b981", etc.
+  themeSecondaryColor?: string; // e.g. "#ea580c" accent color
+  themePreset?: ThemeColorPreset;
+  adminThemeStyle?: AdminThemeStyle; // Admin panel tone: 'dark' | 'midnight' | 'brand_tint' | 'light'
   restaurantMode?: RestaurantOperationMode; // 'single' (Mgahawa Mmoja) | 'multi' (Matawi Mengi)
   branches?: RestaurantBranch[];
   splashEnabled: boolean;

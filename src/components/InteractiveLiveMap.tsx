@@ -19,8 +19,14 @@ import {
 import { RestaurantBranch } from '../types';
 
 export type MapPreset =
-  | 'tanganyika_east_africa'
+  | 'dar_es_salaam'
+  | 'mwenge_hq'
+  | 'kariakoo_hub'
+  | 'masaki_peninsula'
+  | 'sinza_mori'
+  | 'kigamboni_ferry'
   | 'mikocheni_street'
+  | 'tanganyika_east_africa'
   | 'morogoro_corridor'
   | 'tanzania_national'
   | 'world'
@@ -41,34 +47,74 @@ interface MapPresetConfig {
 
 export const MAP_PRESETS: MapPresetConfig[] = [
   {
-    key: 'tanganyika_east_africa',
-    label: 'Ziwa Tanganyika & Afrika Mashariki',
-    shortLabel: 'Tanganyika',
+    key: 'dar_es_salaam',
+    label: 'Dar es Salaam (Matawi Yote)',
+    shortLabel: 'Dar Yote',
+    icon: '🍗',
+    badge: 'Dar es Salaam (Matawi 8)',
+    center: [-6.7900, 39.2600],
+    zoom: 12,
+    description: 'Matawi yote 8 ya Kookoos: Mwenge, Sinza, Kariakoo, Tegeta, Masana, Bahari Beach, Kigamboni na Masaki'
+  },
+  {
+    key: 'mwenge_hq',
+    label: 'Mwenge HQ (Kookoos Central)',
+    shortLabel: 'Mwenge HQ',
+    icon: '👑',
+    badge: 'Mwenge HQ Flagship',
+    center: [-6.7712, 39.2215],
+    zoom: 16,
+    description: 'Kookoos Mwenge HQ Branch • Bagamoyo Road'
+  },
+  {
+    key: 'kariakoo_hub',
+    label: 'Kamata Kariakoo & Posta',
+    shortLabel: 'Kariakoo',
+    icon: '🏢',
+    badge: 'Kariakoo Kamata Hub',
+    center: [-6.8240, 39.2785],
+    zoom: 16,
+    description: 'Kookoos Kamata Kariakoo • Msimbazi / Nyerere Junction'
+  },
+  {
+    key: 'masaki_peninsula',
+    label: 'Masaki & Slipway Pier',
+    shortLabel: 'Masaki',
     icon: '🌊',
-    badge: 'Ziwa Tanganyika (Google Terrain)',
-    center: [-4.6000, 29.8000], // Centered directly on Lake Tanganyika, Burundi, Rwanda, DRC & Tanzania
-    zoom: 7,
-    description: 'Ziwa Tanganyika, Bujumbura (Burundi), Rwanda, DRC Kongo (Kalemie), Ziwa Victoria, Mwanza, Katavi & Dodoma'
+    badge: 'Masaki Peninsula',
+    center: [-6.7580, 39.2820],
+    zoom: 16,
+    description: 'Kookoos Masaki Peninsula • Toure Drive'
+  },
+  {
+    key: 'sinza_mori',
+    label: 'Sinza Mori & Shekilango',
+    shortLabel: 'Sinza',
+    icon: '🏘️',
+    badge: 'Sinza Mori Outlet',
+    center: [-6.7820, 39.2310],
+    zoom: 16,
+    description: 'Kookoos Sinza Mori Branch • Shekilango Road'
+  },
+  {
+    key: 'kigamboni_ferry',
+    label: 'Kigamboni & South Beach',
+    shortLabel: 'Kigamboni',
+    icon: '🌴',
+    badge: 'Kigamboni Ferry',
+    center: [-6.8320, 39.3010],
+    zoom: 15,
+    description: 'Kookoos Kigamboni Branch • Ferry Road'
   },
   {
     key: 'mikocheni_street',
-    label: 'Mikocheni & Msasani Mitaani',
+    label: 'Mikocheni & Shoppers',
     shortLabel: 'Mikocheni',
     icon: '🏙️',
-    badge: 'Mitaani (Street Level)',
-    center: [-6.7725, 39.2485], // Mikocheni A / Shoppers Plaza / Mwai Kibaki Rd
+    badge: 'Mikocheni Mitaani',
+    center: [-6.7725, 39.2485],
     zoom: 16,
-    description: 'Mwai Kibaki Road, Shoppers Plaza Mikocheni, Chwaku St, Kairuki, Shule St'
-  },
-  {
-    key: 'morogoro_corridor',
-    label: 'Dar - Morogoro Highway',
-    shortLabel: 'Morogoro',
-    icon: '🛣️',
-    badge: 'Ukanda (T1/T2/T3 Highway)',
-    center: [-6.6500, 38.3500], // Dar to Morogoro corridor
-    zoom: 9,
-    description: 'Njia kuu za T1, T2 & T3: Dar es Salaam, Kibaha, Chalinze, Morogoro, Kilosa'
+    description: 'Mwai Kibaki Road, Shoppers Plaza Mikocheni'
   },
   {
     key: 'tanzania_national',
@@ -76,19 +122,9 @@ export const MAP_PRESETS: MapPresetConfig[] = [
     shortLabel: 'Tanzania',
     icon: '🇹🇿',
     badge: 'Kitaifa (National View)',
-    center: [-6.3690, 34.8888], // Tanzania Center
+    center: [-6.3690, 34.8888],
     zoom: 6,
-    description: 'Dodoma (Mji Mkuu), Dar es Salaam, Zanzibar, Arusha, Mwanza, Kigoma, Mbeya'
-  },
-  {
-    key: 'world',
-    label: 'Ramani ya Dunia',
-    shortLabel: 'Dunia',
-    icon: '🌍',
-    badge: 'Ulimwengu (Global)',
-    center: [0.0, 25.0], // Africa / World center
-    zoom: 3,
-    description: 'Mabara yote ya dunia, bahari kuu na nchi zote kijiografia'
+    description: 'Dodoma, Dar es Salaam, Zanzibar, Arusha, Mwanza, Mbeya'
   }
 ];
 
@@ -234,7 +270,7 @@ interface InteractiveLiveMapProps {
 }
 
 export const InteractiveLiveMap: React.FC<InteractiveLiveMapProps> = ({
-  initialPreset = 'tanganyika_east_africa',
+  initialPreset = 'dar_es_salaam',
   className = 'h-[480px] sm:h-[560px]',
   isDark = true,
   branches,
@@ -249,7 +285,7 @@ export const InteractiveLiveMap: React.FC<InteractiveLiveMapProps> = ({
 
   const [activePreset, setActivePreset] = useState<MapPreset>(initialPreset);
   const [activeTileType, setActiveTileType] = useState<TileLayerType>('google_roadmap');
-  const [currentZoom, setCurrentZoom] = useState<number>(7);
+  const [currentZoom, setCurrentZoom] = useState<number>(12);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isLocatingUser, setIsLocatingUser] = useState<boolean>(false);
   const [userAddressNotice, setUserAddressNotice] = useState<string | null>(null);
@@ -297,8 +333,17 @@ export const InteractiveLiveMap: React.FC<InteractiveLiveMapProps> = ({
         setTimeout(() => map.invalidateSize(), 1200)
       ];
 
+      let resizeObserver: ResizeObserver | null = null;
+      if (containerRef.current) {
+        resizeObserver = new ResizeObserver(() => {
+          map.invalidateSize();
+        });
+        resizeObserver.observe(containerRef.current);
+      }
+
       return () => {
         timers.forEach(t => clearTimeout(t));
+        if (resizeObserver) resizeObserver.disconnect();
         map.remove();
         mapRef.current = null;
       };

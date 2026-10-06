@@ -1,5 +1,60 @@
 @import "tailwindcss";
 
+:root {
+  --brand-primary: #f59e0b;
+  --brand-primary-rgb: 245, 158, 11;
+  --brand-primary-hover: #d97706;
+  --brand-primary-light: rgba(245, 158, 11, 0.15);
+  --brand-primary-border: rgba(245, 158, 11, 0.35);
+  --brand-primary-shadow: rgba(245, 158, 11, 0.3);
+  --brand-secondary: #ea580c;
+  --brand-secondary-rgb: 234, 88, 12;
+  --brand-admin-bg: #121215;
+}
+
+.bg-brand-primary {
+  background-color: var(--brand-primary, #f59e0b) !important;
+}
+
+.bg-brand-primary-light {
+  background-color: var(--brand-primary-light, rgba(245, 158, 11, 0.15)) !important;
+}
+
+.text-brand-primary {
+  color: var(--brand-primary, #f59e0b) !important;
+}
+
+.border-brand-primary {
+  border-color: var(--brand-primary, #f59e0b) !important;
+}
+
+.border-brand-primary-light {
+  border-color: var(--brand-primary-border, rgba(245, 158, 11, 0.35)) !important;
+}
+
+.ring-brand-primary {
+  --tw-ring-color: var(--brand-primary, #f59e0b) !important;
+}
+
+.shadow-brand {
+  box-shadow: 0 10px 25px -5px var(--brand-primary-shadow, rgba(245, 158, 11, 0.3)) !important;
+}
+
+.brand-btn-primary {
+  background-color: var(--brand-primary, #f59e0b) !important;
+  color: #ffffff !important;
+  transition: all 0.2s ease;
+}
+.brand-btn-primary:hover {
+  filter: brightness(0.92);
+}
+
+.brand-badge {
+  background-color: var(--brand-primary-light, rgba(245, 158, 11, 0.15)) !important;
+  color: var(--brand-primary, #f59e0b) !important;
+  border-color: var(--brand-primary-border, rgba(245, 158, 11, 0.35)) !important;
+}
+
 @layer base {
   html, body {
     overflow-x: hidden;
