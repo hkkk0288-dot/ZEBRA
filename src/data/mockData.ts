@@ -744,7 +744,7 @@ export const DEFAULT_BRANDING_CONFIG = {
   tagline: 'Proudly Tanzanian Fried Chicken • Dar es Salaam',
   restaurantMode: 'multi' as const,
   branches: DEFAULT_BRANCHES,
-  splashEnabled: true,
+  splashEnabled: false,
   splashSlides: DEFAULT_SPLASH_SLIDES,
   splashAutoSkip: true,
   splashShowOncePerSession: false
