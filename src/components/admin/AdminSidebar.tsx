@@ -134,12 +134,12 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                 className="w-full h-full object-cover"
               />
             ) : (
-              <span>{appBranding.logoEmoji || '🦓'}</span>
+              <span>{appBranding.logoEmoji || '🍗'}</span>
             )}
           </div>
           <div className="min-w-0">
             <h1 className="font-extrabold text-sm sm:text-base font-display text-neutral-900 dark:text-white leading-tight truncate">
-              {appBranding.appName || 'Zebra Restaurant'}
+              {appBranding.appName || 'Kookoos'}
             </h1>
             <p className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 truncate">
               Admin Ops Center

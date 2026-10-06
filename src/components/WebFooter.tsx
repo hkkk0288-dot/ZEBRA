@@ -200,7 +200,7 @@ export const WebFooter: React.FC = () => {
 
         {/* Bottom Attribution */}
         <div className="mt-12 pt-6 border-t border-neutral-800/80 flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-500">
-          <p>© {new Date().getFullYear()} Zebra Restaurant. All rights reserved. Dar es Salaam, Tanzania.</p>
+          <p>© {new Date().getFullYear()} Kookoos - Proudly Tanzanian Fried Chicken. All rights reserved. Dar es Salaam, Tanzania.</p>
           <p className="mt-2 sm:mt-0 flex items-center space-x-1">
             <span>Crafted with</span>
             <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />

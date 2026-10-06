@@ -1,11 +1,11 @@
 /**
- * Zebra Restaurant - Media & Video Storage Service
+ * Kookoos - Media & Video Storage Service
  * Handles storing large splash screen videos, banner media, and images
  * using IndexedDB so localStorage never runs out of quota.
  * Also parses YouTube / Vimeo embeds and handles Blob URL generation.
  */
 
-const DB_NAME = 'ZebraMediaDB';
+const DB_NAME = 'KookoosMediaDB';
 const DB_VERSION = 1;
 const STORE_NAME = 'media_files';
 

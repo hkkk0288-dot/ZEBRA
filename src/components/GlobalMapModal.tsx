@@ -86,7 +86,7 @@ export const GlobalMapModal: React.FC<GlobalMapModalProps> = ({
                 </span>
               </div>
               <p className="text-[10px] sm:text-xs text-neutral-400 truncate max-w-[200px] sm:max-w-md">
-                {isSingle ? 'Zebra Masaki HQ & Eneo la kuletewa chakula' : 'Matawi ya Mikocheni, Masaki, Kariakoo na Morogoro'}
+                {isSingle ? 'Kookoos Mwenge HQ & Eneo la kuletewa chakula' : 'Matawi 8 ya Kookoos: Mwenge, Sinza, Kariakoo, Tegeta, Masana, Bahari Beach, Kigamboni na Masaki'}
               </p>
             </div>
           </div>

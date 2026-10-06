@@ -45,7 +45,7 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     discount: 'Punguzo',
     total: 'Jumla Kuu',
     checkout: 'Kamilisha Oda',
-    loyaltyPoints: 'Zebra Points za Uaminifu',
+    loyaltyPoints: 'Kookoos Points za Uaminifu',
     usePoints: 'Tumia pointi kupata punguzo la TZS',
     pointsAvailable: 'pointi zinapatikana',
 
@@ -109,7 +109,7 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     discount: 'Discount',
     total: 'Total',
     checkout: 'Proceed to Checkout',
-    loyaltyPoints: 'Zebra Loyalty Points',
+    loyaltyPoints: 'Kookoos Loyalty Points',
     usePoints: 'Redeem points for discount of TZS',
     pointsAvailable: 'points available',
 

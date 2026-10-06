@@ -41,7 +41,8 @@ export const CartView: React.FC = () => {
     redeemLoyaltyDiscount,
     setRedeemLoyaltyDiscount,
     loyaltyDiscountAmount,
-    openSplitBill
+    openSplitBill,
+    appBranding
   } = useApp();
 
   const isDark = theme === 'dark';
@@ -100,7 +101,7 @@ export const CartView: React.FC = () => {
     const orderTypeLabel = diningMode === 'delivery' ? 'Delivery' : diningMode === 'takeaway' ? 'Takeaway' : 'Dine-In';
 
     const msg =
-`Order - Zebra Restaurant - PWA Online Food Ordering System
+`Order - ${appBranding.appName} - Proudly Tanzanian Fried Chicken
 ***********************************
 Order ID#: ${orderId}
 Token #: ${randomToken}
@@ -120,7 +121,7 @@ Name : ${user?.name || 'Customer'}
 Phone : ${phoneNumber}
 Destination : ${diningMode === 'delivery' ? deliveryAddress : diningMode === 'dine_in' ? `Table ${activeTable?.name}` : 'Takeaway Counter'}
 ${tableNotes ? `Notes : ${tableNotes}\n` : ''}-----------------------------------
-Thank you for choosing Zebra Restaurant!`;
+Thank you for choosing ${appBranding.appName}! 🍗🔥`;
 
     // Save order in system queue
     try {
@@ -182,7 +183,7 @@ Thank you for choosing Zebra Restaurant!`;
           Your Cart is Empty
         </h2>
         <p className="text-sm text-neutral-500 dark:text-neutral-400 max-w-xs mb-6">
-          Explore our mouthwatering dishes, wood-fired pizzas, and Swahili specialties from Zebra Restaurant!
+          Agiza kuku mtamu wa kukaanga, Bomba Box, Bahati Box, na chipsi freshi kutoka {appBranding.appName}!
         </p>
         <button
           onClick={() => setActiveTab('home')}
@@ -252,7 +253,7 @@ Thank you for choosing Zebra Restaurant!`;
                   Review Your Order
                 </h1>
                 <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
-                  {cart.reduce((sum, item) => sum + item.quantity, 0)} items in your basket from Zebra Restaurant
+                  {cart.reduce((sum, item) => sum + item.quantity, 0)} items in your basket from Kookoos
                 </p>
               </div>
             </div>
@@ -625,7 +626,7 @@ Thank you for choosing Zebra Restaurant!`;
               <p className="text-xs text-rose-400 pl-2 font-medium">{promoError}</p>
             )}
 
-            {/* Zebra Loyalty Points & Cashback Redemption */}
+            {/* Kookoos Loyalty Points & Cashback Redemption */}
             <div
               className={`p-4 rounded-3xl border transition-all ${
                 isDark ? 'bg-neutral-900/80 border-neutral-800' : 'bg-white border-neutral-200 shadow-sm'
@@ -639,7 +640,7 @@ Thank you for choosing Zebra Restaurant!`;
                   <div>
                     <div className="flex items-center space-x-1.5">
                       <span className="text-xs font-bold text-neutral-900 dark:text-white">
-                        Zebra Rewards Club
+                        Kookoos Rewards Club
                       </span>
                       <span className="text-[10px] bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold px-1.5 py-0.5 rounded-full">
                         {user.loyaltyTier || 'Gold'} Member

@@ -1,5 +1,5 @@
 /**
- * Zebra Restaurant Audio & Notification Sound Effects
+ * Kookoos Audio & Notification Sound Effects
  * Built using Web Audio API synthesis - zero external audio asset latency, 100% reliable offline & online.
  */
 

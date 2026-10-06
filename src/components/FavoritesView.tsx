@@ -74,7 +74,7 @@ export const FavoritesView: React.FC = () => {
                   <span>Your Favorite Dishes</span>
                 </h1>
                 <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-                  Saved dishes you love for quick re-ordering from Zebra Restaurant
+                  Saved dishes you love for quick re-ordering from Kookoos
                 </p>
               </div>
             </div>

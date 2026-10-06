@@ -1,5 +1,5 @@
 /**
- * Cloudinary Integration Service for Zebra Restaurant
+ * Cloudinary Integration Service for Kookoos
  * Cloud Name: cy4pidvh
  * Console: https://console.cloudinary.com/
  */

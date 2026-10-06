@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Download, X, Smartphone, Sparkles, CheckCircle2, HelpCircle } from 'lucide-react';
+import { useApp } from '../context/AppContext';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -7,6 +8,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export const PwaInstallBanner: React.FC = () => {
+  const { appBranding } = useApp();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showBanner, setShowBanner] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
@@ -76,11 +78,11 @@ export const PwaInstallBanner: React.FC = () => {
         <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white p-3.5 rounded-2xl shadow-2xl border border-emerald-400/40 flex items-center justify-between gap-3">
           <div className="flex items-center space-x-3 min-w-0">
             <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 text-xl border border-white/30">
-              🦓
+              {appBranding.logoEmoji || '🍗'}
             </div>
             <div className="min-w-0">
               <div className="flex items-center space-x-1.5">
-                <h4 className="font-bold text-xs sm:text-sm truncate">Sakinisha Zebra App (PWA)</h4>
+                <h4 className="font-bold text-xs sm:text-sm truncate">Sakinisha {appBranding.appName} (PWA)</h4>
                 <span className="px-1.5 py-0.2 rounded-full bg-amber-400 text-neutral-950 font-black text-[9px]">
                   PWA
                 </span>

@@ -66,7 +66,7 @@ export const AdminProductsView: React.FC = () => {
   const [newCustomUrl, setNewCustomUrl] = useState('');
   const [prepTime, setPrepTime] = useState('20');
   const [calories, setCalories] = useState('520');
-  const [restaurantName, setRestaurantName] = useState('Zebra Central Kitchen');
+  const [restaurantName, setRestaurantName] = useState('Kookoos Central Kitchen');
   const [isAvailable, setIsAvailable] = useState(true);
 
   // Dynamic Category Creation Modal State
@@ -93,17 +93,17 @@ export const AdminProductsView: React.FC = () => {
     setEditingItem(null);
     setName('');
     setSwahiliName('');
-    const defaultCat = categories[1]?.id || 'pizza';
+    const defaultCat = categories[1]?.id || 'boxes';
     setCategory(defaultCat);
-    setPriceTZS('28000');
-    setPriceUSD('10.50');
+    setPriceTZS('18500');
+    setPriceUSD('6.99');
     setDescription('');
     setImageUrl(PRESET_FOOD_IMAGES[0].url);
     setImages([PRESET_FOOD_IMAGES[0].url]);
     setNewCustomUrl('');
-    setPrepTime('20');
+    setPrepTime('12');
     setCalories('520');
-    setRestaurantName('Zebra Central Kitchen');
+    setRestaurantName('Kookoos Central Kitchen');
     setIsAvailable(true);
     setShowModal(true);
   };
@@ -123,7 +123,7 @@ export const AdminProductsView: React.FC = () => {
     setNewCustomUrl('');
     setPrepTime(String(item.prepTimeMinutes || 20));
     setCalories(String(item.calories || 450));
-    setRestaurantName(item.restaurantName || 'Zebra Central Kitchen');
+    setRestaurantName(item.restaurantName || 'Kookoos Central Kitchen');
     setIsAvailable(item.isAvailable);
     setShowModal(true);
   };
@@ -207,7 +207,7 @@ export const AdminProductsView: React.FC = () => {
         category,
         price: parsedUSD,
         priceTZS: parsedTZS,
-        description: description || 'Freshly prepared meal from Zebra Kitchen.',
+        description: description || 'Freshly prepared meal from Kookoos Kitchen.',
         image: primaryImg,
         images: allImages,
         prepTimeMinutes: parseInt(prepTime) || 20,
@@ -223,7 +223,7 @@ export const AdminProductsView: React.FC = () => {
         category,
         price: parsedUSD,
         priceTZS: parsedTZS,
-        description: description || 'Freshly prepared meal from Zebra Kitchen.',
+        description: description || 'Freshly prepared meal from Kookoos Kitchen.',
         image: primaryImg,
         images: allImages,
         rating: 5.0,

@@ -34,7 +34,7 @@ export const AdminHelpView: React.FC = () => {
             Direct chat with system engineers for instant bug fixes or webhook audits.
           </p>
           <a
-            href="https://wa.me/255744883291?text=Hello%20Zebra%20Admin%20Support"
+            href="https://wa.me/255744883291?text=Hello%20Kookoos%20Admin%20Support"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm transition-colors"

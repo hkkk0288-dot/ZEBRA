@@ -268,14 +268,14 @@ export interface SlideBanner {
   ctaText: string;
   promoCode?: string;
   ussdNumber?: string;
-  bgGradient: string;
+  bgGradient?: string;
   accentColor: string;
   imageUrl?: string;
   decorativeEmoji?: string;
   targetCategory?: string;
   active: boolean;
   orderIndex: number;
-  createdAt: number;
+  createdAt?: number;
 }
 
 export type SplashMediaType = 'image' | 'video';
@@ -310,9 +310,9 @@ export interface RestaurantBranch {
 
 export interface AppBrandingConfig {
   logoUrl?: string; // Custom uploaded or preset image URL
-  logoEmoji?: string; // e.g. "🦓" fallback
-  appName: string; // "Zebra Restaurant"
-  tagline: string; // "Masaki Peninsula, Dar es Salaam"
+  logoEmoji?: string; // e.g. "🍗" fallback
+  appName: string; // "Kookoos"
+  tagline: string; // "Proudly Tanzanian Fried Chicken • Dar es Salaam"
   restaurantMode?: RestaurantOperationMode; // 'single' (Mgahawa Mmoja) | 'multi' (Matawi Mengi)
   branches?: RestaurantBranch[];
   splashEnabled: boolean;

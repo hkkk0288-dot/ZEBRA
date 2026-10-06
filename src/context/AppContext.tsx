@@ -357,16 +357,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved ? JSON.parse(saved) : DEFAULT_USER;
   });
 
-  // Menu Items state (synced with admin edits)
+  // Menu Items state (synced with admin edits, auto-migrates to Kookoos menu)
   const [menuItems, setMenuItems] = useState<MenuItem[]>(() => {
     const saved = localStorage.getItem('zebra_menu');
-    return saved ? JSON.parse(saved) : INITIAL_MENU_ITEMS;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.some((i: any) => i.name?.includes('Kookoos') || i.name?.includes('Bomba Box'))) {
+          return parsed;
+        }
+      } catch {}
+    }
+    return INITIAL_MENU_ITEMS;
   });
 
   // Dynamic Categories state
   const [categories, setCategories] = useState<Category[]>(() => {
     const saved = localStorage.getItem('zebra_categories');
-    return saved ? JSON.parse(saved) : CATEGORIES;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.some((c: any) => c.id === 'boxes' || c.id === 'chicken')) {
+          return parsed;
+        }
+      } catch {}
+    }
+    return CATEGORIES;
   });
 
   useEffect(() => {
@@ -681,10 +697,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
+        const isZebraName = !parsed.appName || parsed.appName.toLowerCase().includes('zebra');
+        const appName = isZebraName ? 'Kookoos' : parsed.appName;
+        const logoEmoji = !parsed.logoEmoji || parsed.logoEmoji === '🦓' || isZebraName ? '🍗' : parsed.logoEmoji;
+        const isZebraTagline = !parsed.tagline || parsed.tagline.toLowerCase().includes('zebra') || parsed.tagline === 'Masaki Peninsula, Dar es Salaam';
+        const tagline = isZebraTagline
+          ? 'Proudly Tanzanian Fried Chicken • Dar es Salaam'
+          : parsed.tagline;
+
         return {
           ...DEFAULT_BRANDING_CONFIG,
           ...parsed,
-          branches: parsed.branches !== undefined ? parsed.branches : DEFAULT_BRANDING_CONFIG.branches
+          appName,
+          logoEmoji,
+          tagline,
+          branches: parsed.branches && parsed.branches.length > 0 ? parsed.branches : DEFAULT_BRANDING_CONFIG.branches
         };
       } catch {}
     }
@@ -693,20 +720,45 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [showSplashPreview, setShowSplashPreview] = useState(false);
 
-  // Helper to persist branding safely without QuotaExceededError or crashing
+  // Helper to persist branding safely without QuotaExceededError or circular structure errors
   const safePersistBranding = (branding: AppBrandingConfig) => {
     try {
-      // In localStorage, ensure large data URLs (> 50KB) don't choke localStorage quota
-      const cleanSlides = branding.splashSlides.map(slide => {
-        if (slide.mediaUrl && slide.mediaUrl.startsWith('data:') && slide.mediaUrl.length > 50000) {
-          return { ...slide, mediaUrl: `idb:${slide.id}` };
+      // In localStorage, ensure only pure serializable primitives are saved
+      const cleanSlides = (branding.splashSlides || []).map(slide => {
+        let media = typeof slide.mediaUrl === 'string' ? slide.mediaUrl : '';
+        if (media.startsWith('data:') && media.length > 50000) {
+          media = `idb:${slide.id}`;
         }
-        return slide;
+        return {
+          id: String(slide.id || ''),
+          type: slide.type === 'video' ? ('video' as const) : ('image' as const),
+          mediaUrl: media,
+          title: slide.title ? String(slide.title) : '',
+          subtitle: slide.subtitle ? String(slide.subtitle) : '',
+          durationSeconds: Number(slide.durationSeconds) || 5,
+          buttonText: slide.buttonText ? String(slide.buttonText) : '',
+          fitMode: slide.fitMode === 'cover' ? ('cover' as const) : ('fit' as const),
+          active: slide.active !== false,
+          orderIndex: Number(slide.orderIndex) || 0
+        };
       });
-      const toSave = { ...branding, splashSlides: cleanSlides };
+
+      const toSave = {
+        appName: String(branding.appName || 'Kookoos'),
+        tagline: String(branding.tagline || 'Proudly Tanzanian Fried Chicken • Dar es Salaam'),
+        logoEmoji: String(branding.logoEmoji || '🍗'),
+        logoUrl: typeof branding.logoUrl === 'string' ? branding.logoUrl : undefined,
+        restaurantMode: branding.restaurantMode === 'multi' ? ('multi' as const) : ('single' as const),
+        branches: Array.isArray(branding.branches) ? branding.branches : [],
+        splashEnabled: Boolean(branding.splashEnabled),
+        splashAutoSkip: Boolean(branding.splashAutoSkip),
+        splashShowOncePerSession: Boolean(branding.splashShowOncePerSession),
+        splashSlides: cleanSlides
+      };
+
       localStorage.setItem('zebra_app_branding', JSON.stringify(toSave));
     } catch (e) {
-      console.warn('LocalStorage save failed, quota exceeded or storage blocked:', e);
+      console.warn('LocalStorage save failed, quota exceeded or storage blocked:', e instanceof Error ? e.message : 'storage error');
     }
   };
 
@@ -841,7 +893,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const trimmed = identifier.trim();
     // Check if identifier is email, phone, or 3-part name
     let displayName = user.name || 'David Johnson';
-    let userEmail = user.email || 'customer@zebradsm.com';
+    let userEmail = user.email || 'customer@kookoos.co.tz';
     let userPhone = user.phone || '+255 754 123 456';
     let systemRole: SystemRole = 'Customer';
     let rolePermissions: RolePermissions | undefined = undefined;
@@ -1207,7 +1259,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         name: user.name,
         phone: details.phoneNumber || user.phone,
         email: user.email,
-        address: isDineIn ? `Meza: ${assignedTable} (Dine-In Zebra Masaki)` : details.deliveryAddress,
+        address: isDineIn ? `Meza: ${assignedTable} (Dine-In Kookoos Mwenge HQ)` : details.deliveryAddress,
         notes: details.notes
       },
       rider: isDineIn ? undefined : {

@@ -78,7 +78,7 @@ export const LuckySpinWheelModal: React.FC<LuckySpinWheelModalProps> = ({ isOpen
           Gurudumu la Bahati (Lucky Wheel)
         </h2>
         <p className="text-xs text-neutral-400 mt-0.5 mb-4">
-          Zungusha ujishindie pointi za Zebra, punguzo au kinywaji cha bure!
+          Zungusha ujishindie pointi za Kookoos, punguzo au kinywaji cha bure!
         </p>
 
         {/* Wheel Container */}

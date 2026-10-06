@@ -43,7 +43,8 @@ export const OrderTrackingView: React.FC = () => {
     openThermalReceipt,
     openSplitBill,
     openRiderTracker,
-    setShowScratchModal
+    setShowScratchModal,
+    appBranding
   } = useApp();
 
   const isDark = theme === 'dark';
@@ -97,7 +98,7 @@ export const OrderTrackingView: React.FC = () => {
           No Orders Yet
         </h2>
         <p className="text-sm text-neutral-500 max-w-xs mb-6">
-          Order something delicious from Zebra Restaurant to track your delivery in real-time!
+          Agiza kuku mtamu wa kukaanga au boksi za mlo kutoka {appBranding.appName} ili ufuatilie dereva wako mubashara!
         </p>
         <button
           onClick={() => setActiveTab('home')}

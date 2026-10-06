@@ -73,7 +73,7 @@ export const AdminMerchantsView: React.FC<AdminMerchantsViewProps> = () => {
         reviewsCount: '24',
         calories: 520,
         prepTimeMinutes: 20,
-        restaurantName: 'Zebra Central Kitchen',
+        restaurantName: 'Kookoos Central Kitchen',
         isAvailable: true,
         sizes: [
           { id: 's1', name: 'Regular', label: 'Regular', price: 0 },

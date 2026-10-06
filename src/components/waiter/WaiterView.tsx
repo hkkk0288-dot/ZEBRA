@@ -74,7 +74,7 @@ const INITIAL_TABLE_ORDERS: TableOrder[] = [
     waiterId: 'usr-wtr-6',
     guestCount: 5,
     items: [
-      { dishId: 'dish-2', name: 'Zebra Wagyu Double Smash Burger', quantity: 2, priceTZS: 24000 },
+      { dishId: 'dish-2', name: 'Kookoos Double Crunch Burger', quantity: 2, priceTZS: 24000 },
       { dishId: 'dish-7', name: 'Samaki wa Kupaka wa Nazi (Whole Tilapia)', quantity: 2, priceTZS: 32000 },
       { dishId: 'dish-8', name: 'Ugali ya Dona na Sukuma Wiki', quantity: 2, priceTZS: 4000 }
     ],
@@ -299,7 +299,7 @@ export const WaiterView: React.FC = () => {
               </span>
             </div>
             <p className="text-xs text-neutral-500 dark:text-neutral-400">
-              Mhudumu: <strong className="text-neutral-800 dark:text-neutral-200">{waiterDisplayName}</strong> • Kituo: Zebra Masaki Dining Hall
+              Mhudumu: <strong className="text-neutral-800 dark:text-neutral-200">{waiterDisplayName}</strong> • Kituo: Kookoos Mwenge HQ Dining Hall
             </p>
           </div>
         </div>

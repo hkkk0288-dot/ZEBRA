@@ -67,7 +67,7 @@ export const LiveRiderTrackerModal: React.FC<LiveRiderTrackerModalProps> = ({
   };
 
   const handleWhatsAppRider = () => {
-    const text = `Habari Juma! Ninafuatilia oda yangu ya Zebra Restaurant #${orderNum}. Nipo hapa ${deliveryAddr}.`;
+    const text = `Habari Juma! Ninafuatilia oda yangu ya ${appBranding.appName} #${orderNum}. Nipo hapa ${deliveryAddr}.`;
     window.open(`https://wa.me/255712345678?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -228,7 +228,7 @@ export const LiveRiderTrackerModal: React.FC<LiveRiderTrackerModalProps> = ({
                   🏍️ Bajaj Boxer 150 • Namba: <strong className="font-mono text-neutral-800 dark:text-neutral-200">MC 419 EAY</strong>
                 </p>
                 <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
-                  🛡️ Dereva rasmi aliyethibitishwa wa Zebra Delivery
+                  🛡️ Dereva rasmi aliyethibitishwa wa {appBranding.appName} Delivery
                 </p>
               </div>
             </div>
@@ -258,7 +258,7 @@ export const LiveRiderTrackerModal: React.FC<LiveRiderTrackerModalProps> = ({
 
         {/* Footer */}
         <div className="px-5 py-3 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-between text-xs text-neutral-400">
-          <span>Kituo Kikuu: Zebra Central Masaki Kitchen</span>
+          <span>Kituo Kikuu: {appBranding.appName} Mwenge HQ Kitchen</span>
           <button
             type="button"
             onClick={onClose}

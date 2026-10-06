@@ -143,7 +143,7 @@ export const HomeFeedView: React.FC = () => {
                   </button>
                 </div>
                 <h1 className="text-base font-bold font-display text-neutral-900 dark:text-white leading-tight">
-                  {isLoggedIn ? user.name : 'Zebra Customer'}
+                  {isLoggedIn ? user.name : `${appBranding.appName} Guest`}
                 </h1>
                 <button
                   type="button"
@@ -468,7 +468,7 @@ export const HomeFeedView: React.FC = () => {
               <div className="flex items-center space-x-1.5">
                 <Sparkles className="w-4 h-4 text-emerald-500 shrink-0" />
                 <h2 className="text-sm sm:text-base font-extrabold font-display text-neutral-900 dark:text-white tracking-tight">
-                  Zebra Signature & Swahili Dishes
+                  {appBranding.appName} Crispy Chicken & Sides
                 </h2>
                 <span className="text-[10px] font-bold text-neutral-400 bg-neutral-200/50 dark:bg-neutral-800/80 px-2 py-0.5 rounded-full">
                   {otherItems.length}
@@ -593,9 +593,9 @@ export const HomeFeedView: React.FC = () => {
 
             <div className="space-y-2.5">
               <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-xs">
-                <p className="font-bold text-emerald-400">🎉 Karibu Zebra Restaurant!</p>
+                <p className="font-bold text-emerald-400">🎉 Karibu {appBranding.appName}!</p>
                 <p className="text-neutral-400 mt-0.5">
-                  Tumia kuponi <strong className="text-white">ZEBRA30</strong> kupata 30% discount kwenye agizo lako la kwanza.
+                  Tumia kuponi <strong className="text-white">KOOKOOS20</strong> kupata 20% discount kwenye agizo lako la kwanza.
                 </p>
               </div>
 

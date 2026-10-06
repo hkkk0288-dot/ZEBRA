@@ -23,7 +23,7 @@ interface FoodDetailModalContentProps {
 }
 
 const FoodDetailModalContent: React.FC<FoodDetailModalContentProps> = ({ selectedDish }) => {
-  const { setSelectedDish, addToCart, toggleFavorite, isFavorite, currency, theme, isLoggedIn, menuItems } = useApp();
+  const { setSelectedDish, addToCart, toggleFavorite, isFavorite, currency, theme, isLoggedIn, menuItems, appBranding } = useApp();
 
   const isDark = theme === 'dark';
 
@@ -100,8 +100,8 @@ const FoodDetailModalContent: React.FC<FoodDetailModalContentProps> = ({ selecte
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: `${selectedDish.name} - Zebra Restaurant`,
-        text: `Check out ${selectedDish.name} on Zebra Restaurant!`,
+        title: `${selectedDish.name} - ${appBranding.appName}`,
+        text: `Check out ${selectedDish.name} on ${appBranding.appName}!`,
         url: window.location.href
       }).catch(() => {});
     } else {

@@ -19,33 +19,33 @@ interface ScratchCardModalProps {
 
 const REWARDS = [
   {
-    code: 'ZEBRA15',
+    code: 'KOOKOOS15',
     title: 'Punguzo la 15%!',
-    description: 'Punguzo la 15% kwenye oda yako ijayo ya chakula chochote!',
-    icon: '🍕'
+    description: 'Punguzo la 15% kwenye Boksi yoyote ya Kookoos Bomba au Bahati!',
+    icon: '🍗'
   },
   {
     code: 'FREEDRINK',
-    title: 'Mocktail au Soda ya Bure!',
-    description: 'Pata kinywaji freshi cha baridi bure unapoagiza chakula chochote mezani au delivery!',
-    icon: '🍹'
+    title: 'Soda au Mocktail ya Bure!',
+    description: 'Pata kinywaji freshi cha baridi bure unapoagiza chakula chochote!',
+    icon: '🥤'
   },
   {
     code: 'BONUS200',
-    title: 'Alama 200 za Uaminifu!',
-    description: 'Zebra Points 200 zimeongezwa kwenye akaunti yako tayari kutumika kama pesa taslimu!',
+    title: 'Pointi 200 za Kookoos!',
+    description: 'Kookoos Points 200 zimeongezwa kwenye akaunti yako tayari kutumika kama pesa taslimu!',
     icon: '🪙'
   },
   {
-    code: 'FRIESFREE',
-    title: 'Chipsi Masala ya Bure!',
-    description: 'Sahani ya chipsi masala moto bure unapoagiza burger au nyama choma!',
+    code: 'BOMBAFREE',
+    title: 'Chipsi Kubwa ya Bure!',
+    description: 'Bure portion kubwa ya chipsi freshi za Kookoos unapoagiza kuku!',
     icon: '🍟'
   }
 ];
 
 export const ScratchCardModal: React.FC<ScratchCardModalProps> = ({ isOpen, onClose }) => {
-  const { theme, applyPromoCode, addLoyaltyPoints } = useApp();
+  const { theme, applyPromoCode, addLoyaltyPoints, appBranding } = useApp();
   const isDark = theme === 'dark';
 
   const [reward] = useState(() => REWARDS[Math.floor(Math.random() * REWARDS.length)]);
@@ -152,7 +152,7 @@ export const ScratchCardModal: React.FC<ScratchCardModalProps> = ({ isOpen, onCl
             Kadi ya Zawadi ya Kujikuna (Scratch & Win)
           </h3>
           <p className="text-xs text-neutral-500 dark:text-neutral-400 max-w-xs mx-auto">
-            Asante kwa kuagiza Zebra Restaurant! Parura kadi hapa chini kufungua zawadi yako maalum:
+            Asante kwa kuagiza {appBranding.appName}! Parura kadi hapa chini kufungua zawadi yako maalum:
           </p>
         </div>
 

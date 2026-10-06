@@ -120,7 +120,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ currency }) => {
   const [phone, setPhone] = useState('+255 7');
   const [role, setRole] = useState<SystemRole>('Waiter');
   const [status, setStatus] = useState<'active' | 'suspended'>('active');
-  const [assignedBranch, setAssignedBranch] = useState('Zebra Central Masaki Kitchen');
+  const [assignedBranch, setAssignedBranch] = useState('Kookoos Mwenge HQ Branch');
   const [passwordMode, setPasswordMode] = useState<'auto' | 'manual'>('auto');
   const [customPassword, setCustomPassword] = useState('');
   const [permissions, setPermissions] = useState<RolePermissions>(DEFAULT_ROLE_PERMISSIONS['Waiter']);
@@ -178,7 +178,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ currency }) => {
 
   const generateRandomPassword = () => {
     const randNum = Math.floor(100000 + Math.random() * 900000);
-    return `Zebra-${randNum}!`;
+    return `Kookoos-${randNum}!`;
   };
 
   const openAddModal = () => {
@@ -188,7 +188,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ currency }) => {
     setPhone('+255 7');
     setRole('Waiter');
     setStatus('active');
-    setAssignedBranch('Zebra Central Masaki Kitchen');
+    setAssignedBranch('Kookoos Mwenge HQ Branch');
     setPasswordMode('auto');
     setCustomPassword('');
     setPermissions(DEFAULT_ROLE_PERMISSIONS['Waiter']);
@@ -202,7 +202,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ currency }) => {
     setPhone(u.phone);
     setRole(u.role);
     setStatus(u.status);
-    setAssignedBranch(u.assignedBranch || 'Zebra Central Masaki Kitchen');
+    setAssignedBranch(u.assignedBranch || 'Kookoos Mwenge HQ Branch');
     setPasswordMode('auto');
     setCustomPassword(u.tempPassword || '');
     setPermissions(
@@ -316,16 +316,16 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ currency }) => {
     const appUrl = window.location.origin;
     return `Habari ${u.name},
 
-Akaunti yako ya *Zebra Restaurant & Bar* imeundwa kikamilifu kwenye mfumo!
+Akaunti yako ya *Kookoos* imeundwa kikamilifu kwenye mfumo!
 
 🔐 *Taarifa Zako za Kuingilia (Login Credentials):*
 • *Nafasi / Cheo:* ${u.role}
 • *Barua Pepe (Email):* ${u.email}
 • *Nenosiri (Password):* ${pass}
-• *Kituo (Branch):* ${u.assignedBranch || 'Zebra Masaki Main Kitchen'}
+• *Kituo (Branch):* ${u.assignedBranch || 'Kookoos Mwenge HQ Branch'}
 • *Kiungo cha Kuingia (Login Link):* ${appUrl}
 
-Tafadhali ingia kwenye mfumo na ubadilishe nenosiri lako kwa usalama. Karibu sana kwenye timu ya Zebra! 🍽️🦓`;
+Tafadhali ingia kwenye mfumo na ubadilishe nenosiri lako kwa usalama. Karibu sana kwenye timu ya Kookoos! 🍗🔥`;
   };
 
   const sendWhatsApp = (u: AdminUserRecord, pass: string) => {
@@ -675,9 +675,9 @@ Tafadhali ingia kwenye mfumo na ubadilishe nenosiri lako kwa usalama. Karibu san
                     onChange={e => setAssignedBranch(e.target.value)}
                     className="w-full p-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white font-semibold outline-none"
                   >
-                    <option value="Zebra Central Masaki Kitchen">Zebra Central Masaki Kitchen</option>
-                    <option value="Zebra Oysterbay Pizza & Grill">Zebra Oysterbay Pizza & Grill</option>
-                    <option value="Zebra Mikocheni Delivery Hub">Zebra Mikocheni Delivery Hub</option>
+                    <option value="Kookoos Mwenge HQ Branch">Kookoos Mwenge HQ Branch</option>
+                    <option value="Kookoos Sinza Mori Branch">Kookoos Sinza Mori Branch</option>
+                    <option value="Kookoos Kamata Kariakoo Branch">Kookoos Kamata Kariakoo Branch</option>
                   </select>
                 </div>
               </div>
@@ -750,7 +750,7 @@ Tafadhali ingia kwenye mfumo na ubadilishe nenosiri lako kwa usalama. Karibu san
 
                 {passwordMode === 'auto' ? (
                   <p className="text-[11px] text-neutral-500 italic">
-                    Mfumo utatengeneza nenosiri imara kiotomatiki (mf. Zebra-849201!) na kuliweka tayari kutumwa WhatsApp.
+                    Mfumo utatengeneza nenosiri imara kiotomatiki (mf. Kookoos-849201!) na kuliweka tayari kutumwa WhatsApp.
                   </p>
                 ) : (
                   <div className="pt-1">
@@ -758,7 +758,7 @@ Tafadhali ingia kwenye mfumo na ubadilishe nenosiri lako kwa usalama. Karibu san
                       type="text"
                       value={customPassword}
                       onChange={e => setCustomPassword(e.target.value)}
-                      placeholder="Weka nenosiri la mtumiaji (mfano: Zebra@2025)"
+                      placeholder="Weka nenosiri la mtumiaji (mfano: Kookoos@2025)"
                       className="w-full p-2 rounded-xl bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-white font-mono outline-none"
                     />
                   </div>

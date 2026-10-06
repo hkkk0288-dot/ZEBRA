@@ -189,21 +189,21 @@ const KEY_LOCATIONS: KeyLocation[] = [
   },
   {
     id: 'masaki_kitchen',
-    name: 'Zebra Restaurant (Masaki Central)',
-    category: 'Zebra Kitchen HQ',
-    coords: [-6.7680, 39.2780],
-    description: 'Plot 44, Toure Drive, Masaki Peninsula',
+    name: 'Kookoos (Mwenge HQ Central)',
+    category: 'Kookoos Kitchen HQ',
+    coords: [-6.7712, 39.2215],
+    description: 'Bagamoyo Road, Karibu na Kituo cha Mwenge',
     color: '#f59e0b',
-    icon: '🍕'
+    icon: '🍗'
   },
   {
     id: 'kariakoo_hub',
-    name: 'Zebra Express (Kariakoo)',
-    category: 'Zebra Kitchen',
-    coords: [-6.8195, 39.2730],
-    description: 'China Plaza & Uhuru St, Kariakoo',
+    name: 'Kookoos Express (Kariakoo)',
+    category: 'Kookoos Kitchen',
+    coords: [-6.8240, 39.2785],
+    description: 'Kamata Junction, Nyerere / Msimbazi Road',
     color: '#ef4444',
-    icon: '🥩'
+    icon: '🍗'
   },
   {
     id: 'morogoro_town',

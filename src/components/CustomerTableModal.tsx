@@ -465,7 +465,7 @@ export const CustomerTableModal: React.FC<CustomerTableModalProps> = ({
         {/* Footer */}
         <div className="p-4 border-t border-neutral-100 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50 flex items-center justify-between">
           <p className="text-[11px] text-neutral-500">
-            Zebra Masaki Peninsula • Toure Drive
+            Kookoos Mwenge HQ • Bagamoyo Road
           </p>
           <button
             type="button"

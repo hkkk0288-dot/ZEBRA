@@ -35,7 +35,7 @@ export const TableQrModal: React.FC<TableQrModalProps> = ({
   onClose,
   onSelectTableForDineIn
 }) => {
-  const { tables, setActiveTable, setActiveTab } = useApp();
+  const { tables, setActiveTable, setActiveTab, appBranding } = useApp();
 
   // Active table selection (can be switched to other tables without closing)
   const [selectedTable, setSelectedTable] = useState<RestaurantTable>(initialTable);
@@ -70,11 +70,11 @@ export const TableQrModal: React.FC<TableQrModalProps> = ({
   const [fields, setFields] = useState<FlyerFields>({
     tableName: initialTable.name.toUpperCase(),
     sectionName: String(initialTable.section),
-    restaurantName: 'Zebra',
-    restaurantType: 'Restaurant & Lounge',
-    locationText: 'Masaki & Slipway • Dar es Salaam',
-    taglineLine1: 'Good Food',
-    taglineLine2: 'Good Vibes',
+    restaurantName: appBranding?.appName || 'Kookoos',
+    restaurantType: 'Fried Chicken & Fast Food',
+    locationText: 'Mwenge & Dar es Salaam Branches',
+    taglineLine1: 'Proudly Tanzanian',
+    taglineLine2: 'Fried Chicken',
     ctaTitle: 'Changanua Kuagiza',
     ctaSubtitle: 'Chakula na Vinywaji',
     step1Title: '1. Scan',
@@ -83,7 +83,7 @@ export const TableQrModal: React.FC<TableQrModalProps> = ({
     step2Desc: 'full menu, customize dishes,',
     step3Title: '3. Order',
     step3Desc: 'directly to this table!',
-    bottomGreeting: 'Karibu Sana!',
+    bottomGreeting: 'Karibu Kookoos!',
     customUrl: '',
     bgTheme: 'steak_mojito'
   });
@@ -127,11 +127,11 @@ export const TableQrModal: React.FC<TableQrModalProps> = ({
     setFields({
       tableName: selectedTable.name.toUpperCase(),
       sectionName: selectedTable.section,
-      restaurantName: 'Zebra',
-      restaurantType: 'Restaurant & Lounge',
-      locationText: 'Masaki & Slipway • Dar es Salaam',
-      taglineLine1: 'Good Food',
-      taglineLine2: 'Good Vibes',
+      restaurantName: 'Kookoos',
+      restaurantType: 'Fried Chicken & Burgers',
+      locationText: 'Mwenge HQ & 8 Branches • Dar es Salaam',
+      taglineLine1: 'Crispy Fresh',
+      taglineLine2: 'Proudly Tanzanian',
       ctaTitle: 'Changanua Kuagiza',
       ctaSubtitle: 'Chakula na Vinywaji',
       step1Title: '1. Scan',
@@ -161,8 +161,9 @@ export const TableQrModal: React.FC<TableQrModalProps> = ({
       });
 
       const safeName = fields.tableName.replace(/[^a-zA-Z0-9]/g, '_');
+      const safeBrand = (fields.restaurantName || 'Kookoos').replace(/[^a-zA-Z0-9]/g, '_');
       const link = document.createElement('a');
-      link.download = `Zebra-${safeName}-Full-Flyer.png`;
+      link.download = `${safeBrand}-${safeName}-Full-Flyer.png`;
       link.href = dataUrl;
       document.body.appendChild(link);
       link.click();
@@ -183,9 +184,10 @@ export const TableQrModal: React.FC<TableQrModalProps> = ({
   const handleDownloadQrOnly = () => {
     if (!qrDataUrl) return;
     const safeName = fields.tableName.replace(/[^a-zA-Z0-9]/g, '_');
+    const safeBrand = (fields.restaurantName || 'Kookoos').replace(/[^a-zA-Z0-9]/g, '_');
     const a = document.createElement('a');
     a.href = qrDataUrl;
-    a.download = `Zebra-QR-${safeName}.png`;
+    a.download = `${safeBrand}-QR-${safeName}.png`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -388,7 +390,7 @@ export const TableQrModal: React.FC<TableQrModalProps> = ({
                     type="text"
                     value={fields.restaurantName}
                     onChange={e => setFields(prev => ({ ...prev, restaurantName: e.target.value }))}
-                    placeholder="Zebra"
+                    placeholder="Kookoos"
                     className="w-full px-3 py-2 text-xs rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 focus:outline-none focus:ring-2 focus:ring-amber-500 text-neutral-900 dark:text-white"
                   />
                 </div>
@@ -612,24 +614,11 @@ export const TableQrModal: React.FC<TableQrModalProps> = ({
 
                   {/* ================= TOP SECTION ================= */}
                   <div className="relative z-10 pt-5 px-6 flex items-start justify-between">
-                    {/* Left: Zebra Mascot + Brand Name */}
+                    {/* Left: Kookoos Mascot + Brand Name */}
                     <div className="flex items-center space-x-3 text-left">
-                      {/* Stylized Zebra Mascot SVG */}
-                      <div className="w-12 h-12 rounded-2xl bg-white/95 p-1.5 shadow-lg border border-amber-400 flex items-center justify-center shrink-0">
-                        <svg viewBox="0 0 100 100" className="w-full h-full">
-                          {/* Stylized Zebra Head & Stripes */}
-                          <path d="M20 75 Q20 30 50 20 Q70 15 80 30 Q85 45 75 60 Q70 70 85 85 L20 85 Z" fill="#ffffff" stroke="#111" strokeWidth="2" />
-                          {/* Black Stripes */}
-                          <path d="M35 32 L45 38 L38 45" stroke="#111" strokeWidth="4" strokeLinecap="round" fill="none" />
-                          <path d="M48 24 L58 34 L50 44" stroke="#111" strokeWidth="4" strokeLinecap="round" fill="none" />
-                          <path d="M60 22 L72 32 L64 45" stroke="#111" strokeWidth="4" strokeLinecap="round" fill="none" />
-                          <path d="M30 55 L50 56 L40 68" stroke="#111" strokeWidth="4" strokeLinecap="round" fill="none" />
-                          <path d="M48 58 L68 60 L58 72" stroke="#111" strokeWidth="4" strokeLinecap="round" fill="none" />
-                          <path d="M25 74 L75 75" stroke="#111" strokeWidth="4" strokeLinecap="round" fill="none" />
-                          {/* Zebra Eye & Muzzle */}
-                          <circle cx="72" cy="38" r="3" fill="#111" />
-                          <path d="M80 50 Q88 55 82 62" stroke="#111" strokeWidth="3" fill="none" />
-                        </svg>
+                      {/* Stylized Kookoos Chicken Mascot */}
+                      <div className="w-12 h-12 rounded-2xl bg-amber-500/95 p-1.5 shadow-lg border border-amber-300 flex items-center justify-center shrink-0 text-2xl">
+                        🍗
                       </div>
 
                       <div>

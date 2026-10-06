@@ -95,7 +95,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish, isPreview 
             setVideoError(false);
           })
           .catch(err => {
-            console.warn('Autoplay with sound was blocked, retrying muted:', err);
+            console.warn('Autoplay with sound was blocked, retrying muted:', err instanceof Error ? err.message : 'autoplay blocked');
             video.muted = true;
             setIsMuted(true);
             video.play()
@@ -104,7 +104,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish, isPreview 
                 setVideoError(false);
               })
               .catch(retryErr => {
-                console.warn('Video playback failed completely:', retryErr);
+                console.warn('Video playback failed completely:', retryErr instanceof Error ? retryErr.message : 'playback error');
               });
           });
       }
@@ -269,8 +269,8 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish, isPreview 
                   setVideoDuration(dur);
                 }
               }}
-              onError={e => {
-                console.warn('Video failed to load in splash screen:', e);
+              onError={() => {
+                console.warn('Video failed to load in splash screen: media error or codec unsupported');
                 setVideoError(true);
                 setIsVideoLoading(false);
               }}

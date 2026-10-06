@@ -96,10 +96,10 @@ const SplashSlideThumbnail: React.FC<{ slide: SplashMediaItem }> = ({ slide }) =
 // Preset Restaurant Logos
 const LOGO_PRESETS = [
   {
-    name: 'Zebra Safari Badge',
-    url: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=200&q=80',
-    emoji: '🦓',
-    description: 'Classic Zebra Emblem'
+    name: 'Kookoos Fried Chicken Badge',
+    url: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=200&q=80',
+    emoji: '🍗',
+    description: 'Kookoos Fried Chicken Emblem'
   },
   {
     name: 'Golden Crown & Grill',
@@ -126,8 +126,8 @@ const VIDEO_PRESETS = [
   {
     name: 'Fresh Hot Pizza Slice Pull',
     url: 'https://assets.mixkit.co/videos/preview/mixkit-hands-holding-a-slice-of-freshly-baked-pizza-42971-large.mp4',
-    title: 'Piza Moto & Vyakula vya Kisasa',
-    subtitle: 'Zebra Restaurant Masaki - Ladha halisi ya tanuru la kuni'
+    title: 'Kookoos Crispy Chicken & Combos',
+    subtitle: 'Kookoos Fried Chicken - Ladha halisi ya kuku wa kukaanga'
   },
   {
     name: 'Pouring Refreshing Tropical Drink',
@@ -152,10 +152,10 @@ const VIDEO_PRESETS = [
 // High-def Curated Picture Presets for Splash Screen
 const IMAGE_PRESETS = [
   {
-    name: 'Zebra Restaurant Masaki Dining Ambiance',
+    name: 'Kookoos Mwenge HQ Dining Ambiance',
     url: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1600&q=85',
-    title: 'Karibu Zebra Restaurant Masaki',
-    subtitle: 'Peninsula Toure Drive - Mazingira tulivu, huduma bora na chakula kitamu'
+    title: 'Karibu Kookoos - Proudly Tanzanian Fried Chicken',
+    subtitle: 'Matawi 8 Dar es Salaam - Mazingira safi, kuku motomoto na huduma ya haraka'
   },
   {
     name: 'Nyama Choma Platter & Swahili Grill',
@@ -173,7 +173,7 @@ const IMAGE_PRESETS = [
     name: 'Gourmet Double Smash Burger',
     url: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1600&q=85',
     title: 'Gourmet Smash Burgers',
-    subtitle: 'Zinaambatana na chips za moto na sosi maalum ya Zebra'
+    subtitle: 'Zinaambatana na chips freshi za viazi na mchuzi maalum wa Kookoos'
   }
 ];
 
@@ -198,9 +198,9 @@ export const AdminBrandingView: React.FC = () => {
 
   // Logo form state
   const [logoUrlInput, setLogoUrlInput] = useState(appBranding.logoUrl || '');
-  const [logoEmojiInput, setLogoEmojiInput] = useState(appBranding.logoEmoji || '🦓');
-  const [appNameInput, setAppNameInput] = useState(appBranding.appName || 'Zebra Restaurant');
-  const [taglineInput, setTaglineInput] = useState(appBranding.tagline || 'Masaki Peninsula, Dar es Salaam');
+  const [logoEmojiInput, setLogoEmojiInput] = useState(appBranding.logoEmoji || '🍗');
+  const [appNameInput, setAppNameInput] = useState(appBranding.appName || 'Kookoos');
+  const [taglineInput, setTaglineInput] = useState(appBranding.tagline || 'Proudly Tanzanian Fried Chicken • Dar es Salaam');
 
   // Modal for adding or editing splash slide
   const [isSlideModalOpen, setIsSlideModalOpen] = useState(false);
@@ -267,9 +267,9 @@ export const AdminBrandingView: React.FC = () => {
     e.preventDefault();
     updateAppBranding({
       logoUrl: logoUrlInput.trim(),
-      logoEmoji: logoEmojiInput.trim() || '🦓',
-      appName: appNameInput.trim() || 'Zebra Restaurant',
-      tagline: taglineInput.trim() || 'Masaki Peninsula, Dar es Salaam'
+      logoEmoji: logoEmojiInput.trim() || '🍗',
+      appName: appNameInput.trim() || 'Kookoos',
+      tagline: taglineInput.trim() || 'Proudly Tanzanian Fried Chicken • Dar es Salaam'
     });
     showToast('Taarifa za Logo na Brand zimehifadhiwa kikamilifu! ✅');
   };
@@ -346,8 +346,8 @@ export const AdminBrandingView: React.FC = () => {
     setModalResolvedUrl(VIDEO_PRESETS[0].url);
     setUploadedFile(null);
     setModalVideoDuration(null);
-    setSlideTitle('Karibu Zebra Restaurant Masaki');
-    setSlideSubtitle('Chakula kitamu, mazingira safi, na uletewe popote Dar es Salaam');
+    setSlideTitle('Karibu Kookoos - Fried Chicken');
+    setSlideSubtitle('Kuku safi wa kukaanga, chipsi za viazi vya asubuhi, na uletewe popote Dar es Salaam');
     setSlideDuration(6);
     setSlideButtonText('Anza Sasa ➔');
     setSlideFitMode('fit');
@@ -416,15 +416,15 @@ export const AdminBrandingView: React.FC = () => {
       orderIndex: 0,
       type: 'video',
       mediaUrl: VIDEO_PRESETS[0].url,
-      title: 'Piza Moto & Vyakula vya Kisasa',
-      subtitle: 'Zebra Restaurant Masaki - Ladha halisi ya tanuru la kuni na viungo safi',
+      title: 'Kookoos Bomba Box & Fried Chicken',
+      subtitle: 'Kookoos - Kuku wa kukaanga aliyekolea vikolezo safi na chipsi za viazi vya asili',
       durationSeconds: 6,
       buttonText: 'Anza Sasa ➔',
       fitMode: 'fit',
       active: true
     };
     updateAppBranding({ splashSlides: [slide], splashEnabled: true });
-    showToast('Imewekwa: Slide 1 ya Video ya Piza Moto! 🍕🎬');
+    showToast('Imewekwa: Slide 1 ya Video ya Kookoos! 🍗🎬');
   };
 
   const handleSetSingleDrinkVideo = () => {
@@ -450,8 +450,8 @@ export const AdminBrandingView: React.FC = () => {
       orderIndex: 0,
       type: 'image',
       mediaUrl: IMAGE_PRESETS[0].url,
-      title: 'Karibu Zebra Restaurant Masaki',
-      subtitle: 'Peninsula Toure Drive - Mazingira tulivu, huduma bora na chakula kitamu',
+      title: 'Karibu Kookoos Dar es Salaam',
+      subtitle: 'Mwenge, Sinza, Kariakoo, Tegeta, Kigamboni na Bahari Beach - Huduma bora na kuku mtamu',
       durationSeconds: 5,
       buttonText: 'Fungua Menyu ➔',
       fitMode: 'fit',
@@ -990,10 +990,10 @@ export const AdminBrandingView: React.FC = () => {
 
               <div>
                 <h4 className="font-extrabold text-sm text-neutral-900 dark:text-white">
-                  {appNameInput || 'Zebra Restaurant'}
+                  {appNameInput || 'Kookoos'}
                 </h4>
                 <p className="text-[11px] text-amber-500 font-medium">
-                  {taglineInput || 'Masaki Peninsula, Dar es Salaam'}
+                  {taglineInput || 'Proudly Tanzanian Fried Chicken • Dar es Salaam'}
                 </p>
               </div>
 
@@ -1064,7 +1064,7 @@ export const AdminBrandingView: React.FC = () => {
                     value={appNameInput}
                     onChange={e => setAppNameInput(e.target.value)}
                     className="w-full p-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white font-bold outline-none focus:border-orange-500"
-                    placeholder="Zebra Restaurant"
+                    placeholder="Kookoos"
                   />
                 </div>
 
@@ -1077,7 +1077,7 @@ export const AdminBrandingView: React.FC = () => {
                     value={taglineInput}
                     onChange={e => setTaglineInput(e.target.value)}
                     className="w-full p-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white outline-none focus:border-orange-500"
-                    placeholder="Masaki Peninsula, Dar es Salaam"
+                    placeholder="Proudly Tanzanian Fried Chicken • Dar es Salaam"
                   />
                 </div>
               </div>
@@ -1687,7 +1687,7 @@ export const AdminBrandingView: React.FC = () => {
                     type="text"
                     value={slideTitle}
                     onChange={e => setSlideTitle(e.target.value)}
-                    placeholder="Mfano: Karibu Zebra Restaurant Masaki"
+                    placeholder="Mfano: Karibu Kookoos - Fried Chicken"
                     className="w-full p-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white font-bold outline-none focus:border-orange-500"
                   />
                 </div>
@@ -1871,7 +1871,7 @@ export const AdminBrandingView: React.FC = () => {
                   required
                   value={branchName}
                   onChange={e => setBranchName(e.target.value)}
-                  placeholder="Mfano: Zebra Mikocheni Gourmet"
+                  placeholder="Mfano: Kookoos Mwenge HQ"
                   className="w-full p-2.5 rounded-xl bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-white font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                 />
               </div>

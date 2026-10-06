@@ -89,7 +89,7 @@ const DEFAULT_PAYMENT_METHODS: PosPaymentMethodOption[] = [
   { id: 'cash', name: 'Cash', type: 'cash', icon: '💵' },
   { id: 'card', name: 'Card (POS)', type: 'card', icon: '💳' },
   { id: 'mfs', name: 'MFS (Simu)', type: 'mfs', icon: '📱', accountDetails: 'M-Pesa / Tigo / Airtel Lipa: 445566' },
-  { id: 'points', name: 'Zebra Points', type: 'points', icon: '🎁', accountDetails: 'Pointi za Zawadi' },
+  { id: 'points', name: 'Kookoos Points', type: 'points', icon: '🎁', accountDetails: 'Pointi za Zawadi' },
   { id: 'bank_crdb', name: 'CRDB Lipa', type: 'bank', icon: '🏦', accountDetails: 'Lipa Namba: 01529944' },
   { id: 'bank_nmb', name: 'NMB Quick', type: 'bank', icon: '🏛️', accountDetails: 'Lipa Namba: 778899' }
 ];
@@ -408,13 +408,13 @@ export const PosTerminalView: React.FC = () => {
       {/* Top Header Bar */}
       <div className="px-4 py-3 bg-[#111723] border-b border-neutral-800 flex flex-wrap items-center justify-between gap-3 shrink-0">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-2xl bg-emerald-500 text-neutral-950 font-black flex items-center justify-center text-xl shadow-lg shadow-emerald-500/20">
-            🦓
+          <div className="w-10 h-10 rounded-2xl bg-amber-500 text-neutral-950 font-black flex items-center justify-center text-xl shadow-lg shadow-amber-500/20">
+            🍗
           </div>
           <div>
             <div className="flex items-center space-x-2">
               <h1 className="font-bold text-base sm:text-lg font-display tracking-wide text-white">
-                Zebra POS Terminal
+                Kookoos POS Terminal
               </h1>
               <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-extrabold border border-emerald-500/30">
                 POINT OF SALE
@@ -1455,7 +1455,7 @@ export const PosTerminalView: React.FC = () => {
                   ||||| | |||| ||| |||||| |||| ||
                 </div>
                 <p className="text-[10px] font-bold text-neutral-700">
-                  Asante kwa kuchagua Zebra Restaurant! Karibu tena.
+                  Asante kwa kuchagua Kookoos! Karibu tena.
                 </p>
               </div>
             </div>

@@ -93,19 +93,19 @@ export const AdminBannersView: React.FC = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Form states
-  const [tag, setTag] = useState('Festive Offer • Zebra Restaurant');
+  const [tag, setTag] = useState('Festive Offer • Kookoos');
   const [title, setTitle] = useState('30% OFF');
-  const [titleHighlight, setTitleHighlight] = useState('Everything');
+  const [titleHighlight, setTitleHighlight] = useState('Bomba Box');
   const [description, setDescription] = useState(
-    'Authentic wood-fired pizzas, gourmet smash burgers, and fresh Swahili mishkaki & biryani delivered hot across Dar es Salaam.'
+    'Hand-breaded crispy fried chicken, signature Bomba Box, fresh daily hand-cut fries, and secret dips delivered hot across Dar es Salaam.'
   );
   const [ctaText, setCtaText] = useState('Claim 30% Off');
-  const [promoCode, setPromoCode] = useState('ZEBRA30');
+  const [promoCode, setPromoCode] = useState('KOOKOOS30');
   const [ussdNumber, setUssdNumber] = useState('*150*00#');
   const [bgGradient, setBgGradient] = useState(GRADIENT_PRESETS[0].value);
   const [accentColor, setAccentColor] = useState(GRADIENT_PRESETS[0].accent);
   const [imageUrl, setImageUrl] = useState(FOOD_IMAGE_PRESETS[0].url);
-  const [decorativeEmoji, setDecorativeEmoji] = useState('🍕');
+  const [decorativeEmoji, setDecorativeEmoji] = useState('🍗');
   const [targetCategory, setTargetCategory] = useState('all');
   const [active, setActive] = useState(true);
 
@@ -124,10 +124,10 @@ export const AdminBannersView: React.FC = () => {
     setCtaText(banner.ctaText);
     setPromoCode(banner.promoCode || '');
     setUssdNumber(banner.ussdNumber || '*150*00#');
-    setBgGradient(banner.bgGradient);
+    setBgGradient(banner.bgGradient || GRADIENT_PRESETS[0].value);
     setAccentColor(banner.accentColor);
     setImageUrl(banner.imageUrl || '');
-    setDecorativeEmoji(banner.decorativeEmoji || '🍕');
+    setDecorativeEmoji(banner.decorativeEmoji || '🍗');
     setTargetCategory(banner.targetCategory || 'all');
     setActive(banner.active !== false);
   };
@@ -135,12 +135,12 @@ export const AdminBannersView: React.FC = () => {
   const startCreate = () => {
     setEditingBanner(null);
     setIsCreatingNew(true);
-    setTag('Ofa Maalumu • Zebra Restaurant');
+    setTag('Ofa Maalumu • Kookoos');
     setTitle('20% PUNGUZO');
-    setTitleHighlight('Vyakula Vyote');
-    setDescription('Onja vyakula vitamu kutoka jiko la kisasa la Zebra Restaurant Masaki & Slipway.');
+    setTitleHighlight('Maboksi Yote');
+    setDescription('Onja kuku motomoto wa kukaanga kutoka matawi ya Kookoos Dar es Salaam.');
     setCtaText('Agiza Sasa');
-    setPromoCode('ZEBRA20');
+    setPromoCode('KOOKOOS20');
     setUssdNumber('*150*00#');
     setBgGradient(GRADIENT_PRESETS[1].value);
     setAccentColor(GRADIENT_PRESETS[1].accent);
@@ -357,7 +357,7 @@ export const AdminBannersView: React.FC = () => {
                   type="text"
                   value={tag}
                   onChange={e => setTag(e.target.value)}
-                  placeholder="e.g. Festive Offer • Zebra Restaurant"
+                  placeholder="e.g. Festive Offer • Kookoos"
                   className="w-full p-2.5 text-xs rounded-xl bg-neutral-800 border border-neutral-700 text-white outline-none focus:border-emerald-500"
                   required
                 />

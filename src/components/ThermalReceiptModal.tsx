@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { TableOrder, Order } from '../types';
 import { formatPrice } from '../utils/formatters';
+import { useApp } from '../context/AppContext';
 
 interface ThermalReceiptModalProps {
   tableOrder?: TableOrder | null;
@@ -25,9 +26,13 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
   onlineOrder,
   onClose
 }) => {
+  const { appBranding } = useApp();
   const [receiptType, setReceiptType] = useState<'kot' | 'customer_bill'>('customer_bill');
   const [copied, setCopied] = useState(false);
   const receiptRef = useRef<HTMLDivElement>(null);
+
+  const brandName = appBranding?.appName || 'KOOKOOS';
+  const brandTagline = appBranding?.tagline || 'Proudly Tanzanian Fried Chicken';
 
   const orderNumber = tableOrder?.orderNumber || onlineOrder?.orderNumber || 'ORD-001';
   const tableNumber = tableOrder?.tableNumber || onlineOrder?.tableNumber || 'Table 01';
@@ -64,12 +69,12 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
   };
 
   const handleShareWhatsApp = () => {
-    let text = `*ZEBRA RESTAURANT & LOUNGE MASAKI*\nPlot 44, Toure Drive, Masaki Peninsula, Dar es Salaam\nTel: +255 712 345 678 | TIN: 142-990-881\n\n*RISITI YA ODA / INVOICE*\nOda: *#${orderNumber}*\nMeza/Eneo: *${tableNumber}*\nTarehe: ${dateStr} ${timestamp}\n\n*ORODHA YA VYAKULA:*\n`;
+    let text = `*${brandName.toUpperCase()} - PROUDLY TANZANIAN FRIED CHICKEN*\n${brandTagline}\nTel: +255 712 345 678 | TIN: 142-990-881\n\n*RISITI YA ODA / INVOICE*\nOda: *#${orderNumber}*\nMeza/Eneo: *${tableNumber}*\nTarehe: ${dateStr} ${timestamp}\n\n*ORODHA YA VYAKULA:*\n`;
     items.forEach(i => {
       text += `• [${i.qty}x] ${i.name} - ${formatPrice(i.total, 'TZS')}\n`;
       if (i.notes) text += `   _(${i.notes})_\n`;
     });
-    text += `\n*JUMLA KUU (TOTAL): ${formatPrice(totalAmountTZS, 'TZS')}*\nLipa Namba M-Pesa / Tigo: *445566*\nAsante sana kwa kuchagua Zebra Restaurant Masaki! 🦓🍽️`;
+    text += `\n*JUMLA KUU (TOTAL): ${formatPrice(totalAmountTZS, 'TZS')}*\nLipa Namba M-Pesa / Tigo: *445566*\nAsante sana kwa kuagiza ${brandName}! 🍗🔥`;
     const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
   };
@@ -77,13 +82,13 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
   const handleCopyText = () => {
     let text = '';
     if (receiptType === 'kot') {
-      text = `=== KITCHEN ORDER TICKET (KOT) ===\nZEBRA RESTAURANT - MASAKI\nOrder: ${orderNumber} | Table: ${tableNumber}\nTime: ${timestamp} | Waiter: ${waiterName}\n----------------------------------\n`;
+      text = `=== KITCHEN ORDER TICKET (KOT) ===\n${brandName.toUpperCase()} KITCHEN\nOrder: ${orderNumber} | Table: ${tableNumber}\nTime: ${timestamp} | Waiter: ${waiterName}\n----------------------------------\n`;
       items.forEach(i => {
         text += `[${i.qty}x] ${i.name}\n${i.notes ? `   * Maelekezo: ${i.notes}\n` : ''}`;
       });
       text += `----------------------------------\nTotal Items: ${items.reduce((acc, c) => acc + c.qty, 0)}`;
     } else {
-      text = `=== ZEBRA RESTAURANT & LOUNGE ===\nPlot 44, Toure Drive, Masaki, Dar es Salaam\nTel: +255 712 345 678 | TIN: 142-990-881\nDate: ${dateStr} ${timestamp}\nTable: ${tableNumber} | Order: ${orderNumber}\n----------------------------------\n`;
+      text = `=== ${brandName.toUpperCase()} ===\n${brandTagline}\nTel: +255 712 345 678 | TIN: 142-990-881\nDate: ${dateStr} ${timestamp}\nTable: ${tableNumber} | Order: ${orderNumber}\n----------------------------------\n`;
       items.forEach(i => {
         text += `${i.qty}x ${i.name.padEnd(24, ' ')} ${formatPrice(i.total, 'TZS')}\n`;
       });
@@ -187,15 +192,15 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
             {/* Receipt Header */}
             {receiptType === 'customer_bill' ? (
               <div className="text-center space-y-0.5 border-b border-dashed border-neutral-300 pb-2 mb-2">
-                <h2 className="text-sm font-black tracking-tight uppercase">ZEBRA RESTAURANT & LOUNGE</h2>
-                <p className="text-[10px] text-neutral-600">Masaki Peninsula, Toure Drive, Dar es Salaam</p>
+                <h2 className="text-sm font-black tracking-tight uppercase">{brandName.toUpperCase()}</h2>
+                <p className="text-[10px] text-neutral-600">{brandTagline}</p>
                 <p className="text-[10px] text-neutral-600">Tel: +255 712 345 678 | TIN: 142-990-881</p>
                 <p className="text-[10px] font-bold text-neutral-800 mt-1">*** GUEST RECEIPT / BILI YA CHAKULA ***</p>
               </div>
             ) : (
               <div className="text-center space-y-0.5 border-b-2 border-black pb-2 mb-2 bg-neutral-100 p-1.5 rounded-sm">
                 <h2 className="text-base font-black tracking-wider uppercase">⚡ K.O.T - JIKONI ⚡</h2>
-                <p className="text-[11px] font-bold">ZEBRA RESTAURANT KITCHEN PASS</p>
+                <p className="text-[11px] font-bold">{brandName.toUpperCase()} KITCHEN PASS</p>
                 <p className="text-[10px] text-neutral-600">Ticket No: KOT-{orderNumber.slice(-4)}</p>
               </div>
             )}
@@ -276,9 +281,9 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
                 <div className="p-2 border border-neutral-300 rounded-sm bg-neutral-50 text-[10px]">
                   <p className="font-bold text-neutral-900">LIPA HAPA KWA SIMU:</p>
                   <p className="font-mono font-bold text-xs text-red-700">M-PESA / TIGO LIPA: 445566</p>
-                  <p className="text-[9px] text-neutral-500">Jina: ZEBRA RESTAURANT MASAKI</p>
+                  <p className="text-[9px] text-neutral-500">Jina: KOOKOOS FRIED CHICKEN DAR</p>
                 </div>
-                <p className="text-[10px] font-bold mt-2">ASANTE SANA KWA KUCHAGUA ZEBRA!</p>
+                <p className="text-[10px] font-bold mt-2">ASANTE SANA KWA KUCHAGUA KOOKOOS!</p>
                 <p className="text-[9px] text-neutral-500">Mfumo rasmi wa POS & KDS unaoendeshwa na AmourCodes</p>
               </div>
             )}

@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
 
 export const UssdPaymentModal: React.FC = () => {
-  const { ussdModalOrder, setUssdModalOrder, completeUssdPayment, currency, theme } = useApp();
+  const { ussdModalOrder, setUssdModalOrder, completeUssdPayment, currency, theme, appBranding } = useApp();
 
   const [selectedNetwork, setSelectedNetwork] = useState(USSD_NETWORKS[0]);
   const [copied, setCopied] = useState(false);
@@ -357,7 +357,7 @@ export const UssdPaymentModal: React.FC = () => {
                     </div>
                     <h3 className="font-bold text-white text-base">Malipo Yamethibitishwa!</h3>
                     <p className="text-xs text-neutral-300 leading-relaxed">
-                      Asante! Umelipa <strong className="text-emerald-400">{formattedTZS}</strong> kwa Zebra Restaurant.
+                      Asante! Umelipa <strong className="text-emerald-400">{formattedTZS}</strong> kwa {appBranding.appName}.
                       <br />
                       Kumbukumbu:{' '}
                       <span className="font-mono text-amber-400">

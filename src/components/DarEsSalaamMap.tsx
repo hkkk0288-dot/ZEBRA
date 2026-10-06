@@ -111,8 +111,8 @@ export const DarEsSalaamMap: React.FC<DarEsSalaamMapProps> = ({
       html: `
         <div class="relative flex flex-col items-center">
           <div class="px-2 py-1 rounded-xl bg-amber-500 text-neutral-950 font-black text-[10px] shadow-lg border border-amber-300 flex items-center space-x-1 whitespace-nowrap">
-            <span>🍕</span>
-            <span>Zebra Kitchen</span>
+            <span>🍗</span>
+            <span>Kookoos Kitchen</span>
           </div>
           <div class="w-1.5 h-1.5 bg-amber-500 rotate-45 -mt-0.5"></div>
         </div>
@@ -125,8 +125,8 @@ export const DarEsSalaamMap: React.FC<DarEsSalaamMapProps> = ({
       .addTo(map)
       .bindPopup(`
         <div style="font-family: sans-serif; padding: 2px;">
-          <strong style="color: #d97706; font-size: 12px;">Zebra Kitchen Hub</strong><br/>
-          <span style="font-size: 11px; color: #666;">Chakula kimeandaliwa hapa</span>
+          <strong style="color: #d97706; font-size: 12px;">Kookoos Kitchen Hub</strong><br/>
+          <span style="font-size: 11px; color: #666;">Kuku wa kukaanga anapikwa hapa</span>
         </div>
       `);
 
@@ -289,7 +289,7 @@ export const DarEsSalaamMap: React.FC<DarEsSalaamMapProps> = ({
       <div className="absolute bottom-3 left-3 right-3 pointer-events-none z-10 flex justify-center">
         <div className="pointer-events-auto bg-neutral-900/90 backdrop-blur-md border border-neutral-800 rounded-2xl px-3.5 py-1.5 text-white shadow-xl flex items-center space-x-2 text-[11px] max-w-sm w-full justify-between">
           <div className="flex items-center space-x-1.5 truncate">
-            <span className="text-amber-400 font-bold">Zebra Masaki</span>
+            <span className="text-amber-400 font-bold">Kookoos Hub</span>
             <span className="text-neutral-500">➔</span>
             <span className="truncate text-neutral-300">{customerLocationName}</span>
           </div>

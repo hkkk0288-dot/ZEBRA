@@ -70,7 +70,7 @@ export const AdminTransactionsView: React.FC<AdminTransactionsViewProps> = ({ cu
         amount: parseFloat(testAmount),
         buyerPhone: testPhone,
         feePayer: 'MERCHANT',
-        buyerName: 'Zebra Admin Tester'
+        buyerName: 'Kookoos Admin Tester'
       });
 
       setTestResult(res);

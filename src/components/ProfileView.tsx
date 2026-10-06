@@ -57,7 +57,7 @@ export const ProfileView: React.FC = () => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [nameInput, setNameInput] = useState(user?.name || 'David Michael Johnson');
   const [phoneInput, setPhoneInput] = useState(user?.phone || '+255 754 123 456');
-  const [emailInput, setEmailInput] = useState(user?.email || 'customer@zebradsm.com');
+  const [emailInput, setEmailInput] = useState(user?.email || 'customer@kookoos.co.tz');
   const [avatarInput, setAvatarInput] = useState(user?.avatar || '');
   const [avatarError, setAvatarError] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -420,7 +420,7 @@ export const ProfileView: React.FC = () => {
                 <Award className="w-5 h-5" />
               </span>
               <span className="text-xs font-black uppercase tracking-widest text-amber-400">
-                Zebra VIP Club • {user.loyaltyTier || 'Gold'} Tier
+                Kookoos VIP Club • {user.loyaltyTier || 'Gold'} Tier
               </span>
             </div>
             <h3 className="text-xl sm:text-2xl font-black text-white font-display">
@@ -690,7 +690,7 @@ export const ProfileView: React.FC = () => {
               </a>
 
               <a
-                href="https://wa.me/255744883291?text=Habari%20Zebra%20Restaurant,%20naomba%20msaada%20kuhusu%20oda%20yangu"
+                href="https://wa.me/255744883291?text=Habari%20Kookoos,%20naomba%20msaada%20kuhusu%20oda%20yangu"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-between p-3 rounded-2xl bg-neutral-800/40 border border-neutral-800 hover:border-emerald-500/40 transition-colors"

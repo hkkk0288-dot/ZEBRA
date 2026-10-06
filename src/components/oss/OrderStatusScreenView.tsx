@@ -37,16 +37,16 @@ interface OssTokenItem {
 }
 
 const INITIAL_TOKENS: OssTokenItem[] = [
-  { id: 't1', tokenNumber: '0104', status: 'preparing', type: 'dine_in', locationInfo: 'Meza 4 (VIP)', dishNames: 'Grilled Mixed Platter', timeElapsed: 7, estimatedTotal: 12 },
-  { id: 't2', tokenNumber: '1020', status: 'preparing', type: 'waiting_line', locationInfo: 'Mstari #2 (Kaunta)', dishNames: 'Zebra Beef Burger + Chips', timeElapsed: 4, estimatedTotal: 8 },
-  { id: 't3', tokenNumber: '0123', status: 'preparing', type: 'dine_in', locationInfo: 'Meza 2 (Dirishani)', dishNames: 'Samaki wa Kupaka', timeElapsed: 9, estimatedTotal: 15 },
-  { id: 't4', tokenNumber: '0126', status: 'preparing', type: 'waiting_line', locationInfo: 'Mstari #5 (Takeaway)', dishNames: 'Chicken Biryani Special', timeElapsed: 3, estimatedTotal: 10 },
-  { id: 't5', tokenNumber: '0130', status: 'preparing', type: 'delivery', locationInfo: 'Bodaboda - Mikocheni', dishNames: 'Swahili Coconut Fish', timeElapsed: 11, estimatedTotal: 16 },
+  { id: 't1', tokenNumber: '0104', status: 'preparing', type: 'dine_in', locationInfo: 'Meza 4 (VIP)', dishNames: 'Kookoos Bomba Box (3 Pcs)', timeElapsed: 7, estimatedTotal: 12 },
+  { id: 't2', tokenNumber: '1020', status: 'preparing', type: 'waiting_line', locationInfo: 'Mstari #2 (Kaunta)', dishNames: 'Kookoos Bomba Box + Chips', timeElapsed: 4, estimatedTotal: 8 },
+  { id: 't3', tokenNumber: '0123', status: 'preparing', type: 'dine_in', locationInfo: 'Meza 2 (Dirishani)', dishNames: 'Bahati Box Special Combo', timeElapsed: 9, estimatedTotal: 15 },
+  { id: 't4', tokenNumber: '0126', status: 'preparing', type: 'waiting_line', locationInfo: 'Mstari #5 (Takeaway)', dishNames: 'Chicken Pops & Fries', timeElapsed: 3, estimatedTotal: 10 },
+  { id: 't5', tokenNumber: '0130', status: 'preparing', type: 'delivery', locationInfo: 'Bodaboda - Mwenge', dishNames: 'Boneless Box + Soda', timeElapsed: 11, estimatedTotal: 16 },
   { id: 't6', tokenNumber: '0131', status: 'preparing', type: 'dine_in', locationInfo: 'Meza 7 (Bustani)', dishNames: 'Crispy Wings & Fries', timeElapsed: 2, estimatedTotal: 7 },
   
   // Ready tokens
-  { id: 't7', tokenNumber: '0105', status: 'ready', type: 'dine_in', locationInfo: 'Meza 1 (Ndani)', dishNames: 'Chips Mayai Special', timeElapsed: 14, estimatedTotal: 14 },
-  { id: 't8', tokenNumber: '0107', status: 'ready', type: 'waiting_line', locationInfo: 'Mstari #1 (Takeaway)', dishNames: 'Zebra Cheeseburger', timeElapsed: 9, estimatedTotal: 9 },
+  { id: 't7', tokenNumber: '0105', status: 'ready', type: 'dine_in', locationInfo: 'Meza 1 (Ndani)', dishNames: 'Masala Fries Special', timeElapsed: 14, estimatedTotal: 14 },
+  { id: 't8', tokenNumber: '0107', status: 'ready', type: 'waiting_line', locationInfo: 'Mstari #1 (Takeaway)', dishNames: 'Kookoos Double Crunch Burger', timeElapsed: 9, estimatedTotal: 9 },
   { id: 't9', tokenNumber: '1030', status: 'ready', type: 'dine_in', locationInfo: 'Meza 6 (Ghorofani)', dishNames: 'Nyama Choma Ribs', timeElapsed: 18, estimatedTotal: 18 },
   { id: 't10', tokenNumber: '0124', status: 'ready', type: 'waiting_line', locationInfo: 'Mstari #3 (Kaunta)', dishNames: 'Passion Juice + Pizza', timeElapsed: 12, estimatedTotal: 12 },
   { id: 't11', tokenNumber: '0125', status: 'ready', type: 'delivery', locationInfo: 'Bodaboda - Masaki', dishNames: 'Chef Special Mishkaki', timeElapsed: 15, estimatedTotal: 15 }
@@ -473,7 +473,7 @@ export const OrderStatusScreenView: React.FC = () => {
                 Special Dishes & Specials
               </h2>
             </div>
-            <span className="text-xs text-neutral-400 font-medium">Zebra Menu</span>
+            <span className="text-xs text-neutral-400 font-medium">Kookoos Menu</span>
           </div>
 
           {/* Food Items Showcase Grid */}

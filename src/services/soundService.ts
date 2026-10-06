@@ -1,5 +1,5 @@
 /**
- * Web Audio API Sound Synthesizer for Zebra Restaurant
+ * Web Audio API Sound Synthesizer for Kookoos
  * Generates realistic restaurant bells, kitchen dings, and cashier chimes
  * without relying on external MP3 assets.
  */

@@ -47,7 +47,7 @@ export const HomeMapSection: React.FC<HomeMapSectionProps> = ({
                 </span>
               </div>
               <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
-                Tazama vituo vya jikoni na maeneo ya matawi ya Zebra Restaurant Dar es Salaam
+                Tazama vituo vya jikoni na maeneo ya matawi ya Kookoos Dar es Salaam
               </p>
             </div>
           </div>

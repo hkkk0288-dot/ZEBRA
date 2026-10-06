@@ -275,7 +275,7 @@ export const AuthView: React.FC = () => {
           password: signupPassword
         });
 
-        setSuccessMsg(`Hongera ${fullName3}! Akaunti yako ya Zebra Restaurant imetengenezwa kwa mafanikio.`);
+        setSuccessMsg(`Hongera ${fullName3}! Akaunti yako ya Kookoos imetengenezwa kwa mafanikio.`);
         confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
         const nextTab = pendingAction ? 'cart' : 'home';
         setTimeout(() => setActiveTab(nextTab), 1200);
@@ -833,7 +833,7 @@ export const AuthView: React.FC = () => {
                     >
                       Sera ya Faragha
                     </button>{' '}
-                    ya Zebra Restaurant.
+                    ya Kookoos.
                   </span>
                 </label>
               </div>
@@ -1026,7 +1026,7 @@ export const AuthView: React.FC = () => {
             <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
               <h3 className="font-bold text-sm flex items-center space-x-2">
                 <ShieldCheck className="w-4 h-4 text-amber-400" />
-                <span>Vigezo na Masharti (Zebra Restaurant)</span>
+                <span>Vigezo na Masharti (Kookoos)</span>
               </h3>
               <button
                 onClick={() => setShowTermsModal(false)}

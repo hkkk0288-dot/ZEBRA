@@ -95,7 +95,7 @@ export const TableReservationModal: React.FC<TableReservationModalProps> = ({ on
                 <span>Hifadhi Meza Kabla (Table Reservation)</span>
               </h2>
               <p className="text-xs text-neutral-500">
-                Zebra Restaurant & Lounge • Masaki Peninsula
+                Kookoos Fried Chicken & Lounge • Mwenge HQ
               </p>
             </div>
           </div>
@@ -192,7 +192,7 @@ export const TableReservationModal: React.FC<TableReservationModalProps> = ({ on
                   Meza Yako Imehifadhiwa Kikamilifu!
                 </h3>
                 <p className="text-xs text-neutral-500 mt-1 max-w-sm mx-auto">
-                  Tumekutumia uthibitisho na namba ya kumbukumbu. Karibu sana Zebra Masaki.
+                  Tumekutumia uthibitisho na namba ya kumbukumbu. Karibu sana Kookoos.
                 </p>
               </div>
 

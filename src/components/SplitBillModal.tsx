@@ -254,7 +254,7 @@ export const SplitBillModal: React.FC<SplitBillModalProps> = ({
             <div>
               <p className="font-bold text-neutral-800 dark:text-white">Namba ya Lipa Meza:</p>
               <p className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">
-                M-Pesa / Tigo: 445566 (Zebra Masaki)
+                M-Pesa / Tigo: 445566 (Kookoos Dar)
               </p>
             </div>
             <span className="text-[11px] bg-neutral-200 dark:bg-neutral-700 px-2 py-1 rounded-lg font-mono">

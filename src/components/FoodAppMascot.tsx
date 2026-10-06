@@ -227,7 +227,7 @@ export const FoodAppMascot: React.FC<FoodAppMascotProps> = ({
 
       {showSubtitle && (
         <p className="mt-2 text-xs font-semibold text-amber-400/90 tracking-wider uppercase">
-          Zebra Restaurant • Dar es Salaam
+          Kookoos • Dar es Salaam
         </p>
       )}
     </div>
