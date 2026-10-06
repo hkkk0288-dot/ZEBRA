@@ -30,6 +30,8 @@ interface MapLocationPickerModalProps {
   initialAddress?: string;
   initialCoords?: [number, number];
   isDark?: boolean;
+  title?: string;
+  subtitle?: string;
 }
 
 // Popular delivery areas in Dar es Salaam with predefined coordinates
@@ -54,7 +56,9 @@ export const MapLocationPickerModal: React.FC<MapLocationPickerModalProps> = ({
   onSelectLocation,
   initialAddress = '',
   initialCoords = [-6.7725, 39.2725], // Default: Masaki / Oysterbay area, Dar es Salaam
-  isDark = true
+  isDark = true,
+  title,
+  subtitle
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -324,7 +328,7 @@ export const MapLocationPickerModal: React.FC<MapLocationPickerModalProps> = ({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-2 sm:p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/85 backdrop-blur-md p-2 sm:p-4 animate-in fade-in duration-200">
       <div
         className={`w-full max-w-2xl rounded-3xl border shadow-2xl overflow-hidden flex flex-col max-h-[94vh] sm:max-h-[90vh] transition-all ${
           isDark
@@ -351,13 +355,13 @@ export const MapLocationPickerModal: React.FC<MapLocationPickerModalProps> = ({
             </div>
             <div className="min-w-0 flex-1">
               <h3 className="font-extrabold text-xs sm:text-base font-display flex items-center space-x-1.5 truncate">
-                <span>Eneo Lako la Kuletewa Chakula</span>
+                <span>{title || 'Eneo Lako la Kuletewa Chakula'}</span>
                 <span className="text-[10px] bg-emerald-500/20 text-emerald-400 font-bold px-1.5 py-0.2 rounded-full border border-emerald-500/30 hidden xs:inline-block">
-                  Dar Delivery
+                  Dar Live Map
                 </span>
               </h3>
               <p className="text-[10px] sm:text-[11px] text-neutral-400 truncate">
-                Chagua au sogeza alama kuweka eneo lako la kupokelea oda
+                {subtitle || 'Chagua au sogeza alama kuweka eneo lako la kupokelea oda'}
               </p>
             </div>
           </div>

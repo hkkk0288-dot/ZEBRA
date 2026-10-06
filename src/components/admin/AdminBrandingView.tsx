@@ -37,6 +37,7 @@ import {
   ParsedVideoInfo
 } from '../../services/mediaStorageService';
 import { uploadVideoToCloudinary, uploadImageToCloudinary } from '../../services/cloudinaryService';
+import { MapLocationPickerModal, LocationPickerResult } from '../MapLocationPickerModal';
 
 // Thumbnail component for video / image splash slides with IndexedDB and YouTube resolution
 const SplashSlideThumbnail: React.FC<{ slide: SplashMediaItem }> = ({ slide }) => {
@@ -515,6 +516,7 @@ export const AdminBrandingView: React.FC = () => {
 
   // Branch management state for Multi-Branch Mode
   const [isBranchModalOpen, setIsBranchModalOpen] = useState(false);
+  const [isBranchMapPickerOpen, setIsBranchMapPickerOpen] = useState(false);
   const [editingBranch, setEditingBranch] = useState<RestaurantBranch | null>(null);
   const [branchName, setBranchName] = useState('');
   const [branchArea, setBranchArea] = useState('');
@@ -1948,12 +1950,21 @@ export const AdminBrandingView: React.FC = () => {
 
               {/* Coordinates (Latitude & Longitude) */}
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-neutral-700 dark:text-neutral-300 font-bold">
-                    Coordinates za Ramani (GPS Lat / Lng):
+                <div className="flex items-center justify-between mb-1.5 flex-wrap gap-1.5">
+                  <label className="text-neutral-700 dark:text-neutral-300 font-bold flex items-center space-x-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-emerald-500" />
+                    <span>Coordinates za Ramani (GPS Lat / Lng):</span>
                   </label>
-                  <span className="text-[10px] text-emerald-500 font-bold">Kwa ajili ya Pin kwenye Ramani</span>
+                  <button
+                    type="button"
+                    onClick={() => setIsBranchMapPickerOpen(true)}
+                    className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs shadow-md shadow-emerald-600/25 active:scale-95 transition-all cursor-pointer"
+                    title="Bofya hapa kufungua ramani na kuchagua eneo la tawi moja kwa moja"
+                  >
+                    <span>🗺️ Chagua Kwenye Ramani</span>
+                  </button>
                 </div>
+
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <span className="text-[10px] text-neutral-400 block mb-0.5">Latitude (Lat)</span>
@@ -1962,7 +1973,7 @@ export const AdminBrandingView: React.FC = () => {
                       step="any"
                       value={branchLat}
                       onChange={e => setBranchLat(parseFloat(e.target.value))}
-                      className="w-full p-2 rounded-xl bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-white font-mono text-xs"
+                      className="w-full p-2.5 rounded-xl bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                     />
                   </div>
                   <div>
@@ -1972,20 +1983,41 @@ export const AdminBrandingView: React.FC = () => {
                       step="any"
                       value={branchLng}
                       onChange={e => setBranchLng(parseFloat(e.target.value))}
-                      className="w-full p-2 rounded-xl bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-white font-mono text-xs"
+                      className="w-full p-2.5 rounded-xl bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                     />
                   </div>
                 </div>
 
+                {/* Selected Location Indicator Card with Map Trigger */}
+                <div className="mt-2 p-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between gap-2">
+                  <div className="flex items-center space-x-2 text-xs min-w-0">
+                    <span className="text-emerald-500 font-extrabold shrink-0">📍 GPS Pin:</span>
+                    <span className="font-mono text-neutral-800 dark:text-neutral-200 font-bold truncate">
+                      {branchLat.toFixed(5)}, {branchLng.toFixed(5)}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsBranchMapPickerOpen(true)}
+                    className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] shrink-0 transition-colors cursor-pointer"
+                  >
+                    Gusa Kwenye Ramani ➔
+                  </button>
+                </div>
+
                 {/* Quick Presets for Dar es Salaam Areas */}
-                <div className="mt-2 flex items-center space-x-1.5 flex-wrap gap-y-1">
-                  <span className="text-[10px] text-neutral-400 mr-1">Maeneo ya Haraka:</span>
+                <div className="mt-2.5 flex items-center space-x-1.5 flex-wrap gap-y-1.5">
+                  <span className="text-[10px] text-neutral-400 mr-0.5 font-semibold">Maeneo ya Haraka (Dar):</span>
                   {[
-                    { name: 'Masaki', lat: -6.7538, lng: 39.2780 },
-                    { name: 'Oysterbay', lat: -6.7725, lng: 39.2650 },
-                    { name: 'Slipway', lat: -6.7582, lng: 39.2685 },
-                    { name: 'Kariakoo', lat: -6.8195, lng: 39.2730 },
-                    { name: 'Mikocheni', lat: -6.7725, lng: 39.2485 }
+                    { name: 'Mwenge HQ', lat: -6.7712, lng: 39.2215 },
+                    { name: 'Sinza Mori', lat: -6.7820, lng: 39.2310 },
+                    { name: 'Kariakoo', lat: -6.8240, lng: 39.2785 },
+                    { name: 'Masaki', lat: -6.7580, lng: 39.2820 },
+                    { name: 'Mikocheni', lat: -6.7725, lng: 39.2485 },
+                    { name: 'Goba Masana', lat: -6.7450, lng: 39.1850 },
+                    { name: 'Tegeta', lat: -6.6850, lng: 39.2010 },
+                    { name: 'Kigamboni', lat: -6.8320, lng: 39.3010 },
+                    { name: 'Bahari Beach', lat: -6.6620, lng: 39.2130 }
                   ].map(preset => (
                     <button
                       key={preset.name}
@@ -1993,8 +2025,11 @@ export const AdminBrandingView: React.FC = () => {
                       onClick={() => {
                         setBranchLat(preset.lat);
                         setBranchLng(preset.lng);
+                        if (!branchArea.trim() || branchArea === 'Masaki Peninsula') {
+                          setBranchArea(preset.name);
+                        }
                       }}
-                      className="px-2 py-0.5 rounded-lg bg-neutral-200 dark:bg-neutral-800 hover:bg-emerald-500/20 hover:text-emerald-400 text-[10px] font-bold text-neutral-700 dark:text-neutral-300 transition-colors"
+                      className="px-2 py-0.5 rounded-lg bg-neutral-200 dark:bg-neutral-800 hover:bg-emerald-500/20 hover:text-emerald-400 text-[10px] font-bold text-neutral-700 dark:text-neutral-300 transition-colors cursor-pointer"
                     >
                       {preset.name}
                     </button>
@@ -2007,13 +2042,13 @@ export const AdminBrandingView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsBranchModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 font-bold"
+                  className="flex-1 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 font-bold cursor-pointer"
                 >
                   Ghairi
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-neutral-950 font-black shadow-md shadow-emerald-600/20 active:scale-95 transition-all"
+                  className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-neutral-950 font-black shadow-md shadow-emerald-600/20 active:scale-95 transition-all cursor-pointer"
                 >
                   {editingBranch ? 'Hifadhi Mabadiliko' : 'Weka Tawi Jipya'}
                 </button>
@@ -2021,6 +2056,31 @@ export const AdminBrandingView: React.FC = () => {
             </form>
           </div>
         </div>
+      )}
+
+      {/* INTERACTIVE MAP LOCATION PICKER MODAL FOR BRANCH PIN */}
+      {isBranchMapPickerOpen && (
+        <MapLocationPickerModal
+          isOpen={isBranchMapPickerOpen}
+          onClose={() => setIsBranchMapPickerOpen(false)}
+          initialCoords={[branchLat, branchLng]}
+          initialAddress={branchAddress || branchArea || 'Kookoos Branch'}
+          title="Chagua Eneo la Tawi kwenye Ramani"
+          subtitle="Bofya au sogeza alama kuweka tawi lako jipya la Kookoos popote Dar es Salaam"
+          isDark={isDark}
+          onSelectLocation={(res: LocationPickerResult) => {
+            setBranchLat(res.coords[0]);
+            setBranchLng(res.coords[1]);
+            if (!branchArea.trim() || branchArea === 'Masaki Peninsula') {
+              setBranchArea(res.areaName);
+            }
+            if (!branchAddress.trim()) {
+              setBranchAddress(res.address);
+            }
+            setIsBranchMapPickerOpen(false);
+            showToast(`📍 Eneo la tawi limechaguliwa: ${res.areaName} (${res.coords[0].toFixed(4)}, ${res.coords[1].toFixed(4)})`);
+          }}
+        />
       )}
     </div>
   );
