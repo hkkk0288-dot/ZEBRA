@@ -26,7 +26,7 @@ export type MapPreset =
   | 'world'
   | 'user_location';
 
-export type TileLayerType = 'google_terrain' | 'google_roadmap' | 'google_hybrid' | 'google_satellite' | 'carto_voyager';
+export type TileLayerType = 'google_roadmap' | 'google_hybrid' | 'google_satellite' | 'google_terrain' | 'osm_standard';
 
 interface MapPresetConfig {
   key: MapPreset;
@@ -122,12 +122,12 @@ const LIVE_TILE_LAYERS: Record<TileLayerType, { name: string; url: string; subdo
     maxZoom: 20,
     attr: '&copy; Google Maps'
   },
-  carto_voyager: {
-    name: 'Carto Voyager (Safi)',
-    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-    subdomains: ['a', 'b', 'c', 'd'],
+  osm_standard: {
+    name: 'OpenStreetMap (Asilia)',
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    subdomains: ['a', 'b', 'c'],
     maxZoom: 19,
-    attr: '&copy; CartoDB & OSM'
+    attr: '&copy; OpenStreetMap contributors'
   }
 };
 
@@ -248,7 +248,7 @@ export const InteractiveLiveMap: React.FC<InteractiveLiveMapProps> = ({
   const userCircleRef = useRef<L.Circle | null>(null);
 
   const [activePreset, setActivePreset] = useState<MapPreset>(initialPreset);
-  const [activeTileType, setActiveTileType] = useState<TileLayerType>('google_terrain');
+  const [activeTileType, setActiveTileType] = useState<TileLayerType>('google_roadmap');
   const [currentZoom, setCurrentZoom] = useState<number>(7);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isLocatingUser, setIsLocatingUser] = useState<boolean>(false);
