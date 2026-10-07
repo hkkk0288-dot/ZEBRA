@@ -16,7 +16,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { TableOrder, Order } from '../types';
-import { formatPrice } from '../utils/formatters';
+import { formatPrice, formatTzsPrice } from '../utils/formatters';
 import { useApp } from '../context/AppContext';
 import {
   downloadElementAsImage,
@@ -326,11 +326,11 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
               <div className="space-y-1 border-b border-dashed border-neutral-300 pb-2 mb-2 text-[10px]">
                 <div className="flex justify-between text-neutral-600">
                   <span>Jumla Ndogo (Subtotal):</span>
-                  <span>{formatPrice(totalAmountTZS, 'TZS')}</span>
+                  <span>{formatTzsPrice(totalAmountTZS)}</span>
                 </div>
                 <div className="flex justify-between text-neutral-600">
                   <span>VAT (18% Inclusive):</span>
-                  <span>{formatPrice(Math.round(totalAmountTZS * 0.18), 'TZS')}</span>
+                  <span>{formatTzsPrice(Math.round(totalAmountTZS * 0.18))}</span>
                 </div>
                 <div className="flex justify-between text-neutral-600">
                   <span>Huduma ya Mezani (Dine-In):</span>
@@ -338,7 +338,7 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
                 </div>
                 <div className="flex justify-between text-sm font-black pt-1 border-t border-black text-black">
                   <span>JUMLA KUU (TOTAL):</span>
-                  <span>{formatPrice(totalAmountTZS, 'TZS')}</span>
+                  <span>{formatTzsPrice(totalAmountTZS)}</span>
                 </div>
               </div>
             ) : (

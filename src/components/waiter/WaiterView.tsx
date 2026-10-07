@@ -868,17 +868,19 @@ export const WaiterView: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex space-x-2 pt-2">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 pt-2">
               <button
                 type="button"
                 onClick={() => {
-                  showToast('🖨️ Risiti inachapwa kwenye printer ya mezani...');
+                  const targetOrder = showBillModal;
                   setShowBillModal(null);
+                  openThermalReceipt(targetOrder);
                 }}
-                className="flex-1 py-3 rounded-2xl bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 font-bold text-xs flex items-center justify-center space-x-1.5 cursor-pointer"
+                className="flex-1 py-3 rounded-2xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 border border-orange-500/30 font-bold text-xs flex items-center justify-center space-x-1.5 cursor-pointer transition-all active:scale-95"
+                title="Chapisha au pakua risiti ya thermal (POS)"
               >
                 <Printer className="w-4 h-4" />
-                <span>Print Risiti</span>
+                <span>Chapisha / Pakua Risiti</span>
               </button>
 
               <button
@@ -886,8 +888,9 @@ export const WaiterView: React.FC = () => {
                 onClick={() => {
                   handleStatusChange(showBillModal.id, 'paid');
                   setShowBillModal(null);
+                  showToast('✅ Malipo yamethibitishwa kikamilifu!');
                 }}
-                className="flex-1 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md shadow-emerald-600/30 flex items-center justify-center space-x-1.5 cursor-pointer"
+                className="flex-1 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md shadow-emerald-600/30 flex items-center justify-center space-x-1.5 cursor-pointer transition-all active:scale-95"
               >
                 <CheckCircle2 className="w-4 h-4" />
                 <span>Thibitisha Malipo</span>

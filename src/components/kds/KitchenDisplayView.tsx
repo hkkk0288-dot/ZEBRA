@@ -14,11 +14,12 @@ import {
   Sparkles,
   ShoppingBag,
   ChefHat,
-  ArrowLeft
+  ArrowLeft,
+  Printer
 } from 'lucide-react';
 
 export const KitchenDisplayView: React.FC = () => {
-  const { orders, tableOrders, updateOrderStatus, setActiveTab, goBack, currency } = useApp();
+  const { orders, tableOrders, updateOrderStatus, setActiveTab, goBack, currency, openThermalReceipt } = useApp();
 
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [filterType, setFilterType] = useState<'all' | 'preparing' | 'ready'>('all');
@@ -189,9 +190,19 @@ export const KitchenDisplayView: React.FC = () => {
                       </span>
                     </div>
 
-                    <div className="flex items-center space-x-1 text-[11px] text-neutral-400 font-medium">
-                      <Clock className="w-3 h-3" />
-                      <span>{order.date?.split(',')[1] || 'Sasa hivi'}</span>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => openThermalReceipt(null, order)}
+                        className="p-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white transition-all cursor-pointer"
+                        title="Chapisha au pakua tiketi ya mpishi (KOT)"
+                      >
+                        <Printer className="w-3.5 h-3.5 text-neutral-300" />
+                      </button>
+                      <div className="flex items-center space-x-1 text-[11px] text-neutral-400 font-medium">
+                        <Clock className="w-3 h-3" />
+                        <span>{order.date?.split(',')[1] || 'Sasa hivi'}</span>
+                      </div>
                     </div>
                   </div>
 

@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --brand-primary: #f59e0b;
   --brand-primary-rgb: 245, 158, 11;

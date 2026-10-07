@@ -22,7 +22,7 @@ import {
   Sparkles,
   ArrowLeft
 } from 'lucide-react';
-import { formatPrice } from '../utils/formatters';
+import { formatPrice, formatTzsPrice } from '../utils/formatters';
 import { MapLocationPickerModal } from './MapLocationPickerModal';
 
 const AVATAR_PRESETS = [
@@ -427,7 +427,7 @@ export const ProfileView: React.FC = () => {
               {loyaltyPoints} Pointi za Uaminifu
             </h3>
             <p className="text-xs text-neutral-300">
-              Thamani halisi ya punguzo: <span className="text-emerald-400 font-bold font-mono">{formatPrice((loyaltyPoints / 100) * 1000, 'TZS')}</span>. Unapata pointi 10 kwa kila TZS 1,000 unayotumia!
+              Thamani halisi ya punguzo: <span className="text-emerald-400 font-bold font-mono">{formatTzsPrice((loyaltyPoints / 100) * 1000)}</span>. Unapata pointi 10 kwa kila TZS 1,000 unayotumia!
             </p>
           </div>
 

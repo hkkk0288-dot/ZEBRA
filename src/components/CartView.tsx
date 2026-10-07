@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { formatPrice } from '../utils/formatters';
+import { formatPrice, formatTzsPrice } from '../utils/formatters';
 import { ArrowLeft, Trash2, Tag, Plus, Minus, MapPin, Check, Smartphone, CreditCard, Banknote, ShieldCheck, UtensilsCrossed, QrCode, ShoppingBag } from 'lucide-react';
 import { PaymentProvider } from '../types';
 import { FoodImage } from './FoodImage';
@@ -196,7 +196,7 @@ Thank you for choosing ${appBranding.appName}! 🍗🔥`;
   }
 
   return (
-    <div className="flex flex-col min-h-screen pb-32">
+    <div className="flex flex-col min-h-screen pb-40">
       {/* Mobile Top Header (only in mobile frame) */}
       {androidFrame && (
         <div
@@ -514,7 +514,7 @@ Thank you for choosing ${appBranding.appName}! 🍗🔥`;
                 >
                   <div className="flex items-center space-x-2 min-w-0 mr-2">
                     <span className="text-base group-hover:scale-110 transition-transform shrink-0">📍</span>
-                    <span className="truncate text-neutral-200 font-medium">
+                    <span className={`truncate font-semibold ${isDark ? 'text-neutral-200' : 'text-neutral-900'}`}>
                       {deliveryAddress || 'Gusa kuchagua eneo kwenye ramani...'}
                     </span>
                   </div>
@@ -647,7 +647,7 @@ Thank you for choosing ${appBranding.appName}! 🍗🔥`;
                       </span>
                     </div>
                     <p className="text-[11px] text-neutral-500">
-                      Una pointi <strong>{loyaltyPoints}</strong> (Thamani: {formatPrice((loyaltyPoints / 100) * 1000, 'TZS')})
+                      Una pointi <strong>{loyaltyPoints}</strong> (Thamani: {formatTzsPrice((loyaltyPoints / 100) * 1000)})
                     </p>
                   </div>
                 </div>
@@ -708,11 +708,11 @@ Thank you for choosing ${appBranding.appName}! 🍗🔥`;
                 isDark ? 'bg-neutral-900/80 border-neutral-800' : 'bg-white border-neutral-200 shadow-sm'
               }`}
             >
-              <div className="text-xs font-bold text-neutral-900 dark:text-white uppercase tracking-wider">
+              <div className={`text-xs font-extrabold uppercase tracking-wider ${isDark ? 'text-white' : 'text-neutral-950'}`}>
                 Payment Method / Njia ya Malipo
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {/* Mongike Mobile Money (Live STK Push) */}
                 <label
                   onClick={() => setSelectedPayment('mongike_mobile_money')}
@@ -720,31 +720,33 @@ Thank you for choosing ${appBranding.appName}! 🍗🔥`;
                     selectedPayment === 'mongike_mobile_money'
                       ? 'border-emerald-500 bg-emerald-500/10 shadow-sm ring-1 ring-emerald-500/30'
                       : isDark
-                      ? 'border-neutral-800 bg-neutral-800/50 hover:border-neutral-700'
-                      : 'border-neutral-200 bg-neutral-50 hover:border-neutral-300'
+                      ? 'border-neutral-800 bg-neutral-800/60 hover:border-neutral-700'
+                      : 'border-neutral-200 bg-white hover:border-neutral-300 shadow-xs'
                   }`}
                 >
                   <div className="flex items-center space-x-3">
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-emerald-400 text-white flex items-center justify-center font-black text-sm shadow-sm">
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-emerald-400 text-white flex items-center justify-center font-black text-sm shadow-sm shrink-0">
                       ⚡
                     </div>
                     <div>
-                      <div className="text-xs font-bold text-neutral-900 dark:text-white flex items-center space-x-1.5">
-                        <span>Mongike Mobile Money</span>
-                        <span className="text-[10px] bg-emerald-500/20 text-emerald-400 font-bold px-1.5 py-0.5 rounded">
+                      <div className="text-xs font-bold flex items-center space-x-1.5">
+                        <span className={isDark ? 'text-white' : 'text-neutral-950'}>Mongike Mobile Money</span>
+                        <span className="text-[10px] bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold px-1.5 py-0.5 rounded">
                           Live STK Push TZ
                         </span>
                       </div>
-                      <p className="text-[11px] text-neutral-400">
+                      <p className={`text-[11px] ${isDark ? 'text-neutral-400' : 'text-neutral-600'}`}>
                         Vodacom M-Pesa, Tigo Pesa, Airtel Money, HaloPesa
                       </p>
                     </div>
                   </div>
                   <div
-                    className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                    className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
                       selectedPayment === 'mongike_mobile_money'
                         ? 'border-emerald-500 bg-emerald-500'
-                        : 'border-neutral-500'
+                        : isDark
+                        ? 'border-neutral-600 bg-neutral-800'
+                        : 'border-neutral-400 bg-white'
                     }`}
                   >
                     {selectedPayment === 'mongike_mobile_money' && (
@@ -758,33 +760,35 @@ Thank you for choosing ${appBranding.appName}! 🍗🔥`;
                   onClick={() => setSelectedPayment('ussd_mpesa')}
                   className={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition-all ${
                     selectedPayment.startsWith('ussd_')
-                      ? 'border-emerald-500 bg-emerald-500/10'
+                      ? 'border-emerald-500 bg-emerald-500/10 shadow-sm ring-1 ring-emerald-500/30'
                       : isDark
-                      ? 'border-neutral-800 bg-neutral-800/50 hover:border-neutral-700'
-                      : 'border-neutral-200 bg-neutral-50 hover:border-neutral-300'
+                      ? 'border-neutral-800 bg-neutral-800/60 hover:border-neutral-700'
+                      : 'border-neutral-200 bg-white hover:border-neutral-300 shadow-xs'
                   }`}
                 >
                   <div className="flex items-center space-x-3">
-                    <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                    <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
                       <Smartphone className="w-5 h-5" />
                     </div>
                     <div>
-                      <div className="text-xs font-bold text-neutral-900 dark:text-white flex items-center space-x-1.5">
-                        <span>USSD Mobile Money</span>
-                        <span className="text-[10px] bg-amber-500/20 text-amber-400 font-semibold px-1.5 py-0.5 rounded">
+                      <div className="text-xs font-bold flex items-center space-x-1.5">
+                        <span className={isDark ? 'text-white' : 'text-neutral-950'}>USSD Mobile Money</span>
+                        <span className="text-[10px] bg-amber-500/20 text-amber-700 dark:text-amber-400 font-bold px-1.5 py-0.5 rounded">
                           Lipa Namba: 445566
                         </span>
                       </div>
-                      <p className="text-[11px] text-neutral-400">
+                      <p className={`text-[11px] ${isDark ? 'text-neutral-400' : 'text-neutral-600'}`}>
                         Vodacom M-Pesa (*150*00#), Tigo, Airtel, HaloPesa
                       </p>
                     </div>
                   </div>
                   <div
-                    className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                    className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
                       selectedPayment.startsWith('ussd_')
                         ? 'border-emerald-500 bg-emerald-500'
-                        : 'border-neutral-500'
+                        : isDark
+                        ? 'border-neutral-600 bg-neutral-800'
+                        : 'border-neutral-400 bg-white'
                     }`}
                   >
                     {selectedPayment.startsWith('ussd_') && (
@@ -798,28 +802,32 @@ Thank you for choosing ${appBranding.appName}! 🍗🔥`;
                   onClick={() => setSelectedPayment('cash_on_delivery')}
                   className={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition-all ${
                     selectedPayment === 'cash_on_delivery'
-                      ? 'border-emerald-500 bg-emerald-500/10'
+                      ? 'border-emerald-500 bg-emerald-500/10 shadow-sm ring-1 ring-emerald-500/30'
                       : isDark
-                      ? 'border-neutral-800 bg-neutral-800/50 hover:border-neutral-700'
-                      : 'border-neutral-200 bg-neutral-50 hover:border-neutral-300'
+                      ? 'border-neutral-800 bg-neutral-800/60 hover:border-neutral-700'
+                      : 'border-neutral-200 bg-white hover:border-neutral-300 shadow-xs'
                   }`}
                 >
                   <div className="flex items-center space-x-3">
-                    <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                    <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
                       <Banknote className="w-5 h-5" />
                     </div>
                     <div>
-                      <div className="text-xs font-bold text-neutral-900 dark:text-white">
+                      <div className={`text-xs font-bold ${isDark ? 'text-white' : 'text-neutral-950'}`}>
                         Cash on Delivery
                       </div>
-                      <p className="text-[11px] text-neutral-400">Pay cash or mobile money to courier upon arrival</p>
+                      <p className={`text-[11px] ${isDark ? 'text-neutral-400' : 'text-neutral-600'}`}>
+                        Pay cash or mobile money to courier upon arrival
+                      </p>
                     </div>
                   </div>
                   <div
-                    className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                    className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
                       selectedPayment === 'cash_on_delivery'
                         ? 'border-emerald-500 bg-emerald-500'
-                        : 'border-neutral-500'
+                        : isDark
+                        ? 'border-neutral-600 bg-neutral-800'
+                        : 'border-neutral-400 bg-white'
                     }`}
                   >
                     {selectedPayment === 'cash_on_delivery' && (
@@ -833,28 +841,32 @@ Thank you for choosing ${appBranding.appName}! 🍗🔥`;
                   onClick={() => setSelectedPayment('card')}
                   className={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition-all ${
                     selectedPayment === 'card'
-                      ? 'border-emerald-500 bg-emerald-500/10'
+                      ? 'border-emerald-500 bg-emerald-500/10 shadow-sm ring-1 ring-emerald-500/30'
                       : isDark
-                      ? 'border-neutral-800 bg-neutral-800/50 hover:border-neutral-700'
-                      : 'border-neutral-200 bg-neutral-50 hover:border-neutral-300'
+                      ? 'border-neutral-800 bg-neutral-800/60 hover:border-neutral-700'
+                      : 'border-neutral-200 bg-white hover:border-neutral-300 shadow-xs'
                   }`}
                 >
                   <div className="flex items-center space-x-3">
-                    <div className="w-9 h-9 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center">
+                    <div className="w-9 h-9 rounded-xl bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
                       <CreditCard className="w-5 h-5" />
                     </div>
                     <div>
-                      <div className="text-xs font-bold text-neutral-900 dark:text-white">
+                      <div className={`text-xs font-bold ${isDark ? 'text-white' : 'text-neutral-950'}`}>
                         Debit / Credit Card
                       </div>
-                      <p className="text-[11px] text-neutral-400">Visa, Mastercard online</p>
+                      <p className={`text-[11px] ${isDark ? 'text-neutral-400' : 'text-neutral-600'}`}>
+                        Visa, Mastercard online
+                      </p>
                     </div>
                   </div>
                   <div
-                    className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                    className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
                       selectedPayment === 'card'
                         ? 'border-emerald-500 bg-emerald-500'
-                        : 'border-neutral-500'
+                        : isDark
+                        ? 'border-neutral-600 bg-neutral-800'
+                        : 'border-neutral-400 bg-white'
                     }`}
                   >
                     {selectedPayment === 'card' && (
@@ -868,19 +880,19 @@ Thank you for choosing ${appBranding.appName}! 🍗🔥`;
             {/* Bill Summary */}
             <div
               className={`p-5 rounded-3xl border space-y-3 ${
-                isDark ? 'bg-neutral-900/60 border-neutral-800' : 'bg-neutral-50 border-neutral-200 shadow-sm'
+                isDark ? 'bg-neutral-900/80 border-neutral-800' : 'bg-white border-neutral-200 shadow-sm'
               }`}
             >
-              <div className="flex justify-between text-xs text-neutral-500 dark:text-neutral-400">
-                <span>Subtotal</span>
-                <span className="font-semibold text-neutral-800 dark:text-neutral-200">
+              <div className={`flex justify-between text-xs ${isDark ? 'text-neutral-400' : 'text-neutral-600'}`}>
+                <span className="font-medium">Subtotal</span>
+                <span className={`font-bold ${isDark ? 'text-neutral-200' : 'text-neutral-900'}`}>
                   {formatPrice(subtotal, currency)}
                 </span>
               </div>
 
-              <div className="flex justify-between text-xs text-neutral-500 dark:text-neutral-400">
-                <span>{diningMode === 'dine_in' ? 'Huduma Mezani (Dine-In)' : 'Delivery (Dar es Salaam)'}</span>
-                <span className="font-semibold text-neutral-800 dark:text-neutral-200">
+              <div className={`flex justify-between text-xs ${isDark ? 'text-neutral-400' : 'text-neutral-600'}`}>
+                <span className="font-medium">{diningMode === 'dine_in' ? 'Huduma Mezani (Dine-In)' : 'Delivery (Dar es Salaam)'}</span>
+                <span className={`font-bold ${isDark ? 'text-neutral-200' : 'text-neutral-900'}`}>
                   {effectiveDeliveryFee === 0 ? (
                     <span className="text-emerald-500 font-bold">BURE (0 TZS)</span>
                   ) : (
@@ -903,8 +915,8 @@ Thank you for choosing ${appBranding.appName}! 🍗🔥`;
                 </div>
               )}
 
-              <div className="border-t border-neutral-800/40 dark:border-neutral-700/40 pt-3 flex justify-between items-baseline">
-                <span className="text-base font-bold text-neutral-900 dark:text-white font-display">
+              <div className={`border-t pt-3 flex justify-between items-baseline ${isDark ? 'border-neutral-800' : 'border-neutral-200'}`}>
+                <span className={`text-base font-extrabold font-display ${isDark ? 'text-white' : 'text-neutral-950'}`}>
                   Total
                 </span>
                 <div className="text-right">
@@ -912,7 +924,7 @@ Thank you for choosing ${appBranding.appName}! 🍗🔥`;
                     {formatPrice(effectiveTotal, currency)}
                   </span>
                   {currency === 'USD' && (
-                    <div className="text-xs text-neutral-400 font-mono">
+                    <div className={`text-xs font-mono font-medium ${isDark ? 'text-neutral-400' : 'text-neutral-600'}`}>
                       ≈ {formatPrice(effectiveTotal, 'TZS')}
                     </div>
                   )}
@@ -920,9 +932,9 @@ Thank you for choosing ${appBranding.appName}! 🍗🔥`;
               </div>
             </div>
 
-            {/* Checkout CTAs: WhatsApp (Screenshot 6) & App Checkout */}
-            <div className="space-y-2 pt-1">
-              {/* Big Green Proceed to WhatsApp Button (Screenshot 6) */}
+            {/* Checkout CTAs: WhatsApp & App Checkout */}
+            <div className="space-y-2.5 pt-2 mb-10">
+              {/* Big Green Proceed to WhatsApp Button */}
               <button
                 type="button"
                 onClick={handleProceedToWhatsApp}
@@ -939,7 +951,7 @@ Thank you for choosing ${appBranding.appName}! 🍗🔥`;
                 className={`w-full active:scale-[0.98] font-bold py-3.5 px-6 rounded-full shadow-md flex items-center justify-center space-x-2 text-xs sm:text-sm transition-all disabled:opacity-50 cursor-pointer ${
                   !isLoggedIn
                     ? 'bg-amber-500 hover:bg-amber-400 text-neutral-950 shadow-amber-500/25'
-                    : 'bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700'
+                    : 'bg-neutral-900 hover:bg-neutral-800 text-white border border-neutral-700'
                 }`}
               >
                 {isSubmitting ? (

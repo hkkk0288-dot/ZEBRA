@@ -185,15 +185,17 @@ export function printReceiptOrElement(
       const widthMm = options.widthMm ?? (isThermal ? 80 : undefined);
       const title = options.title || 'Risiti / Print Document';
 
-      // Create an isolated hidden iframe
+      // Create an isolated hidden iframe with real dimensions so browser layout engine renders it
       const iframe = document.createElement('iframe');
       iframe.style.position = 'fixed';
       iframe.style.right = '0';
       iframe.style.bottom = '0';
-      iframe.style.width = '0';
-      iframe.style.height = '0';
+      iframe.style.width = '200px';
+      iframe.style.height = '200px';
       iframe.style.border = '0';
-      iframe.style.visibility = 'hidden';
+      iframe.style.opacity = '0.01';
+      iframe.style.pointerEvents = 'none';
+      iframe.style.zIndex = '-9999';
       iframe.setAttribute('title', title);
       document.body.appendChild(iframe);
 
@@ -225,12 +227,18 @@ export function printReceiptOrElement(
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
     }
-    body {
+    html, body {
       margin: 0 !important;
       padding: 0 !important;
       background: #ffffff !important;
       color: #000000 !important;
+      visibility: visible !important;
+      opacity: 1 !important;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Courier New", monospace !important;
+    }
+    #print-container, #print-container * {
+      visibility: visible !important;
+      opacity: 1 !important;
     }
     #print-container {
       ${printWidthCss}
@@ -242,12 +250,17 @@ export function printReceiptOrElement(
       line-height: 1.35 !important;
     }
     @media print {
-      body {
+      html, body {
         margin: 0 !important;
         padding: 0 !important;
+        background: #ffffff !important;
       }
       #print-container {
         padding: ${isThermal ? '2mm' : '8mm'} !important;
+        margin: 0 auto !important;
+      }
+      #print-container, #print-container * {
+        visibility: visible !important;
       }
       @page {
         margin: 0;

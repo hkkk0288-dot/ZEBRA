@@ -241,7 +241,7 @@ const MainContent: React.FC = () => {
         <main className="w-full flex-1 flex justify-center p-0 sm:py-6 sm:px-4">
           <div
             className={`relative w-full sm:max-w-[420px] min-h-screen sm:min-h-0 sm:h-[90vh] sm:rounded-[44px] sm:border-[8px] sm:border-[#222228] sm:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col ${
-              isDark ? 'bg-[#0f0f11]' : 'bg-[#fafafa]'
+              isDark ? 'dark bg-[#0f0f11] text-white' : 'bg-[#fafafa] text-neutral-900'
             }`}
           >
             {/* Android Status Bar */}
