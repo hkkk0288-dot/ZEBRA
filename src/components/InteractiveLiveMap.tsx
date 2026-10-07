@@ -261,6 +261,20 @@ const KEY_LOCATIONS: KeyLocation[] = [
   }
 ];
 
+const calculateDistanceKm = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+  const R = 6371; // Earth radius in km
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return Math.round(R * c * 10) / 10;
+};
+
 interface InteractiveLiveMapProps {
   initialPreset?: MapPreset;
   className?: string;
@@ -288,6 +302,8 @@ export const InteractiveLiveMap: React.FC<InteractiveLiveMapProps> = ({
   const [currentZoom, setCurrentZoom] = useState<number>(12);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isLocatingUser, setIsLocatingUser] = useState<boolean>(false);
+  const [userCoords, setUserCoords] = useState<[number, number] | null>(null);
+  const [isExpandedFullscreen, setIsExpandedFullscreen] = useState<boolean>(false);
   const [userAddressNotice, setUserAddressNotice] = useState<string | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<KeyLocation | null>(null);
   const [showLayerMenu, setShowLayerMenu] = useState<boolean>(false);
@@ -390,8 +406,8 @@ export const InteractiveLiveMap: React.FC<InteractiveLiveMapProps> = ({
         category: b.tag || 'Tawi la Mgahawa (Branch)',
         coords: [b.lat, b.lng] as [number, number],
         description: `${b.address} • Simu: ${b.phone} • Masaa: ${b.hours}`,
-        color: '#10b981',
-        icon: '🦓'
+        color: '#f59e0b',
+        icon: '🍗'
       }));
 
     const allLocations = [...branchKeyLocations, ...KEY_LOCATIONS.filter(k => !branchKeyLocations.some(b => b.id === k.id))];
@@ -492,6 +508,7 @@ export const InteractiveLiveMap: React.FC<InteractiveLiveMapProps> = ({
         const coords: [number, number] = [latitude, longitude];
 
         setIsLocatingUser(false);
+        setUserCoords(coords);
         setActivePreset('user_location');
         setUserAddressNotice(
           `Eneo lako: Lat ${latitude.toFixed(4)}, Lng ${longitude.toFixed(4)} (Usahihi ±${Math.round(accuracy)}m)`
@@ -602,11 +619,22 @@ export const InteractiveLiveMap: React.FC<InteractiveLiveMapProps> = ({
 
   const currentPresetInfo = MAP_PRESETS.find(p => p.key === activePreset) || MAP_PRESETS[0];
 
+  // Calculate distance to selected location if user GPS is available
+  const selectedDistance = (selectedLocation && userCoords)
+    ? calculateDistanceKm(userCoords[0], userCoords[1], selectedLocation.coords[0], selectedLocation.coords[1])
+    : null;
+
   return (
-    <div className={`relative w-full rounded-2xl sm:rounded-3xl overflow-hidden border border-neutral-800 bg-[#0d1219] shadow-2xl flex flex-col ${className}`}>
+    <div
+      className={`relative w-full rounded-2xl sm:rounded-3xl overflow-hidden border border-neutral-800 bg-[#0d1219] shadow-2xl flex flex-col transition-all duration-300 ${
+        isExpandedFullscreen
+          ? 'fixed inset-0 z-50 w-screen h-screen rounded-none max-w-none m-0 border-none'
+          : className
+      }`}
+    >
       {/* Top Bar: Presets & Controls */}
       <div className="p-2 sm:p-3 bg-neutral-950/95 backdrop-blur-md border-b border-neutral-800/80 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 z-20 shrink-0">
-        {/* Preset Selector Tabs */}
+        {/* Preset Selector Tabs - Smooth Touch Horizontal Swipe */}
         <div className="flex items-center space-x-1 sm:space-x-1.5 overflow-x-auto no-scrollbar py-0.5">
           {MAP_PRESETS.map(preset => {
             const isSelected = activePreset === preset.key;
@@ -617,9 +645,13 @@ export const InteractiveLiveMap: React.FC<InteractiveLiveMapProps> = ({
                 onClick={() => handleSelectPreset(preset.key)}
                 className={`px-2.5 sm:px-3 py-1.5 rounded-xl font-semibold text-xs transition-all flex items-center space-x-1.5 shrink-0 cursor-pointer ${
                   isSelected
-                    ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/30 ring-1 ring-emerald-400 font-bold'
+                    ? 'text-white shadow-md ring-1 ring-white/30 font-bold'
                     : 'bg-neutral-900/90 text-neutral-300 hover:text-white border border-neutral-800 hover:border-neutral-700'
                 }`}
+                style={isSelected ? {
+                  backgroundColor: 'var(--brand-primary, #f59e0b)',
+                  boxShadow: '0 4px 14px -2px var(--brand-primary-shadow, rgba(245, 158, 11, 0.4))'
+                } : undefined}
               >
                 <span className="text-sm">{preset.icon}</span>
                 <span className="hidden md:inline">{preset.label}</span>
@@ -629,7 +661,7 @@ export const InteractiveLiveMap: React.FC<InteractiveLiveMapProps> = ({
           })}
         </div>
 
-        {/* Live GPS & Layer Switcher */}
+        {/* Live GPS & Fullscreen & Layer Switcher */}
         <div className="flex items-center space-x-1.5 shrink-0 justify-end">
           {/* Real-time GPS Location Button */}
           <button
@@ -646,6 +678,19 @@ export const InteractiveLiveMap: React.FC<InteractiveLiveMapProps> = ({
             <LocateFixed className={`w-3.5 h-3.5 ${isLocatingUser ? 'animate-spin' : ''}`} />
             <span className="hidden sm:inline">{isLocatingUser ? 'Inatafuta GPS...' : 'Eneo Langu Sasa'}</span>
             <span className="sm:hidden">GPS</span>
+          </button>
+
+          {/* Fullscreen Toggle Button */}
+          <button
+            type="button"
+            onClick={() => {
+              setIsExpandedFullscreen(!isExpandedFullscreen);
+              setTimeout(() => mapRef.current?.invalidateSize(), 150);
+            }}
+            className="p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border border-neutral-800 transition-colors cursor-pointer"
+            title={isExpandedFullscreen ? 'Toka Skrini Kamili' : 'Skrini Kamili ya Simu'}
+          >
+            {isExpandedFullscreen ? <Minimize2 className="w-4 h-4 text-amber-400" /> : <Maximize2 className="w-4 h-4" />}
           </button>
 
           {/* Layer Style Menu Button */}
@@ -677,9 +722,10 @@ export const InteractiveLiveMap: React.FC<InteractiveLiveMapProps> = ({
                       }}
                       className={`w-full text-left px-2.5 py-1.5 rounded-xl text-xs flex items-center justify-between transition-colors cursor-pointer ${
                         isCur
-                          ? 'bg-emerald-500 text-white font-bold'
+                          ? 'text-white font-bold'
                           : 'text-neutral-300 hover:bg-neutral-800'
                       }`}
+                      style={isCur ? { backgroundColor: 'var(--brand-primary, #f59e0b)' } : undefined}
                     >
                       <span>{style.name}</span>
                       {isCur && <span className="text-[10px]">✓</span>}
@@ -700,26 +746,29 @@ export const InteractiveLiveMap: React.FC<InteractiveLiveMapProps> = ({
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Tafuta: Ziwa Tanganyika, Bujumbura, Mikocheni, Morogoro, Mwanza..."
-            className="w-full pl-8 pr-3 py-1 text-xs rounded-xl bg-neutral-900 text-white border border-neutral-800 focus:border-emerald-500 outline-none placeholder-neutral-500"
+            placeholder="Tafuta tawi: Mwenge, Sinza, Kariakoo, Masaki..."
+            className="w-full pl-8 pr-3 py-1 text-xs rounded-xl bg-neutral-900 text-white border border-neutral-800 focus:border-amber-500 outline-none placeholder-neutral-500"
           />
         </form>
 
         <div className="text-[11px] text-neutral-400 hidden sm:flex items-center space-x-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span
+            className="w-2 h-2 rounded-full animate-pulse"
+            style={{ backgroundColor: 'var(--brand-primary, #f59e0b)' }}
+          />
           <span>{currentPresetInfo.badge}</span>
         </div>
       </div>
 
-      {/* 100% REAL LIVE LEAFLET CANVAS - NO STATIC PICTURES! */}
+      {/* 100% REAL LIVE LEAFLET CANVAS */}
       <div
         className="relative w-full flex-1"
-        style={{ minHeight: '380px', height: '100%', position: 'relative' }}
+        style={{ minHeight: '340px', height: '100%', position: 'relative' }}
       >
         <div
           ref={containerRef}
           className="absolute inset-0 w-full h-full z-0"
-          style={{ width: '100%', height: '100%', minHeight: '380px' }}
+          style={{ width: '100%', height: '100%', minHeight: '340px' }}
         />
 
         {/* Floating Zoom & Controls */}
@@ -753,60 +802,163 @@ export const InteractiveLiveMap: React.FC<InteractiveLiveMapProps> = ({
           </button>
         </div>
 
-        {/* Bottom Floating Live Info Pill */}
-        <div className="absolute bottom-3 left-3 right-3 sm:right-auto max-w-lg bg-neutral-950/95 backdrop-blur-md p-2.5 rounded-2xl border border-neutral-700/70 shadow-2xl z-20 flex items-start space-x-2.5 pointer-events-auto">
-          <div className="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
-            <Compass className="w-4 h-4" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center space-x-2">
-              <p className="font-bold text-xs text-white truncate">
-                {selectedLocation ? selectedLocation.name : currentPresetInfo.label}
-              </p>
-              <span className="text-[9px] bg-emerald-500/20 text-emerald-400 font-bold px-1.5 py-0.2 rounded-full">
-                LIVE INTERACTIVE MAP
-              </span>
+        {/* MOBILE FLOATING INTERACTIVE BRANCH & LOCATION CARD */}
+        {selectedLocation ? (
+          <div className="absolute bottom-3 left-3 right-3 max-w-md mx-auto bg-neutral-950/95 backdrop-blur-xl p-3.5 rounded-3xl border border-neutral-700/80 shadow-2xl z-20 animate-in fade-in slide-in-from-bottom-2 duration-200">
+            <div className="flex items-start justify-between gap-2 pb-2 border-b border-neutral-800/80">
+              <div className="flex items-center space-x-2.5 min-w-0">
+                <div
+                  className="w-9 h-9 rounded-2xl text-white flex items-center justify-center text-lg font-bold shadow-md shrink-0"
+                  style={{ backgroundColor: 'var(--brand-primary, #f59e0b)' }}
+                >
+                  {selectedLocation.icon || '🍗'}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center space-x-1.5">
+                    <h4 className="font-extrabold text-xs sm:text-sm text-white truncate">
+                      {selectedLocation.name}
+                    </h4>
+                    <span className="px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-400 text-[9px] font-extrabold shrink-0">
+                      Wazi Sasa
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-neutral-400 truncate mt-0.5">
+                    {selectedLocation.category || 'Tawi la Kookoos'}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSelectedLocation(null)}
+                className="p-1.5 rounded-xl hover:bg-neutral-800 text-neutral-400 hover:text-white cursor-pointer"
+                title="Funga kadi hii"
+              >
+                ✕
+              </button>
             </div>
-            <p className="text-[11px] text-neutral-400 mt-0.5 leading-snug">
-              {userAddressNotice || (selectedLocation ? selectedLocation.description : currentPresetInfo.description)}
-            </p>
+
+            <div className="pt-2 space-y-2">
+              <p className="text-[11px] text-neutral-300 leading-snug">
+                {selectedLocation.description}
+              </p>
+
+              {selectedDistance !== null && (
+                <div className="flex items-center space-x-1.5 text-[11px] text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-1 rounded-xl w-fit">
+                  <span>📍</span>
+                  <span>Umbali: km {selectedDistance} kutoka eneo lako la sasa</span>
+                </div>
+              )}
+
+              {/* Action Buttons for Mobile Phone Users */}
+              <div className="flex items-center space-x-2 pt-1">
+                <a
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${selectedLocation.coords[0]},${selectedLocation.coords[1]}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 px-3 py-2 rounded-xl text-white font-extrabold text-xs flex items-center justify-center space-x-1.5 shadow-md active:scale-95 transition-all"
+                  style={{ backgroundColor: 'var(--brand-primary, #f59e0b)' }}
+                >
+                  <Navigation className="w-3.5 h-3.5" />
+                  <span>Nielekeze (Google Maps)</span>
+                </a>
+
+                <a
+                  href="tel:+255744883291"
+                  className="px-3 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-200 border border-neutral-700 font-bold text-xs flex items-center justify-center space-x-1 active:scale-95 transition-all"
+                >
+                  <span>📞 Piga Simu</span>
+                </a>
+              </div>
+            </div>
           </div>
-        </div>
+        ) : (
+          /* Bottom Floating Default Info Pill */
+          <div className="absolute bottom-3 left-3 right-3 sm:right-auto max-w-lg bg-neutral-950/95 backdrop-blur-md p-2.5 rounded-2xl border border-neutral-700/70 shadow-2xl z-20 flex items-start space-x-2.5 pointer-events-auto">
+            <div
+              className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 mt-0.5 text-white shadow-sm"
+              style={{ backgroundColor: 'var(--brand-primary, #f59e0b)' }}
+            >
+              <Compass className="w-4 h-4" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center space-x-2">
+                <p className="font-bold text-xs text-white truncate">
+                  {currentPresetInfo.label}
+                </p>
+                <span
+                  className="text-[9px] font-bold px-1.5 py-0.2 rounded-full"
+                  style={{
+                    backgroundColor: 'var(--brand-primary-light, rgba(245, 158, 11, 0.15))',
+                    color: 'var(--brand-primary, #f59e0b)'
+                  }}
+                >
+                  LIVE INTERACTIVE MAP
+                </span>
+              </div>
+              <p className="text-[11px] text-neutral-400 mt-0.5 leading-snug">
+                {userAddressNotice || currentPresetInfo.description}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Quick Location Shortcuts below map */}
-      <div className="p-2 sm:p-2.5 bg-neutral-950/95 border-t border-neutral-800/80 grid grid-cols-2 sm:grid-cols-4 gap-2 z-10 text-xs shrink-0">
+      {/* Quick Location Shortcuts below map - Horizontal Swipeable on Mobile */}
+      <div className="p-2 sm:p-2.5 bg-neutral-950/95 border-t border-neutral-800/80 flex items-center space-x-2 overflow-x-auto no-scrollbar z-10 text-xs shrink-0">
+        <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider shrink-0 mr-1 hidden sm:inline">
+          Maeneo ya Haraka:
+        </span>
+
         <button
           type="button"
-          onClick={() => handleSelectPreset('tanganyika_east_africa')}
-          className="p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800/80 border border-neutral-800 hover:border-cyan-500/40 text-left transition-all cursor-pointer"
+          onClick={() => handleSelectPreset('mwenge_hq')}
+          className="p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-left transition-all cursor-pointer shrink-0 min-w-[130px]"
         >
-          <span className="text-cyan-400 font-bold block text-[11px]">🌊 Ziwa Tanganyika</span>
-          <span className="text-neutral-400 text-[10px] truncate block">Burundi, Kongo & Kigoma</span>
+          <span className="text-amber-400 font-bold block text-[11px]">👑 Mwenge HQ</span>
+          <span className="text-neutral-400 text-[10px] truncate block">Flagship Store</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleSelectPreset('masaki_peninsula')}
+          className="p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-left transition-all cursor-pointer shrink-0 min-w-[130px]"
+        >
+          <span className="text-cyan-400 font-bold block text-[11px]">🌊 Masaki & Slipway</span>
+          <span className="text-neutral-400 text-[10px] truncate block">Toure Drive Pier</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleSelectPreset('kariakoo_hub')}
+          className="p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-left transition-all cursor-pointer shrink-0 min-w-[130px]"
+        >
+          <span className="text-rose-400 font-bold block text-[11px]">🏢 Kamata Kariakoo</span>
+          <span className="text-neutral-400 text-[10px] truncate block">Msimbazi / Nyerere</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleSelectPreset('sinza_mori')}
+          className="p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-left transition-all cursor-pointer shrink-0 min-w-[130px]"
+        >
+          <span className="text-emerald-400 font-bold block text-[11px]">🏘️ Sinza Mori</span>
+          <span className="text-neutral-400 text-[10px] truncate block">Shekilango Road</span>
         </button>
 
         <button
           type="button"
           onClick={() => handleSelectPreset('mikocheni_street')}
-          className="p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800/80 border border-neutral-800 hover:border-emerald-500/40 text-left transition-all cursor-pointer"
+          className="p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-left transition-all cursor-pointer shrink-0 min-w-[130px]"
         >
-          <span className="text-emerald-400 font-bold block text-[11px]">🏬 Shoppers Plaza</span>
-          <span className="text-neutral-400 text-[10px] truncate block">Mikocheni / Mwai Kibaki</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => handleSelectPreset('morogoro_corridor')}
-          className="p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800/80 border border-neutral-800 hover:border-blue-500/40 text-left transition-all cursor-pointer"
-        >
-          <span className="text-blue-400 font-bold block text-[11px]">🏔️ Dar - Morogoro</span>
-          <span className="text-neutral-400 text-[10px] truncate block">Njia kuu ya T1 & T2</span>
+          <span className="text-teal-400 font-bold block text-[11px]">🏬 Shoppers Plaza</span>
+          <span className="text-neutral-400 text-[10px] truncate block">Mwai Kibaki Rd</span>
         </button>
 
         <button
           type="button"
           onClick={() => handleSelectPreset('tanzania_national')}
-          className="p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800/80 border border-neutral-800 hover:border-amber-500/40 text-left transition-all cursor-pointer"
+          className="p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-left transition-all cursor-pointer shrink-0 min-w-[130px]"
         >
           <span className="text-amber-400 font-bold block text-[11px]">🇹🇿 Tanzania Nzima</span>
           <span className="text-neutral-400 text-[10px] truncate block">Dodoma, Mwanza, Arusha</span>

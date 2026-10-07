@@ -189,6 +189,52 @@ export const AdminSettingsView: React.FC<{ onNavigateToTab?: (tab: string) => vo
         </div>
       </div>
 
+      {/* Global Theme & Colors Quick Card */}
+      <div
+        className="p-5 rounded-3xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm transition-all"
+        style={{
+          backgroundColor: `${appBranding.themeColor || '#f59e0b'}15`,
+          borderColor: `${appBranding.themeColor || '#f59e0b'}40`
+        }}
+      >
+        <div className="flex items-center space-x-3.5">
+          <div
+            className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-md border-2 border-white/40 shrink-0 text-white"
+            style={{ backgroundColor: appBranding.themeColor || '#f59e0b' }}
+          >
+            🎨
+          </div>
+          <div>
+            <div className="flex items-center space-x-2">
+              <h3 className="font-extrabold text-sm sm:text-base text-neutral-900 dark:text-white">
+                Rangi & Mandhari ya Mfumo Mzima (Global Theme)
+              </h3>
+              <span
+                className="px-2.5 py-0.5 rounded-full text-white font-black text-[10px] uppercase tracking-wider"
+                style={{ backgroundColor: appBranding.themeColor || '#f59e0b' }}
+              >
+                {appBranding.themePreset || 'amber'}
+              </span>
+            </div>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
+              Badili rangi ya tovuti, programu ya simu (Mobile Phone View), na Admin Panel (Inasaidia palette 10 za kipekee au Custom Hex Color).
+            </p>
+          </div>
+        </div>
+
+        {onNavigateToTab && (
+          <button
+            type="button"
+            onClick={() => onNavigateToTab('themes')}
+            className="px-4 py-2.5 rounded-xl text-white font-extrabold text-xs flex items-center space-x-1.5 shadow-md transition-all cursor-pointer active:scale-95 shrink-0"
+            style={{ backgroundColor: appBranding.themeColor || '#f59e0b' }}
+          >
+            <Palette className="w-4 h-4" />
+            <span>Badilisha Rangi za Mfumo ➔</span>
+          </button>
+        )}
+      </div>
+
       <form onSubmit={handleSave} className="space-y-4">
         {/* USSD Lipa Namba & Payment Gateway */}
         <div className="p-5 rounded-3xl bg-white dark:bg-[#151518] border border-neutral-200/80 dark:border-neutral-800 shadow-2xs space-y-3">

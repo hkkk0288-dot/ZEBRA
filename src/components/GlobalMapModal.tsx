@@ -262,24 +262,53 @@ export const GlobalMapModal: React.FC<GlobalMapModalProps> = ({
                       <div
                         key={b.id}
                         onClick={() => handleBranchSelect(b)}
-                        className={`w-[220px] sm:w-[260px] p-2 sm:p-2.5 rounded-2xl border text-xs shrink-0 cursor-pointer transition-all active:scale-95 ${
+                        className={`w-[240px] sm:w-[270px] p-2.5 sm:p-3 rounded-2xl border text-xs shrink-0 cursor-pointer transition-all active:scale-95 ${
                           isSelected
-                            ? 'bg-amber-500/20 border-amber-500 text-white shadow-lg ring-1 ring-amber-500/40'
+                            ? 'border-transparent text-white shadow-lg ring-1 ring-white/30'
                             : 'bg-neutral-900/90 border-neutral-800/90 hover:border-neutral-700 text-neutral-300'
                         }`}
+                        style={isSelected ? {
+                          backgroundColor: 'var(--brand-primary, #f59e0b)',
+                          boxShadow: '0 8px 20px -4px var(--brand-primary-shadow, rgba(245, 158, 11, 0.4))'
+                        } : undefined}
                       >
                         <div className="flex items-center justify-between text-[10px] mb-1">
-                          <span className="font-extrabold text-amber-400 truncate max-w-[120px]">
-                            {b.tag || 'Tawi'}
+                          <span className="font-extrabold truncate max-w-[130px] opacity-95">
+                            {b.tag || 'Tawi la Kookoos'}
                           </span>
-                          <span className="text-neutral-400 font-mono text-[9px]">{b.hours}</span>
+                          <span className="font-mono text-[9px] opacity-80">{b.hours}</span>
                         </div>
                         <div className="font-extrabold text-white text-xs truncate flex items-center space-x-1">
                           <span>{b.name}</span>
                         </div>
-                        <div className="text-[11px] text-neutral-400 truncate mt-0.5">
+                        <div className="text-[11px] truncate mt-0.5 opacity-90">
                           {b.area}
                         </div>
+
+                        {isSelected && (
+                          <div className="flex items-center space-x-1.5 mt-2 pt-1.5 border-t border-white/20">
+                            <a
+                              href={`https://www.google.com/maps/dir/?api=1&destination=${b.lat},${b.lng}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={e => e.stopPropagation()}
+                              className="flex-1 py-1 px-2 rounded-lg bg-black/30 hover:bg-black/50 text-white font-extrabold text-[10px] flex items-center justify-center space-x-1"
+                            >
+                              <Navigation className="w-3 h-3" />
+                              <span>Nielekeze</span>
+                            </a>
+                            {b.phone && (
+                              <a
+                                href={`tel:${b.phone}`}
+                                onClick={e => e.stopPropagation()}
+                                className="py-1 px-2 rounded-lg bg-black/30 hover:bg-black/50 text-white font-bold text-[10px] flex items-center justify-center space-x-1"
+                              >
+                                <Phone className="w-3 h-3" />
+                                <span>Piga</span>
+                              </a>
+                            )}
+                          </div>
+                        )}
                       </div>
                     );
                   })}

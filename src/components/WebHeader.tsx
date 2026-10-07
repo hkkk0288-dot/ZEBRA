@@ -88,7 +88,10 @@ export const WebHeader: React.FC = () => {
       }`}
     >
       {/* Top Notification Bar for Delivery and USSD */}
-      <div className="bg-emerald-600 text-white text-[10px] sm:text-[11px] py-1 px-3 sm:px-4 font-medium">
+      <div
+        className="text-white text-[10px] sm:text-[11px] py-1 px-3 sm:px-4 font-medium"
+        style={{ backgroundColor: 'var(--brand-primary, #f59e0b)' }}
+      >
         <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
           <div className="flex items-center space-x-1.5">
             <span className="bg-emerald-700 text-white px-1.5 py-0.5 rounded-full font-bold text-[9px] shrink-0">
@@ -500,7 +503,11 @@ export const WebHeader: React.FC = () => {
             {/* Cart Button - ALWAYS 100% VISIBLE AND FULLY FITTING */}
             <button
               onClick={() => setActiveTab('cart')}
-              className="flex items-center space-x-1.5 bg-emerald-500 hover:bg-emerald-600 text-white px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl sm:rounded-2xl shadow-md shadow-emerald-500/30 transition-transform active:scale-95 shrink-0 cursor-pointer"
+              className="flex items-center space-x-1.5 text-white px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl sm:rounded-2xl shadow-md transition-transform active:scale-95 shrink-0 cursor-pointer"
+              style={{
+                backgroundColor: 'var(--brand-primary, #f59e0b)',
+                boxShadow: '0 8px 20px -4px var(--brand-primary-shadow, rgba(245, 158, 11, 0.35))'
+              }}
               title="View Cart"
             >
               <div className="relative">

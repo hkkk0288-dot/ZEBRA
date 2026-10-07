@@ -304,11 +304,15 @@ export const HomeFeedView: React.FC = () => {
                 onClick={() => setSelectedCategory(cat.id)}
                 className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs transition-all duration-200 shrink-0 cursor-pointer ${
                   isSelected
-                    ? 'bg-emerald-500 text-white font-bold shadow-sm shadow-emerald-500/30 ring-1 ring-emerald-400'
+                    ? 'text-white font-bold shadow-sm ring-1 ring-white/30'
                     : isDark
                     ? 'bg-neutral-900/90 text-neutral-300 border border-neutral-800 hover:border-neutral-700 hover:text-white'
                     : 'bg-white text-neutral-700 border border-neutral-200 shadow-2xs hover:border-neutral-300'
                 }`}
+                style={isSelected ? {
+                  backgroundColor: 'var(--brand-primary, #f59e0b)',
+                  boxShadow: '0 4px 14px -2px var(--brand-primary-shadow, rgba(245, 158, 11, 0.4))'
+                } : undefined}
               >
                 <span className="text-sm select-none">{cat.icon}</span>
                 <span className="whitespace-nowrap font-semibold text-[11px] sm:text-xs">

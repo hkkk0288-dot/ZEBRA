@@ -38,6 +38,7 @@ import {
 } from '../../services/mediaStorageService';
 import { uploadVideoToCloudinary, uploadImageToCloudinary } from '../../services/cloudinaryService';
 import { MapLocationPickerModal, LocationPickerResult } from '../MapLocationPickerModal';
+import { AdminThemeColorsView } from './AdminThemeColorsView';
 
 // Thumbnail component for video / image splash slides with IndexedDB and YouTube resolution
 const SplashSlideThumbnail: React.FC<{ slide: SplashMediaItem }> = ({ slide }) => {
@@ -196,6 +197,7 @@ export const AdminBrandingView: React.FC = () => {
   const mediaFileInputRef = useRef<HTMLInputElement>(null);
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [brandingSubTab, setBrandingSubTab] = useState<'media' | 'themes'>('media');
 
   // Logo form state
   const [logoUrlInput, setLogoUrlInput] = useState(appBranding.logoUrl || '');
@@ -690,6 +692,40 @@ export const AdminBrandingView: React.FC = () => {
         </div>
       </div>
 
+      {/* Subtab Navigation Pills */}
+      <div className="flex items-center space-x-2 p-1.5 rounded-2xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 w-fit">
+        <button
+          type="button"
+          onClick={() => setBrandingSubTab('media')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center space-x-2 transition-all cursor-pointer ${
+            brandingSubTab === 'media'
+              ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm ring-1 ring-black/5 dark:ring-white/10'
+              : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
+          }`}
+        >
+          <ImageIcon className="w-3.5 h-3.5 text-orange-500" />
+          <span>Nembo & Splash Media (Picha & Video)</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setBrandingSubTab('themes')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center space-x-2 transition-all cursor-pointer ${
+            brandingSubTab === 'themes'
+              ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm ring-1 ring-black/5 dark:ring-white/10'
+              : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
+          }`}
+        >
+          <Palette className="w-3.5 h-3.5 text-amber-500" />
+          <span>Rangi & Mandhari ya Mfumo Mzima</span>
+          <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+        </button>
+      </div>
+
+      {brandingSubTab === 'themes' ? (
+        <AdminThemeColorsView />
+      ) : (
+        <>
       {/* SECTION: MUUNDO WA MGAHAWA (SINGLE VS MULTI RESTAURANT) */}
       <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#151518] border border-neutral-200/80 dark:border-neutral-800 shadow-2xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-neutral-100 dark:border-neutral-800 gap-2">
@@ -2081,6 +2117,8 @@ export const AdminBrandingView: React.FC = () => {
             showToast(`📍 Eneo la tawi limechaguliwa: ${res.areaName} (${res.coords[0].toFixed(4)}, ${res.coords[1].toFixed(4)})`);
           }}
         />
+      )}
+        </>
       )}
     </div>
   );

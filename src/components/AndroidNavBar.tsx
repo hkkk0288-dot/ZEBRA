@@ -25,19 +25,23 @@ export const AndroidNavBar: React.FC = () => {
         {/* Home Button with expanding pill when active (exact match to screenshot 2) */}
         <button
           onClick={() => setActiveTab('home')}
-          className="relative flex items-center focus:outline-none transition-all duration-200"
+          className="relative flex items-center focus:outline-none transition-all duration-200 cursor-pointer"
         >
           {activeTab === 'home' ? (
             <motion.div
               layoutId="navPill"
-              className="flex items-center space-x-1.5 bg-emerald-500 text-white px-4 py-2 rounded-full font-medium text-sm shadow-md shadow-emerald-500/30"
+              className="flex items-center space-x-1.5 text-white px-4 py-2 rounded-full font-medium text-sm shadow-md"
+              style={{
+                backgroundColor: 'var(--brand-primary, #f59e0b)',
+                boxShadow: '0 8px 20px -4px var(--brand-primary-shadow, rgba(245, 158, 11, 0.4))'
+              }}
               transition={{ type: 'spring', stiffness: 450, damping: 30 }}
             >
               <Home className="w-4 h-4" />
               <span className="font-semibold text-xs tracking-wide">Home</span>
             </motion.div>
           ) : (
-            <div className="p-2.5 rounded-full hover:text-emerald-500 transition-colors">
+            <div className="p-2.5 rounded-full hover:text-[var(--brand-primary,#f59e0b)] transition-colors">
               <Home className="w-5 h-5" />
             </div>
           )}
@@ -46,19 +50,23 @@ export const AndroidNavBar: React.FC = () => {
         {/* Favorites */}
         <button
           onClick={() => setActiveTab('favorites')}
-          className="relative flex items-center focus:outline-none transition-all duration-200"
+          className="relative flex items-center focus:outline-none transition-all duration-200 cursor-pointer"
         >
           {activeTab === 'favorites' ? (
             <motion.div
               layoutId="navPill"
-              className="flex items-center space-x-1.5 bg-emerald-500 text-white px-4 py-2 rounded-full font-medium text-sm shadow-md shadow-emerald-500/30"
+              className="flex items-center space-x-1.5 text-white px-4 py-2 rounded-full font-medium text-sm shadow-md"
+              style={{
+                backgroundColor: 'var(--brand-primary, #f59e0b)',
+                boxShadow: '0 8px 20px -4px var(--brand-primary-shadow, rgba(245, 158, 11, 0.4))'
+              }}
               transition={{ type: 'spring', stiffness: 450, damping: 30 }}
             >
               <Heart className="w-4 h-4 fill-white" />
               <span className="font-semibold text-xs">Favorites</span>
             </motion.div>
           ) : (
-            <div className="p-2.5 rounded-full hover:text-emerald-500 transition-colors">
+            <div className="p-2.5 rounded-full hover:text-[var(--brand-primary,#f59e0b)] transition-colors">
               <Heart className="w-5 h-5" />
             </div>
           )}
@@ -67,22 +75,29 @@ export const AndroidNavBar: React.FC = () => {
         {/* Cart */}
         <button
           onClick={() => setActiveTab('cart')}
-          className="relative flex items-center focus:outline-none transition-all duration-200"
+          className="relative flex items-center focus:outline-none transition-all duration-200 cursor-pointer"
         >
           {activeTab === 'cart' ? (
             <motion.div
               layoutId="navPill"
-              className="flex items-center space-x-1.5 bg-emerald-500 text-white px-4 py-2 rounded-full font-medium text-sm shadow-md shadow-emerald-500/30"
+              className="flex items-center space-x-1.5 text-white px-4 py-2 rounded-full font-medium text-sm shadow-md"
+              style={{
+                backgroundColor: 'var(--brand-primary, #f59e0b)',
+                boxShadow: '0 8px 20px -4px var(--brand-primary-shadow, rgba(245, 158, 11, 0.4))'
+              }}
               transition={{ type: 'spring', stiffness: 450, damping: 30 }}
             >
               <ShoppingBag className="w-4 h-4" />
               <span className="font-semibold text-xs">Cart</span>
             </motion.div>
           ) : (
-            <div className="relative p-2.5 rounded-full hover:text-emerald-500 transition-colors">
+            <div className="relative p-2.5 rounded-full hover:text-[var(--brand-primary,#f59e0b)] transition-colors">
               <ShoppingBag className="w-5 h-5" />
               {cartCount > 0 && (
-                <span className="absolute 1 top-1 right-1 w-4 h-4 bg-emerald-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow">
+                <span
+                  className="absolute 1 top-1 right-1 w-4 h-4 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow"
+                  style={{ backgroundColor: 'var(--brand-primary, #f59e0b)' }}
+                >
                   {cartCount}
                 </span>
               )}
@@ -93,20 +108,24 @@ export const AndroidNavBar: React.FC = () => {
         {/* OSS Tokens Screen (Accessible to all: Table & Waiting line customers) */}
         <button
           onClick={() => setActiveTab('oss')}
-          className="relative flex items-center focus:outline-none transition-all duration-200"
+          className="relative flex items-center focus:outline-none transition-all duration-200 cursor-pointer"
           title="Fuatilia Token ya Oda Yako (OSS Screen)"
         >
           {activeTab === 'oss' ? (
             <motion.div
               layoutId="navPill"
-              className="flex items-center space-x-1.5 bg-emerald-500 text-white px-3.5 py-2 rounded-full font-bold text-sm shadow-md shadow-emerald-500/30"
+              className="flex items-center space-x-1.5 text-white px-3.5 py-2 rounded-full font-bold text-sm shadow-md"
+              style={{
+                backgroundColor: 'var(--brand-primary, #f59e0b)',
+                boxShadow: '0 8px 20px -4px var(--brand-primary-shadow, rgba(245, 158, 11, 0.4))'
+              }}
               transition={{ type: 'spring', stiffness: 450, damping: 30 }}
             >
               <Tv className="w-4 h-4" />
               <span className="font-semibold text-xs">Tokens</span>
             </motion.div>
           ) : (
-            <div className="relative p-2.5 rounded-full hover:text-emerald-500 transition-colors">
+            <div className="relative p-2.5 rounded-full hover:text-[var(--brand-primary,#f59e0b)] transition-colors">
               <Tv className="w-5 h-5 text-teal-400" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-emerald-400 rounded-full animate-ping" />
             </div>
@@ -117,19 +136,23 @@ export const AndroidNavBar: React.FC = () => {
         {isLoggedIn && (
           <button
             onClick={() => setActiveTab('orders')}
-            className="relative flex items-center focus:outline-none transition-all duration-200"
+            className="relative flex items-center focus:outline-none transition-all duration-200 cursor-pointer"
           >
             {activeTab === 'orders' ? (
               <motion.div
                 layoutId="navPill"
-                className="flex items-center space-x-1.5 bg-emerald-500 text-white px-4 py-2 rounded-full font-medium text-sm shadow-md shadow-emerald-500/30"
+                className="flex items-center space-x-1.5 text-white px-4 py-2 rounded-full font-medium text-sm shadow-md"
+                style={{
+                  backgroundColor: 'var(--brand-primary, #f59e0b)',
+                  boxShadow: '0 8px 20px -4px var(--brand-primary-shadow, rgba(245, 158, 11, 0.4))'
+                }}
                 transition={{ type: 'spring', stiffness: 450, damping: 30 }}
               >
                 <Clock className="w-4 h-4" />
                 <span className="font-semibold text-xs">Orders</span>
               </motion.div>
             ) : (
-              <div className="relative p-2.5 rounded-full hover:text-emerald-500 transition-colors">
+              <div className="relative p-2.5 rounded-full hover:text-[var(--brand-primary,#f59e0b)] transition-colors">
                 <Clock className="w-5 h-5" />
                 {activeOrdersCount > 0 && (
                   <span className="absolute 1 top-1 right-1 w-2 h-2 bg-amber-500 rounded-full animate-ping" />
@@ -143,12 +166,16 @@ export const AndroidNavBar: React.FC = () => {
         {isLoggedIn ? (
           <button
             onClick={() => setActiveTab('profile')}
-            className="relative flex items-center focus:outline-none transition-all duration-200"
+            className="relative flex items-center focus:outline-none transition-all duration-200 cursor-pointer"
           >
             {activeTab === 'profile' ? (
               <motion.div
                 layoutId="navPill"
-                className="flex items-center space-x-1.5 bg-emerald-500 text-white px-3.5 py-1.5 rounded-full font-medium text-sm shadow-md shadow-emerald-500/30"
+                className="flex items-center space-x-1.5 text-white px-3.5 py-1.5 rounded-full font-medium text-sm shadow-md"
+                style={{
+                  backgroundColor: 'var(--brand-primary, #f59e0b)',
+                  boxShadow: '0 8px 20px -4px var(--brand-primary-shadow, rgba(245, 158, 11, 0.4))'
+                }}
                 transition={{ type: 'spring', stiffness: 450, damping: 30 }}
               >
                 {user.avatar && !avatarLoadFailed ? (
@@ -171,11 +198,12 @@ export const AndroidNavBar: React.FC = () => {
                     src={user.avatar}
                     alt=""
                     onError={() => setAvatarLoadFailed(true)}
-                    className="w-7 h-7 rounded-full object-cover border-2 border-emerald-500/80 shadow-sm"
+                    className="w-7 h-7 rounded-full object-cover border-2 shadow-sm"
+                    style={{ borderColor: 'var(--brand-primary, #f59e0b)' }}
                     referrerPolicy="no-referrer"
                   />
                 ) : (
-                  <div className="p-1 hover:text-emerald-500 transition-colors">
+                  <div className="p-1 hover:text-[var(--brand-primary,#f59e0b)] transition-colors">
                     <User className="w-5 h-5" />
                   </div>
                 )}
@@ -186,12 +214,16 @@ export const AndroidNavBar: React.FC = () => {
           /* Login button for guests / unauthenticated users */
           <button
             onClick={() => setActiveTab('auth')}
-            className="relative flex items-center focus:outline-none transition-all duration-200"
+            className="relative flex items-center focus:outline-none transition-all duration-200 cursor-pointer"
           >
             {activeTab === 'auth' ? (
               <motion.div
                 layoutId="navPill"
-                className="flex items-center space-x-1.5 bg-amber-500 text-neutral-950 px-3.5 py-2 rounded-full font-bold text-sm shadow-md shadow-amber-500/30"
+                className="flex items-center space-x-1.5 text-white px-3.5 py-2 rounded-full font-bold text-sm shadow-md"
+                style={{
+                  backgroundColor: 'var(--brand-primary, #f59e0b)',
+                  boxShadow: '0 8px 20px -4px var(--brand-primary-shadow, rgba(245, 158, 11, 0.4))'
+                }}
                 transition={{ type: 'spring', stiffness: 450, damping: 30 }}
               >
                 <LogIn className="w-4 h-4" />

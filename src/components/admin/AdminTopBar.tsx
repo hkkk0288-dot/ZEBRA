@@ -14,7 +14,8 @@ import {
   Sun,
   Moon,
   Plus,
-  ArrowLeft
+  ArrowLeft,
+  Palette
 } from 'lucide-react';
 import { AdminTab } from './AdminSidebar';
 import { useApp } from '../../context/AppContext';
@@ -46,8 +47,9 @@ export const AdminTopBar: React.FC<AdminTopBarProps> = ({
   onNavigateToTab,
   notificationCount = 3
 }) => {
-  const { theme, toggleTheme, setActiveTab } = useApp();
+  const { theme, toggleTheme, setActiveTab, appBranding } = useApp();
   const isDark = theme === 'dark';
+  const brandColor = appBranding?.themeColor || '#f59e0b';
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
@@ -76,6 +78,8 @@ export const AdminTopBar: React.FC<AdminTopBarProps> = ({
         return 'Slide Banners (Mabango)';
       case 'branding':
         return 'Logo ya App & Splash Screen';
+      case 'themes':
+        return 'Rangi & Mandhari ya Mfumo (Global Colors)';
       case 'users':
         return 'Users & Roles';
       case 'analytics':
@@ -277,6 +281,21 @@ export const AdminTopBar: React.FC<AdminTopBarProps> = ({
             ) : (
               <Moon className="w-4 h-4 text-neutral-700 animate-fadeIn" />
             )}
+          </button>
+
+          {/* Quick Theme & Color Palette Button */}
+          <button
+            onClick={() => onNavigateToTab?.('themes')}
+            className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all cursor-pointer shadow-2xs"
+            title="Dhibiti Rangi za Mfumo (Manage Theme Colors)"
+          >
+            <div
+              className="w-3.5 h-3.5 rounded-full border border-white/40 shadow-xs shrink-0"
+              style={{ backgroundColor: brandColor }}
+            />
+            <span className="hidden xl:inline text-xs font-bold text-neutral-700 dark:text-neutral-200">
+              Rangi
+            </span>
           </button>
 
           {/* Settings Quick Access */}

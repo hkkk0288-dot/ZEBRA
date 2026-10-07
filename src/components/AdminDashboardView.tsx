@@ -139,6 +139,8 @@ export const AdminDashboardView: React.FC = () => {
 
           {currentTab === 'branding' && <AdminBrandingView />}
 
+          {currentTab === 'themes' && <AdminThemeColorsView />}
+
           {currentTab === 'settings' && <AdminSettingsView onNavigateToTab={tab => setCurrentTab(tab as any)} />}
         </main>
       </div>

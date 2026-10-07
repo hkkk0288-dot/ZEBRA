@@ -418,11 +418,15 @@ export const MapLocationPickerModal: React.FC<MapLocationPickerModalProps> = ({
               onClick={() => handleSelectArea(area)}
               className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors cursor-pointer border ${
                 selectedArea === area.name
-                  ? 'bg-emerald-500 text-white border-emerald-500 shadow-xs'
+                  ? 'text-white border-transparent shadow-xs'
                   : isDark
-                  ? 'bg-neutral-800/70 text-neutral-300 border-neutral-700 hover:border-emerald-500/50'
-                  : 'bg-neutral-100 text-neutral-700 border-neutral-200 hover:border-emerald-400'
+                  ? 'bg-neutral-800/70 text-neutral-300 border-neutral-700 hover:border-neutral-500'
+                  : 'bg-neutral-100 text-neutral-700 border-neutral-200 hover:border-neutral-400'
               }`}
+              style={selectedArea === area.name ? {
+                backgroundColor: 'var(--brand-primary, #f59e0b)',
+                boxShadow: '0 4px 12px -2px var(--brand-primary-shadow, rgba(245, 158, 11, 0.4))'
+              } : undefined}
             >
               {area.name}
             </button>
@@ -518,7 +522,11 @@ export const MapLocationPickerModal: React.FC<MapLocationPickerModalProps> = ({
               <button
                 type="button"
                 onClick={handleConfirm}
-                className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs flex items-center justify-center space-x-2 shadow-lg shadow-emerald-500/25 active:scale-95 transition-all cursor-pointer"
+                className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl text-white font-extrabold text-xs flex items-center justify-center space-x-2 shadow-lg active:scale-95 transition-all cursor-pointer"
+                style={{
+                  backgroundColor: 'var(--brand-primary, #f59e0b)',
+                  boxShadow: '0 8px 20px -4px var(--brand-primary-shadow, rgba(245, 158, 11, 0.4))'
+                }}
               >
                 <Check className="w-4 h-4 stroke-[3]" />
                 <span>Thibitisha Eneo Hili</span>
