@@ -98,20 +98,24 @@
   border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-/* Print Rules for Full-Bleed Table QR Flyer */
+/* ==========================================================================
+   Universal Print Rules
+   Supports: Thermal POS Receipts (80mm/58mm), KOT, Order Invoices, Reports & Table Flyers
+   ========================================================================== */
 @media print {
-  /* Hide all elements by default */
-  body * {
+  /* Hide non-printable navigation, buttons, close icons, toast notifications */
+  button, nav, header, .no-print, [aria-label="Close"], .fixed.top-4.right-4 {
+    display: none !important;
+  }
+
+  /* When printing Table QR Flyer */
+  body:has(#zebra-full-flyer-printable) * {
     visibility: hidden !important;
   }
-
-  /* Only make the full flyer printable container and its children visible */
-  #zebra-full-flyer-printable,
-  #zebra-full-flyer-printable * {
+  body:has(#zebra-full-flyer-printable) #zebra-full-flyer-printable,
+  body:has(#zebra-full-flyer-printable) #zebra-full-flyer-printable * {
     visibility: visible !important;
   }
-
-  /* Position full flyer to cover the entire printed page */
   #zebra-full-flyer-printable {
     position: fixed !important;
     left: 0 !important;
@@ -133,6 +137,110 @@
     flex-direction: column !important;
     justify-content: space-between !important;
     z-index: 999999 !important;
+  }
+
+  /* When printing Thermal POS / KOT Receipt */
+  body:has(#thermal-receipt-paper) * {
+    visibility: hidden !important;
+  }
+  body:has(#thermal-receipt-paper) #thermal-receipt-paper,
+  body:has(#thermal-receipt-paper) #thermal-receipt-paper * {
+    visibility: visible !important;
+  }
+  #thermal-receipt-paper {
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 80mm !important;
+    max-width: 80mm !important;
+    margin: 0 !important;
+    padding: 3mm !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    z-index: 999999 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* When printing POS Checkout Receipt */
+  body:has(#pos-receipt-paper) * {
+    visibility: hidden !important;
+  }
+  body:has(#pos-receipt-paper) #pos-receipt-paper,
+  body:has(#pos-receipt-paper) #pos-receipt-paper * {
+    visibility: visible !important;
+  }
+  #pos-receipt-paper {
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 80mm !important;
+    max-width: 80mm !important;
+    margin: 0 !important;
+    padding: 4mm !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    z-index: 999999 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* When printing Admin Order Invoice */
+  body:has(#order-invoice-printable) * {
+    visibility: hidden !important;
+  }
+  body:has(#order-invoice-printable) #order-invoice-printable,
+  body:has(#order-invoice-printable) #order-invoice-printable * {
+    visibility: visible !important;
+  }
+  #order-invoice-printable {
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 750px !important;
+    margin: 0 auto !important;
+    padding: 8mm !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    z-index: 999999 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* When printing Dashboard Report */
+  body:has(#dashboard-report-printable) * {
+    visibility: hidden !important;
+  }
+  body:has(#dashboard-report-printable) #dashboard-report-printable,
+  body:has(#dashboard-report-printable) #dashboard-report-printable * {
+    visibility: visible !important;
+  }
+  #dashboard-report-printable {
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 800px !important;
+    margin: 0 auto !important;
+    padding: 8mm !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    z-index: 999999 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   @page {

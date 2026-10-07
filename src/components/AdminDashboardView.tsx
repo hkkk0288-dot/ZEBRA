@@ -27,8 +27,18 @@ import {
   X,
   CheckCircle2,
   Download,
-  FileText
+  FileText,
+  Printer,
+  Image as ImageIcon,
+  FileCode,
+  ChevronDown
 } from 'lucide-react';
+import {
+  downloadElementAsImage,
+  downloadHtmlDocument,
+  downloadTextFile,
+  printReceiptOrElement
+} from '../utils/printAndDownload';
 
 export const AdminDashboardView: React.FC = () => {
   const { theme, currency, setActiveTab, menuItems, banners } = useApp();
@@ -41,14 +51,59 @@ export const AdminDashboardView: React.FC = () => {
   const [showZoneDelayModal, setShowZoneDelayModal] = useState(false);
   const [showReportSummaryModal, setShowReportSummaryModal] = useState(false);
   const [exportNotice, setExportNotice] = useState<string | null>(null);
+  const [reportDownloading, setReportDownloading] = useState(false);
+  const [reportPrinting, setReportPrinting] = useState(false);
+  const [showReportDownloadMenu, setShowReportDownloadMenu] = useState(false);
 
   // Export action
   const handleExport = () => {
-    setExportNotice('Exporting CSV of operations and orders...');
+    setExportNotice('Inapakua ripoti ya operesheni na mauzo (CSV)...');
+    const csvContent = `Tarehe,Jumla ya Oda,Jumla ya Mapato,M-Pesa USSD Success,Customer Rating,Hali ya Hubs\n"${selectedDateRange}",8412,"$128,450 USD","99.4%","4.88 / 5.0","Online (Hubs 4)"\n`;
+    downloadTextFile(csvContent, `Operations-Report-${selectedDateRange.replace(/[^a-zA-Z0-9]/g, '_')}.csv`);
     setTimeout(() => {
-      setExportNotice(null);
-      alert('Orders & Telemetry Report exported successfully! File downloaded.');
-    }, 1200);
+      setExportNotice('✅ Ripoti ya CSV imepakuliwa kikamilifu!');
+      setTimeout(() => setExportNotice(null), 3500);
+    }, 600);
+  };
+
+  const handlePrintReport = async () => {
+    setReportPrinting(true);
+    try {
+      await printReceiptOrElement('dashboard-report-printable', {
+        title: `Ripoti - ${selectedDateRange}`,
+        isThermal: false,
+      });
+    } catch (e) {
+      console.error('Print report failed:', e);
+    } finally {
+      setReportPrinting(false);
+    }
+  };
+
+  const handleDownloadReportImage = async () => {
+    setReportDownloading(true);
+    setShowReportDownloadMenu(false);
+    try {
+      await downloadElementAsImage(
+        'dashboard-report-printable',
+        `Executive-Report-${selectedDateRange.replace(/[^a-zA-Z0-9]/g, '_')}.png`,
+        { pixelRatio: 2.5, backgroundColor: '#ffffff' }
+      );
+    } finally {
+      setReportDownloading(false);
+    }
+  };
+
+  const handleDownloadReportHtml = () => {
+    setShowReportDownloadMenu(false);
+    const el = document.getElementById('dashboard-report-printable');
+    if (!el) return;
+    downloadHtmlDocument(
+      el.innerHTML,
+      `Ripoti ya Utendaji - ${selectedDateRange}`,
+      `Executive-Report-${selectedDateRange.replace(/[^a-zA-Z0-9]/g, '_')}.html`,
+      false
+    );
   };
 
   return (
@@ -209,6 +264,14 @@ export const AdminDashboardView: React.FC = () => {
         </div>
       )}
 
+      {/* Export / System Toast Banner */}
+      {exportNotice && (
+        <div className="fixed top-5 right-5 z-50 px-4 py-2.5 rounded-2xl bg-neutral-900 text-white border border-neutral-700 shadow-2xl text-xs flex items-center space-x-2 animate-scaleUp">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+          <span className="font-semibold">{exportNotice}</span>
+        </div>
+      )}
+
       {/* Reports Summary Modal */}
       {showReportSummaryModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
@@ -220,12 +283,12 @@ export const AdminDashboardView: React.FC = () => {
                   Executive Operations Report ({selectedDateRange})
                 </h3>
               </div>
-              <button onClick={() => setShowReportSummaryModal(false)} className="text-neutral-400 hover:text-neutral-600">
+              <button onClick={() => setShowReportSummaryModal(false)} className="text-neutral-400 hover:text-neutral-600 cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="space-y-3 text-xs">
+            <div id="dashboard-report-printable" className="space-y-3 text-xs p-2">
               <div className="grid grid-cols-2 gap-3">
                 <div className="p-3 rounded-2xl bg-neutral-50 dark:bg-neutral-800/60">
                   <span className="text-[11px] text-neutral-400 block">Total Deliveries</span>
@@ -251,21 +314,81 @@ export const AdminDashboardView: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex space-x-2 pt-2">
+            <div className="flex flex-col gap-2 pt-2 border-t border-neutral-100 dark:border-neutral-800">
+              <div className="flex space-x-2">
+                {/* Download Menu */}
+                <div className="relative flex-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowReportDownloadMenu(!showReportDownloadMenu)}
+                    disabled={reportDownloading}
+                    className="w-full py-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-xs flex items-center justify-center space-x-1.5 border border-amber-500/30 transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    <Download className={`w-4 h-4 ${reportDownloading ? 'animate-bounce' : ''}`} />
+                    <span>{reportDownloading ? 'Inapakua...' : 'Pakua Ripoti'}</span>
+                    <ChevronDown className="w-3.5 h-3.5 opacity-60" />
+                  </button>
+
+                  {showReportDownloadMenu && (
+                    <div className="absolute left-0 bottom-full mb-1.5 w-52 bg-white dark:bg-[#1f1f23] rounded-2xl border border-neutral-200 dark:border-neutral-700 shadow-xl p-1.5 z-50 text-xs animate-scaleUp">
+                      <button
+                        type="button"
+                        onClick={handleDownloadReportImage}
+                        className="w-full text-left px-2.5 py-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center space-x-2 text-neutral-800 dark:text-neutral-200 cursor-pointer"
+                      >
+                        <ImageIcon className="w-3.5 h-3.5 text-amber-500" />
+                        <div>
+                          <div className="font-bold">Pakua Picha (PNG)</div>
+                          <div className="text-[10px] text-neutral-400">Picha ya ripoti ya muhtasari</div>
+                        </div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleDownloadReportHtml}
+                        className="w-full text-left px-2.5 py-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center space-x-2 text-neutral-800 dark:text-neutral-200 cursor-pointer"
+                      >
+                        <FileCode className="w-3.5 h-3.5 text-blue-500" />
+                        <div>
+                          <div className="font-bold">Pakua Faili (HTML)</div>
+                          <div className="text-[10px] text-neutral-400">Inaweza kuprintiwa popote</div>
+                        </div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowReportDownloadMenu(false);
+                          handleExport();
+                        }}
+                        className="w-full text-left px-2.5 py-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center space-x-2 text-neutral-800 dark:text-neutral-200 cursor-pointer"
+                      >
+                        <FileText className="w-3.5 h-3.5 text-emerald-500" />
+                        <div>
+                          <div className="font-bold">Pakua Takwimu (CSV)</div>
+                          <div className="text-[10px] text-neutral-400">Kwa ajili ya Excel au Sheets</div>
+                        </div>
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Print Button */}
+                <button
+                  type="button"
+                  onClick={handlePrintReport}
+                  disabled={reportPrinting}
+                  className="flex-1 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow-md transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  <Printer className={`w-4 h-4 ${reportPrinting ? 'animate-spin' : ''}`} />
+                  <span>{reportPrinting ? 'Inachapa...' : 'Print Ripoti'}</span>
+                </button>
+              </div>
+
               <button
-                onClick={() => {
-                  window.print();
-                }}
-                className="flex-1 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow-md transition-colors"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Print / Download Report</span>
-              </button>
-              <button
+                type="button"
                 onClick={() => setShowReportSummaryModal(false)}
-                className="px-4 py-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 font-semibold text-xs"
+                className="w-full py-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 font-semibold text-xs cursor-pointer hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
               >
-                Close
+                Funga
               </button>
             </div>
           </div>

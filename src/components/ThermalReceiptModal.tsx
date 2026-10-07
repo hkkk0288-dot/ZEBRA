@@ -9,11 +9,21 @@ import {
   Check,
   Share2,
   UtensilsCrossed,
-  Sparkles
+  Sparkles,
+  Download,
+  Image as ImageIcon,
+  FileCode,
+  ChevronDown
 } from 'lucide-react';
 import { TableOrder, Order } from '../types';
 import { formatPrice } from '../utils/formatters';
 import { useApp } from '../context/AppContext';
+import {
+  downloadElementAsImage,
+  downloadHtmlDocument,
+  downloadTextFile,
+  printReceiptOrElement
+} from '../utils/printAndDownload';
 
 interface ThermalReceiptModalProps {
   tableOrder?: TableOrder | null;
@@ -29,6 +39,11 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
   const { appBranding } = useApp();
   const [receiptType, setReceiptType] = useState<'kot' | 'customer_bill'>('customer_bill');
   const [copied, setCopied] = useState(false);
+  const [isPrinting, setIsPrinting] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadSuccess, setDownloadSuccess] = useState(false);
+  const [showDownloadMenu, setShowDownloadMenu] = useState(false);
+  const [printStatus, setPrintStatus] = useState<string | null>(null);
   const receiptRef = useRef<HTMLDivElement>(null);
 
   const brandName = appBranding?.appName || 'KOOKOOS';
@@ -64,22 +79,26 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
   const totalAmountTZS = tableOrder?.totalTZS || (onlineOrder ? Math.round(onlineOrder.total * 2600) : 0);
   const guestCount = tableOrder?.guestCount || 2;
 
-  const handlePrint = () => {
-    window.print();
+  const handlePrint = async () => {
+    setIsPrinting(true);
+    setPrintStatus('Inaandaa kuchapisha...');
+    try {
+      await printReceiptOrElement('thermal-receipt-paper', {
+        title: `${brandName} - Risiti ${orderNumber}`,
+        isThermal: true,
+        widthMm: 80,
+      });
+      setPrintStatus('✅ Amri ya print imetumwa!');
+      setTimeout(() => setPrintStatus(null), 3000);
+    } catch (err) {
+      console.error('Print failed, attempting fallback download:', err);
+      setPrintStatus('⚠️ Print imeshindwa, unaweza kupakua (download) risiti hapa chini.');
+    } finally {
+      setIsPrinting(false);
+    }
   };
 
-  const handleShareWhatsApp = () => {
-    let text = `*${brandName.toUpperCase()} - PROUDLY TANZANIAN FRIED CHICKEN*\n${brandTagline}\nTel: +255 712 345 678 | TIN: 142-990-881\n\n*RISITI YA ODA / INVOICE*\nOda: *#${orderNumber}*\nMeza/Eneo: *${tableNumber}*\nTarehe: ${dateStr} ${timestamp}\n\n*ORODHA YA VYAKULA:*\n`;
-    items.forEach(i => {
-      text += `• [${i.qty}x] ${i.name} - ${formatPrice(i.total, 'TZS')}\n`;
-      if (i.notes) text += `   _(${i.notes})_\n`;
-    });
-    text += `\n*JUMLA KUU (TOTAL): ${formatPrice(totalAmountTZS, 'TZS')}*\nLipa Namba M-Pesa / Tigo: *445566*\nAsante sana kwa kuagiza ${brandName}! 🍗🔥`;
-    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
-    window.open(url, '_blank');
-  };
-
-  const handleCopyText = () => {
+  const getRawReceiptText = () => {
     let text = '';
     if (receiptType === 'kot') {
       text = `=== KITCHEN ORDER TICKET (KOT) ===\n${brandName.toUpperCase()} KITCHEN\nOrder: ${orderNumber} | Table: ${tableNumber}\nTime: ${timestamp} | Waiter: ${waiterName}\n----------------------------------\n`;
@@ -94,7 +113,60 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
       });
       text += `----------------------------------\nTOTAL: ${formatPrice(totalAmountTZS, 'TZS')}\nLIPA KWA M-PESA / TIGO: 445566\nAsante sana, Karibu tena!`;
     }
+    return text;
+  };
 
+  const handleDownloadImage = async () => {
+    setIsDownloading(true);
+    setShowDownloadMenu(false);
+    try {
+      const ok = await downloadElementAsImage(
+        'thermal-receipt-paper',
+        `Risiti-${orderNumber}-${receiptType}.png`,
+        { pixelRatio: 3, backgroundColor: '#fffdfa' }
+      );
+      if (ok) {
+        setDownloadSuccess(true);
+        setTimeout(() => setDownloadSuccess(false), 3000);
+      }
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const handleDownloadHtml = () => {
+    setShowDownloadMenu(false);
+    if (!receiptRef.current) return;
+    downloadHtmlDocument(
+      receiptRef.current.innerHTML,
+      `${brandName} - Risiti #${orderNumber}`,
+      `Risiti-${orderNumber}.html`,
+      true
+    );
+    setDownloadSuccess(true);
+    setTimeout(() => setDownloadSuccess(false), 3000);
+  };
+
+  const handleDownloadText = () => {
+    setShowDownloadMenu(false);
+    downloadTextFile(getRawReceiptText(), `Risiti-${orderNumber}.txt`);
+    setDownloadSuccess(true);
+    setTimeout(() => setDownloadSuccess(false), 3000);
+  };
+
+  const handleShareWhatsApp = () => {
+    let text = `*${brandName.toUpperCase()} - PROUDLY TANZANIAN FRIED CHICKEN*\n${brandTagline}\nTel: +255 712 345 678 | TIN: 142-990-881\n\n*RISITI YA ODA / INVOICE*\nOda: *#${orderNumber}*\nMeza/Eneo: *${tableNumber}*\nTarehe: ${dateStr} ${timestamp}\n\n*ORODHA YA VYAKULA:*\n`;
+    items.forEach(i => {
+      text += `• [${i.qty}x] ${i.name} - ${formatPrice(i.total, 'TZS')}\n`;
+      if (i.notes) text += `   _(${i.notes})_\n`;
+    });
+    text += `\n*JUMLA KUU (TOTAL): ${formatPrice(totalAmountTZS, 'TZS')}*\nLipa Namba M-Pesa / Tigo: *445566*\nAsante sana kwa kuagiza ${brandName}! 🍗🔥`;
+    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+  };
+
+  const handleCopyText = () => {
+    const text = getRawReceiptText();
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
@@ -295,43 +367,120 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="p-3 sm:p-4 bg-white dark:bg-[#16161a] border-t border-neutral-100 dark:border-neutral-800 flex items-center justify-between gap-2">
-          <button
-            onClick={handleCopyText}
-            className="flex-1 py-2.5 px-2.5 rounded-2xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 font-bold text-xs flex items-center justify-center space-x-1.5 transition-colors cursor-pointer"
-            title="Nakili maandishi ya risiti"
-          >
-            {copied ? (
-              <>
-                <Check className="w-3.5 h-3.5 text-emerald-500" />
-                <span className="text-emerald-500">Imenakiliwa!</span>
-              </>
-            ) : (
-              <>
-                <Copy className="w-3.5 h-3.5 text-neutral-500" />
-                <span>Nakili</span>
-              </>
-            )}
-          </button>
+        {/* Status or Print Notice */}
+        {printStatus && (
+          <div className="px-4 py-2 bg-neutral-900 text-white text-xs flex items-center justify-between border-t border-neutral-800">
+            <span className="truncate">{printStatus}</span>
+            <button
+              onClick={() => setPrintStatus(null)}
+              className="text-neutral-400 hover:text-white text-[11px] underline ml-2 cursor-pointer"
+            >
+              Funga
+            </button>
+          </div>
+        )}
 
-          <button
-            onClick={handleShareWhatsApp}
-            className="flex-1 py-2.5 px-2.5 rounded-2xl bg-[#25D366]/15 hover:bg-[#25D366]/25 text-[#25D366] font-bold text-xs flex items-center justify-center space-x-1.5 transition-all border border-[#25D366]/30 cursor-pointer"
-            title="Tuma Risiti WhatsApp"
-          >
-            <Share2 className="w-3.5 h-3.5 text-[#25D366]" />
-            <span>WhatsApp</span>
-          </button>
+        {/* Action Buttons: Download, Print, WhatsApp, Copy */}
+        <div className="p-3 sm:p-4 bg-white dark:bg-[#16161a] border-t border-neutral-100 dark:border-neutral-800 space-y-2">
+          
+          {/* Main Actions Row */}
+          <div className="flex items-center justify-between gap-2">
+            {/* Download Button with Popover */}
+            <div className="relative flex-1">
+              <button
+                type="button"
+                onClick={() => setShowDownloadMenu(!showDownloadMenu)}
+                disabled={isDownloading}
+                className="w-full py-2.5 px-2.5 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-xs flex items-center justify-center space-x-1.5 transition-all border border-amber-500/30 cursor-pointer disabled:opacity-50"
+                title="Chagua muundo wa kupakua risiti"
+              >
+                <Download className={`w-3.5 h-3.5 ${isDownloading ? 'animate-bounce' : ''}`} />
+                <span>{downloadSuccess ? 'Imepakuliwa!' : isDownloading ? 'Inapakua...' : 'Pakua Risiti'}</span>
+                <ChevronDown className="w-3 h-3 opacity-60" />
+              </button>
 
-          <button
-            onClick={handlePrint}
-            className="flex-1 py-2.5 px-2.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs flex items-center justify-center space-x-1.5 transition-all shadow-md shadow-emerald-500/20 cursor-pointer"
-            title="Chapisha kwenye printer ya keshia"
-          >
-            <Printer className="w-4 h-4" />
-            <span>Print</span>
-          </button>
+              {/* Download Format Menu Popover */}
+              {showDownloadMenu && (
+                <div className="absolute left-0 bottom-full mb-2 w-56 bg-white dark:bg-[#1f1f23] rounded-2xl border border-neutral-200 dark:border-neutral-700 shadow-xl p-1.5 z-50 text-xs animate-scaleUp">
+                  <div className="px-2 py-1 text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
+                    Chagua Muundo wa Kupakua
+                  </div>
+                  <button
+                    onClick={handleDownloadImage}
+                    className="w-full text-left px-2.5 py-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center space-x-2 text-neutral-800 dark:text-neutral-200 cursor-pointer transition-colors"
+                  >
+                    <ImageIcon className="w-3.5 h-3.5 text-amber-500" />
+                    <div>
+                      <div className="font-bold">Pakua Picha (PNG)</div>
+                      <div className="text-[10px] text-neutral-400">Picha safi ya HD ya risiti</div>
+                    </div>
+                  </button>
+                  <button
+                    onClick={handleDownloadHtml}
+                    className="w-full text-left px-2.5 py-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center space-x-2 text-neutral-800 dark:text-neutral-200 cursor-pointer transition-colors"
+                  >
+                    <FileCode className="w-3.5 h-3.5 text-blue-500" />
+                    <div>
+                      <div className="font-bold">Pakua Faili (HTML / PDF)</div>
+                      <div className="text-[10px] text-neutral-400">Tayari kuprinti kwenye kifaa chochote</div>
+                    </div>
+                  </button>
+                  <button
+                    onClick={handleDownloadText}
+                    className="w-full text-left px-2.5 py-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center space-x-2 text-neutral-800 dark:text-neutral-200 cursor-pointer transition-colors"
+                  >
+                    <FileText className="w-3.5 h-3.5 text-emerald-500" />
+                    <div>
+                      <div className="font-bold">Pakua Nakala (Text / .txt)</div>
+                      <div className="text-[10px] text-neutral-400">Muundo wa mashine ya POS</div>
+                    </div>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Print Button */}
+            <button
+              onClick={handlePrint}
+              disabled={isPrinting}
+              className="flex-1 py-2.5 px-2.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs flex items-center justify-center space-x-1.5 transition-all shadow-md shadow-emerald-500/20 cursor-pointer disabled:opacity-50"
+              title="Chapisha kwenye printer ya keshia au simu"
+            >
+              <Printer className={`w-4 h-4 ${isPrinting ? 'animate-spin' : ''}`} />
+              <span>{isPrinting ? 'Inachapa...' : 'Print Risiti'}</span>
+            </button>
+          </div>
+
+          {/* Secondary Actions Row */}
+          <div className="flex items-center justify-between gap-2 pt-1 border-t border-neutral-100 dark:border-neutral-800/60">
+            <button
+              onClick={handleCopyText}
+              className="flex-1 py-1.5 px-2 rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 font-semibold text-[11px] flex items-center justify-center space-x-1.5 transition-colors cursor-pointer"
+              title="Nakili maandishi ya risiti"
+            >
+              {copied ? (
+                <>
+                  <Check className="w-3 h-3 text-emerald-500" />
+                  <span className="text-emerald-500">Imenakiliwa!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3 h-3 text-neutral-500" />
+                  <span>Nakili</span>
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={handleShareWhatsApp}
+              className="flex-1 py-1.5 px-2 rounded-xl bg-[#25D366]/15 hover:bg-[#25D366]/25 text-[#25D366] font-semibold text-[11px] flex items-center justify-center space-x-1.5 transition-all border border-[#25D366]/30 cursor-pointer"
+              title="Tuma Risiti WhatsApp"
+            >
+              <Share2 className="w-3 h-3 text-[#25D366]" />
+              <span>WhatsApp</span>
+            </button>
+          </div>
+
         </div>
 
       </div>

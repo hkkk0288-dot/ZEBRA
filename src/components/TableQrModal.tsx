@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { RestaurantTable } from '../types';
 import { useApp } from '../context/AppContext';
+import { printReceiptOrElement } from '../utils/printAndDownload';
 
 interface TableQrModalProps {
   table: RestaurantTable;
@@ -194,8 +195,11 @@ export const TableQrModal: React.FC<TableQrModalProps> = ({
   };
 
   // Print full flyer
-  const handlePrintFull = () => {
-    window.print();
+  const handlePrintFull = async () => {
+    await printReceiptOrElement('zebra-full-flyer-printable', {
+      title: `${fields.restaurantName || 'Kookoos'} Flyer - ${fields.tableName}`,
+      isThermal: false,
+    });
   };
 
   const handleCopyLink = () => {

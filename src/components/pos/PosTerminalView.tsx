@@ -31,8 +31,18 @@ import {
   Tag,
   Hash,
   Users,
-  AlertCircle
+  AlertCircle,
+  Download,
+  Image as ImageIcon,
+  FileCode,
+  FileText
 } from 'lucide-react';
+import {
+  downloadElementAsImage,
+  downloadHtmlDocument,
+  downloadTextFile,
+  printReceiptOrElement
+} from '../../utils/printAndDownload';
 
 export type PosOrderType = 'dine_in' | 'takeaway' | 'delivery';
 
@@ -102,7 +112,8 @@ export const PosTerminalView: React.FC = () => {
     placeOrder,
     setActiveTab,
     goBack,
-    theme
+    theme,
+    appBranding
   } = useApp();
 
   const isDark = theme === 'dark';
@@ -162,6 +173,9 @@ export const PosTerminalView: React.FC = () => {
 
   // Receipt Modal State
   const [showReceiptModal, setShowReceiptModal] = useState<boolean>(false);
+  const [posDownloading, setPosDownloading] = useState<boolean>(false);
+  const [posPrinting, setPosPrinting] = useState<boolean>(false);
+  const [posShowDownloadMenu, setPosShowDownloadMenu] = useState<boolean>(false);
   const [printedOrderData, setPrintedOrderData] = useState<{
     tokenNumber: string;
     orderId: string;
@@ -179,6 +193,82 @@ export const PosTerminalView: React.FC = () => {
     address: string;
     timestamp: string;
   } | null>(null);
+
+  const handlePrintPosReceipt = async () => {
+    if (!printedOrderData) return;
+    setPosPrinting(true);
+    try {
+      await printReceiptOrElement('pos-receipt-paper', {
+        title: `POS-Receipt-${printedOrderData.tokenNumber}`,
+        isThermal: true,
+        widthMm: 80,
+      });
+    } catch (e) {
+      console.error('POS Print failed:', e);
+    } finally {
+      setPosPrinting(false);
+    }
+  };
+
+  const handleDownloadPosImage = async () => {
+    if (!printedOrderData) return;
+    setPosDownloading(true);
+    setPosShowDownloadMenu(false);
+    try {
+      await downloadElementAsImage(
+        'pos-receipt-paper',
+        `POS-Receipt-${printedOrderData.tokenNumber}.png`,
+        { pixelRatio: 3, backgroundColor: '#ffffff' }
+      );
+    } finally {
+      setPosDownloading(false);
+    }
+  };
+
+  const handleDownloadPosHtml = () => {
+    if (!printedOrderData) return;
+    setPosShowDownloadMenu(false);
+    const el = document.getElementById('pos-receipt-paper');
+    if (!el) return;
+    downloadHtmlDocument(
+      el.innerHTML,
+      `POS Receipt #${printedOrderData.tokenNumber}`,
+      `POS-Receipt-${printedOrderData.tokenNumber}.html`,
+      true
+    );
+  };
+
+  const handleDownloadPosText = () => {
+    if (!printedOrderData) return;
+    setPosShowDownloadMenu(false);
+    let txt = `=== ${appBranding?.appName?.toUpperCase() || 'KOOKOOS'} POS ===\n`;
+    txt += `TOKEN: ${printedOrderData.tokenNumber} | ORDER: #${printedOrderData.orderId}\n`;
+    txt += `TYPE: ${printedOrderData.orderType} | DATE: ${printedOrderData.timestamp}\n`;
+    txt += `CUSTOMER: ${printedOrderData.customer.name} (${printedOrderData.customer.phone})\n`;
+    txt += `----------------------------------------\n`;
+    printedOrderData.items.forEach(({ item, quantity }) => {
+      const price = currency === 'TZS' ? item.priceTZS : (item.priceUSD ?? item.price);
+      txt += `${quantity}x ${item.name.padEnd(20, ' ')} ${formatPrice(price * quantity, currency)}\n`;
+    });
+    txt += `----------------------------------------\n`;
+    txt += `SUBTOTAL: ${formatPrice(printedOrderData.subtotal, currency)}\n`;
+    if (printedOrderData.deliveryFee > 0) {
+      txt += `DELIVERY: ${formatPrice(printedOrderData.deliveryFee, currency)}\n`;
+    }
+    if (printedOrderData.discount > 0) {
+      txt += `DISCOUNT: -${formatPrice(printedOrderData.discount, currency)}\n`;
+    }
+    txt += `TOTAL: ${formatPrice(printedOrderData.total, currency)}\n`;
+    txt += `METHOD: ${printedOrderData.paymentMethod}\n`;
+    if (printedOrderData.changeDue > 0) {
+      txt += `CHANGE DUE: ${formatPrice(printedOrderData.changeDue, currency)}\n`;
+    }
+    if (printedOrderData.transactionId) {
+      txt += `TRX ID: ${printedOrderData.transactionId}\n`;
+    }
+    txt += `----------------------------------------\nAsante kwa kutuchagua!\n`;
+    downloadTextFile(txt, `POS-Receipt-${printedOrderData.tokenNumber}.txt`);
+  };
 
   // Calculations
   const subtotal = useMemo(() => {
@@ -1362,11 +1452,11 @@ export const PosTerminalView: React.FC = () => {
             </div>
 
             {/* Paper Receipt Body */}
-            <div className="p-5 space-y-3 bg-[#fffefc] border-b border-dashed border-neutral-300">
+            <div id="pos-receipt-paper" className="p-5 space-y-3 bg-[#fffefc] border-b border-dashed border-neutral-300">
               <div className="text-center space-y-1">
-                <div className="text-2xl font-black">🦓 ZEBRA RESTAURANT</div>
-                <div className="text-[10px] text-neutral-600">Mikocheni & Shoppers Plaza, Dar es Salaam</div>
-                <div className="text-[10px] text-neutral-600">Simu: +255 700 000 000</div>
+                <div className="text-2xl font-black">🍗 {appBranding?.appName?.toUpperCase() || 'KOOKOOS'}</div>
+                <div className="text-[10px] text-neutral-600">{appBranding?.tagline || 'Proudly Tanzanian Fried Chicken • Dar es Salaam'}</div>
+                <div className="text-[10px] text-neutral-600">Simu: +255 712 345 678 | TIN: 142-990-881</div>
               </div>
 
               <div className="border-t border-b border-dashed border-neutral-300 py-2 space-y-1 text-[11px]">
@@ -1455,35 +1545,91 @@ export const PosTerminalView: React.FC = () => {
                   ||||| | |||| ||| |||||| |||| ||
                 </div>
                 <p className="text-[10px] font-bold text-neutral-700">
-                  Asante kwa kuchagua Kookoos! Karibu tena.
+                  Asante kwa kuchagua {appBranding?.appName || 'Kookoos'}! Karibu tena.
                 </p>
               </div>
             </div>
 
             {/* Receipt Actions */}
-            <div className="p-3 bg-neutral-100 flex items-center justify-between gap-2">
+            <div className="p-3 bg-neutral-100 flex flex-col gap-2">
+              <div className="flex items-center justify-between gap-2">
+                {/* Download Menu */}
+                <div className="relative flex-1">
+                  <button
+                    type="button"
+                    onClick={() => setPosShowDownloadMenu(!posShowDownloadMenu)}
+                    disabled={posDownloading}
+                    className="w-full py-2.5 px-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-500 font-bold text-xs flex items-center justify-center space-x-1 border border-amber-500/30 cursor-pointer disabled:opacity-50"
+                    title="Pakua risiti kwenye simu au kompyuta"
+                  >
+                    <Download className={`w-3.5 h-3.5 ${posDownloading ? 'animate-bounce' : ''}`} />
+                    <span>{posDownloading ? 'Inapakua...' : 'Pakua'}</span>
+                    <ChevronDown className="w-3 h-3 opacity-60" />
+                  </button>
+
+                  {posShowDownloadMenu && (
+                    <div className="absolute left-0 bottom-full mb-1.5 w-52 bg-white rounded-2xl border border-neutral-200 shadow-xl p-1.5 z-50 text-xs animate-scaleUp">
+                      <button
+                        type="button"
+                        onClick={handleDownloadPosImage}
+                        className="w-full text-left px-2.5 py-2 rounded-xl hover:bg-neutral-100 flex items-center space-x-2 text-neutral-800 cursor-pointer"
+                      >
+                        <ImageIcon className="w-3.5 h-3.5 text-amber-500" />
+                        <div>
+                          <div className="font-bold">Pakua Picha (PNG)</div>
+                          <div className="text-[10px] text-neutral-400">Picha ya HD ya risiti</div>
+                        </div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleDownloadPosHtml}
+                        className="w-full text-left px-2.5 py-2 rounded-xl hover:bg-neutral-100 flex items-center space-x-2 text-neutral-800 cursor-pointer"
+                      >
+                        <FileCode className="w-3.5 h-3.5 text-blue-500" />
+                        <div>
+                          <div className="font-bold">Pakua Faili (HTML)</div>
+                          <div className="text-[10px] text-neutral-400">Inaweza kuprintiwa popote</div>
+                        </div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleDownloadPosText}
+                        className="w-full text-left px-2.5 py-2 rounded-xl hover:bg-neutral-100 flex items-center space-x-2 text-neutral-800 cursor-pointer"
+                      >
+                        <FileText className="w-3.5 h-3.5 text-emerald-500" />
+                        <div>
+                          <div className="font-bold">Pakua Nakala (.txt)</div>
+                          <div className="text-[10px] text-neutral-400">POS Text receipt</div>
+                        </div>
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Print Receipt */}
+                <button
+                  type="button"
+                  onClick={handlePrintPosReceipt}
+                  disabled={posPrinting}
+                  className="flex-1 py-2.5 px-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center space-x-1 cursor-pointer disabled:opacity-50 shadow-sm"
+                  title="Chapisha risiti kwenye mashine ya keshia"
+                >
+                  <Printer className={`w-3.5 h-3.5 ${posPrinting ? 'animate-spin' : ''}`} />
+                  <span>{posPrinting ? 'Inachapa...' : 'Print Risiti'}</span>
+                </button>
+              </div>
+
               <button
                 type="button"
                 onClick={() => {
                   setShowReceiptModal(false);
                   setActiveTab('oss');
                 }}
-                className="flex-1 py-2 px-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs flex items-center justify-center space-x-1 cursor-pointer"
+                className="w-full py-2 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-bold text-xs flex items-center justify-center space-x-1.5 cursor-pointer"
                 title="Tazama maendeleo ya token hii kwenye OSS Screen"
               >
                 <Tv className="w-3.5 h-3.5" />
-                <span>Angalia OSS</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  window.print();
-                }}
-                className="flex-1 py-2 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-bold text-xs flex items-center justify-center space-x-1 cursor-pointer"
-              >
-                <Printer className="w-3.5 h-3.5" />
-                <span>Print Receipt</span>
+                <span>Angalia Kwenye Skrini ya OSS & Funga</span>
               </button>
             </div>
           </div>

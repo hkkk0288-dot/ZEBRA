@@ -14,12 +14,20 @@ import {
   Plus,
   X,
   Phone,
-  MapPin
+  MapPin,
+  Download,
+  Image as ImageIcon,
+  FileCode
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Order, OrderStatus } from '../../types';
 import { formatPrice } from '../../utils/formatters';
 import { INITIAL_DRIVERS } from './adminMockData';
+import {
+  downloadElementAsImage,
+  downloadHtmlDocument,
+  printReceiptOrElement
+} from '../../utils/printAndDownload';
 
 interface AdminOrdersViewProps {
   isDark: boolean;
@@ -32,6 +40,52 @@ export const AdminOrdersView: React.FC<AdminOrdersViewProps> = ({ isDark }) => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [assigningOrder, setAssigningOrder] = useState<Order | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [invoiceDownloading, setInvoiceDownloading] = useState(false);
+  const [invoicePrinting, setInvoicePrinting] = useState(false);
+  const [showDownloadMenu, setShowDownloadMenu] = useState(false);
+
+  const handlePrintInvoice = async () => {
+    if (!selectedOrder) return;
+    setInvoicePrinting(true);
+    try {
+      await printReceiptOrElement('order-invoice-printable', {
+        title: `Invoice-${selectedOrder.orderNumber}`,
+        isThermal: false,
+      });
+    } catch (e) {
+      console.error('Failed to print invoice:', e);
+    } finally {
+      setInvoicePrinting(false);
+    }
+  };
+
+  const handleDownloadInvoiceImage = async () => {
+    if (!selectedOrder) return;
+    setInvoiceDownloading(true);
+    setShowDownloadMenu(false);
+    try {
+      await downloadElementAsImage(
+        'order-invoice-printable',
+        `Invoice-${selectedOrder.orderNumber}.png`,
+        { pixelRatio: 2.5, backgroundColor: '#ffffff' }
+      );
+    } finally {
+      setInvoiceDownloading(false);
+    }
+  };
+
+  const handleDownloadInvoiceHtml = () => {
+    if (!selectedOrder) return;
+    setShowDownloadMenu(false);
+    const el = document.getElementById('order-invoice-printable');
+    if (!el) return;
+    downloadHtmlDocument(
+      el.innerHTML,
+      `Order Invoice #${selectedOrder.orderNumber}`,
+      `Invoice-${selectedOrder.orderNumber}.html`,
+      false
+    );
+  };
 
   // New order form state
   const [custName, setCustName] = useState('');
@@ -230,12 +284,12 @@ export const AdminOrdersView: React.FC<AdminOrdersViewProps> = ({ isDark }) => {
                 </h3>
                 <p className="text-xs text-neutral-400">Date: {selectedOrder.date}</p>
               </div>
-              <button onClick={() => setSelectedOrder(null)} className="text-neutral-400 hover:text-neutral-600">
+              <button onClick={() => setSelectedOrder(null)} className="text-neutral-400 hover:text-neutral-600 cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="space-y-3 text-xs">
+            <div id="order-invoice-printable" className="space-y-3 text-xs p-2">
               <div className="p-3.5 rounded-2xl bg-neutral-50 dark:bg-neutral-800/60 space-y-1">
                 <p className="font-bold text-neutral-900 dark:text-white">{selectedOrder.customer.name}</p>
                 <p className="text-neutral-500">{selectedOrder.customer.phone}</p>
@@ -274,22 +328,81 @@ export const AdminOrdersView: React.FC<AdminOrdersViewProps> = ({ isDark }) => {
               </div>
             </div>
 
-            <div className="flex space-x-2 pt-2">
-              <button
-                onClick={() => {
-                  window.print();
-                }}
-                className="flex-1 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs flex items-center justify-center space-x-2 shadow-md transition-colors"
-              >
-                <Printer className="w-4 h-4" />
-                <span>Print Kitchen Receipt</span>
-              </button>
-              <button
-                onClick={() => setSelectedOrder(null)}
-                className="px-4 py-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 font-semibold text-xs"
-              >
-                Close
-              </button>
+            <div className="flex flex-col gap-2 pt-2 border-t border-neutral-100 dark:border-neutral-800">
+              <div className="flex space-x-2">
+                {/* Download Menu */}
+                <div className="relative flex-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowDownloadMenu(!showDownloadMenu)}
+                    disabled={invoiceDownloading}
+                    className="w-full py-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-xs flex items-center justify-center space-x-1.5 border border-amber-500/30 transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    <Download className={`w-4 h-4 ${invoiceDownloading ? 'animate-bounce' : ''}`} />
+                    <span>{invoiceDownloading ? 'Inapakua...' : 'Pakua Invoice'}</span>
+                    <ChevronDown className="w-3.5 h-3.5 opacity-60" />
+                  </button>
+
+                  {showDownloadMenu && (
+                    <div className="absolute left-0 bottom-full mb-1.5 w-52 bg-white dark:bg-[#1f1f23] rounded-2xl border border-neutral-200 dark:border-neutral-700 shadow-xl p-1.5 z-50 text-xs animate-scaleUp">
+                      <button
+                        type="button"
+                        onClick={handleDownloadInvoiceImage}
+                        className="w-full text-left px-2.5 py-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center space-x-2 text-neutral-800 dark:text-neutral-200 cursor-pointer"
+                      >
+                        <ImageIcon className="w-3.5 h-3.5 text-amber-500" />
+                        <div>
+                          <div className="font-bold">Pakua Picha (PNG)</div>
+                          <div className="text-[10px] text-neutral-400">Picha ya HD ya invoice</div>
+                        </div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleDownloadInvoiceHtml}
+                        className="w-full text-left px-2.5 py-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center space-x-2 text-neutral-800 dark:text-neutral-200 cursor-pointer"
+                      >
+                        <FileCode className="w-3.5 h-3.5 text-blue-500" />
+                        <div>
+                          <div className="font-bold">Pakua Faili (HTML)</div>
+                          <div className="text-[10px] text-neutral-400">Inaweza kuprintiwa popote</div>
+                        </div>
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Print Button */}
+                <button
+                  type="button"
+                  onClick={handlePrintInvoice}
+                  disabled={invoicePrinting}
+                  className="flex-1 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs flex items-center justify-center space-x-2 shadow-md transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  <Printer className={`w-4 h-4 ${invoicePrinting ? 'animate-spin' : ''}`} />
+                  <span>{invoicePrinting ? 'Inachapa...' : 'Print Invoice'}</span>
+                </button>
+              </div>
+
+              <div className="flex space-x-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const ord = selectedOrder;
+                    setSelectedOrder(null);
+                    openThermalReceipt(null, ord);
+                  }}
+                  className="flex-1 py-2 rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 font-semibold text-xs transition-colors cursor-pointer"
+                >
+                  Fungua Risiti ya POS (Thermal 80mm)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedOrder(null)}
+                  className="px-5 py-2 rounded-xl bg-neutral-200 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 font-bold text-xs cursor-pointer"
+                >
+                  Funga
+                </button>
+              </div>
             </div>
           </div>
         </div>
