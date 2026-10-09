@@ -32,7 +32,8 @@ import { ThermalReceiptModal } from './components/ThermalReceiptModal';
 import { SplitBillModal } from './components/SplitBillModal';
 import { LiveRiderTrackerModal } from './components/LiveRiderTrackerModal';
 import { ScratchCardModal } from './components/ScratchCardModal';
-import { Smartphone, Monitor, ShieldCheck, User, LogIn, Store, Tv, ArrowLeft } from 'lucide-react';
+import { AdminAuthGuard } from './components/admin/AdminAuthGuard';
+import { Smartphone, Monitor, ShieldCheck, User, LogIn, Store, Tv, ArrowLeft, Lock } from 'lucide-react';
 
 const MainContent: React.FC = () => {
   const {
@@ -46,6 +47,7 @@ const MainContent: React.FC = () => {
     androidFrame,
     setAndroidFrame,
     isLoggedIn,
+    user,
     tables,
     activeTable,
     setActiveTable,
@@ -98,6 +100,13 @@ const MainContent: React.FC = () => {
     (appBranding.splashEnabled && !splashDismissed && appBranding.splashSlides.length > 0) ||
     showSplashPreview;
 
+  // True full-screen operations screens that have their own dedicated topbar/navigation
+  const isOperationsView =
+    activeTab === 'admin' ||
+    activeTab === 'pos' ||
+    activeTab === 'oss' ||
+    activeTab === 'kds';
+
   const renderActiveView = () => {
     switch (activeTab) {
       case 'home':
@@ -115,6 +124,14 @@ const MainContent: React.FC = () => {
       case 'waiter':
         return <WaiterView />;
       case 'admin':
+        if (!isLoggedIn || user.role !== 'admin') {
+          return (
+            <AdminAuthGuard
+              onBack={() => setActiveTab('home')}
+              onSuccess={() => setActiveTab('admin')}
+            />
+          );
+        }
         return <AdminDashboardView />;
       case 'pos':
         return <PosTerminalView />;
@@ -208,26 +225,30 @@ const MainContent: React.FC = () => {
               <span>{activeTab === 'auth' ? 'Rudi' : 'Login'}</span>
             </button>
 
-            <button
-              onClick={() => setActiveTab(activeTab === 'admin' ? 'home' : 'admin')}
-              className={`flex items-center space-x-1 px-2.5 sm:px-3 py-1 rounded-full text-[11px] font-bold transition-colors ${
-                activeTab === 'admin'
-                  ? 'bg-amber-500 text-neutral-900'
-                  : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
-              }`}
-            >
-              {activeTab === 'admin' ? (
-                <>
-                  <User className="w-3.5 h-3.5" />
-                  <span>Customer</span>
-                </>
-              ) : (
-                <>
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Admin</span>
-                </>
-              )}
-            </button>
+            {/* Admin entry in Phone Mockup Toolbar - ONLY visible to logged-in admin */}
+            {isLoggedIn && user.role === 'admin' && (
+              <button
+                onClick={() => setActiveTab(activeTab === 'admin' ? 'home' : 'admin')}
+                className={`flex items-center space-x-1 px-2.5 sm:px-3 py-1 rounded-full text-[11px] font-bold transition-colors ${
+                  activeTab === 'admin'
+                    ? 'bg-amber-500 text-neutral-900'
+                    : 'bg-neutral-800 text-amber-400 hover:bg-neutral-700'
+                }`}
+                title="Dashibodi ya Admin"
+              >
+                {activeTab === 'admin' ? (
+                  <>
+                    <User className="w-3.5 h-3.5" />
+                    <span>Rudi App</span>
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Admin</span>
+                  </>
+                )}
+              </button>
+            )}
 
             {/* Switch to Full Website Mode */}
             <button
@@ -255,8 +276,8 @@ const MainContent: React.FC = () => {
               {renderActiveView()}
             </div>
 
-            {/* Floating Android Nav Bar */}
-            <AndroidNavBar />
+            {/* Floating Android Nav Bar - Only in customer views */}
+            {!isOperationsView && <AndroidNavBar />}
           </div>
         </main>
 
@@ -364,23 +385,27 @@ const MainContent: React.FC = () => {
         isDark ? 'bg-[#09090b] text-white' : 'bg-[#fafafa] text-neutral-900'
       }`}
     >
-      {/* Full Website Header */}
-      <WebHeader />
+      {/* Full Website Header - Hidden in Admin and Operations Views */}
+      {!isOperationsView && <WebHeader />}
 
-      {/* Main View Container (Full width responsive container with bottom padding for mobile floating nav) */}
-      <main className="flex-1 w-full relative pb-24 sm:pb-28 lg:pb-8">
+      {/* Main View Container (No storefront bottom padding in operations views) */}
+      <main className={`flex-1 w-full relative ${isOperationsView ? '' : 'pb-24 sm:pb-28 lg:pb-8'}`}>
         {renderActiveView()}
       </main>
 
-      {/* Website Footer - Desktop always, Mobile only on home feed */}
-      <div className={`pb-16 lg:pb-0 ${activeTab === 'home' ? 'block' : 'hidden lg:block'}`}>
-        <WebFooter />
-      </div>
+      {/* Website Footer - Desktop always, Mobile only on home feed - Hidden in Admin and Operations Views */}
+      {!isOperationsView && (
+        <div className={`pb-16 lg:pb-0 ${activeTab === 'home' ? 'block' : 'hidden lg:block'}`}>
+          <WebFooter />
+        </div>
+      )}
 
-      {/* Floating Bottom Nav for Mobile Screens only */}
-      <div className="lg:hidden">
-        <AndroidNavBar />
-      </div>
+      {/* Floating Bottom Nav for Mobile Screens only - Hidden in Admin and Operations Views */}
+      {!isOperationsView && (
+        <div className="lg:hidden">
+          <AndroidNavBar />
+        </div>
+      )}
 
       {/* Detail & Payment Modals */}
       <FoodDetailModal />
@@ -470,7 +495,7 @@ const MainContent: React.FC = () => {
       )}
 
       {/* PWA Install Banner */}
-      <PwaInstallBanner />
+      {!isOperationsView && <PwaInstallBanner />}
 
       {/* Splash Screen (Picha au Video - Moja au Zaidi) */}
       {showSplash && (

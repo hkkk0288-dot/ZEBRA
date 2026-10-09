@@ -216,7 +216,11 @@ export const AuthView: React.FC = () => {
         await login(identifier, loginPassword);
         setSuccessMsg(`Karibu tena! Umefanikiwa kuingia.`);
         confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
-        const nextTab = pendingAction ? 'cart' : 'home';
+        const isStaff = identifier.toLowerCase().includes('admin') ||
+                        identifier.toLowerCase().includes('amour') ||
+                        identifier.toLowerCase().includes('david') ||
+                        identifier.toLowerCase().includes('zebradsm');
+        const nextTab = pendingAction ? 'cart' : (isStaff ? 'admin' : 'home');
         setTimeout(() => setActiveTab(nextTab), 1100);
       } catch (err: any) {
         setErrorMsg(err?.message || 'Hitilafu imetokea. Tafadhali jaribu tena.');
@@ -369,17 +373,7 @@ export const AuthView: React.FC = () => {
 
         {/* 1. Brand Logo & Title */}
         <div className="mb-4 flex flex-col items-center text-center space-y-2">
-          {appBranding?.logoUrl ? (
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-amber-500/10 border-2 border-amber-500/30 overflow-hidden shadow-xl shadow-amber-500/20 p-1 flex items-center justify-center">
-              <img
-                src={appBranding.logoUrl}
-                alt={appBranding?.appName || 'App Logo'}
-                className="w-full h-full object-cover rounded-2xl"
-              />
-            </div>
-          ) : (
-            <FoodAppMascot size={androidFrame ? 'sm' : 'md'} />
-          )}
+          <AppLogo size="xl" fallbackEmoji={appBranding?.logoEmoji || '🍗'} />
           <div>
             <h2 className="text-xl sm:text-2xl font-black font-display tracking-tight text-white">
               {appBranding?.appName || 'Kookoos'}

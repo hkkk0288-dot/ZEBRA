@@ -20,7 +20,9 @@ import {
   Sparkles,
   Tv,
   X,
-  Palette
+  Palette,
+  LogOut,
+  ShieldCheck
 } from 'lucide-react';
 
 export type AdminTab =
@@ -78,7 +80,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   bannersBadge,
   usersBadge = 6
 }) => {
-  const { appBranding } = useApp();
+  const { appBranding, user, logout, setActiveTab } = useApp();
 
   const navSections = [
     {
@@ -233,6 +235,34 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
             className="w-full py-1.5 px-3 rounded-xl bg-neutral-900 dark:bg-neutral-700 hover:bg-neutral-800 dark:hover:bg-neutral-600 text-white text-[11px] font-bold transition-all shadow-xs"
           >
             See zones
+          </button>
+        </div>
+
+        {/* Logged in Admin Profile Badge & Logout */}
+        <div className="p-2.5 rounded-2xl bg-neutral-100 dark:bg-neutral-800/80 border border-neutral-200/80 dark:border-neutral-700/60 flex items-center justify-between">
+          <div className="flex items-center space-x-2 min-w-0">
+            <div className="w-8 h-8 rounded-full bg-amber-500/20 text-amber-500 border border-amber-500/30 flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-4 h-4" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-neutral-900 dark:text-white truncate">
+                {user.name || 'Admin'}
+              </p>
+              <p className="text-[10px] text-amber-500 font-semibold truncate">
+                {user.systemRole || 'Super Admin'}
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => {
+              logout();
+              setActiveTab('home');
+            }}
+            className="p-1.5 rounded-xl hover:bg-rose-500/20 text-neutral-400 hover:text-rose-500 transition-colors cursor-pointer shrink-0"
+            title="Toka kwenye Admin (Logout)"
+          >
+            <LogOut className="w-4 h-4" />
           </button>
         </div>
 

@@ -15,7 +15,8 @@ import {
   Moon,
   Plus,
   ArrowLeft,
-  Palette
+  Palette,
+  LogOut
 } from 'lucide-react';
 import { AdminTab } from './AdminSidebar';
 import { useApp } from '../../context/AppContext';
@@ -47,7 +48,7 @@ export const AdminTopBar: React.FC<AdminTopBarProps> = ({
   onNavigateToTab,
   notificationCount = 3
 }) => {
-  const { theme, toggleTheme, setActiveTab, appBranding } = useApp();
+  const { theme, toggleTheme, setActiveTab, appBranding, logout } = useApp();
   const isDark = theme === 'dark';
   const brandColor = appBranding?.themeColor || '#f59e0b';
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -258,6 +259,19 @@ export const AdminTopBar: React.FC<AdminTopBarProps> = ({
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Rudi kwenye App</span>
+          </button>
+
+          {/* Admin Logout Button */}
+          <button
+            onClick={() => {
+              logout();
+              setActiveTab('home');
+            }}
+            className="flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 text-xs font-bold transition-all active:scale-98 cursor-pointer"
+            title="Toka kwenye akaunti ya Admin (Logout)"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Toka (Logout)</span>
           </button>
 
           {/* Quick Add Product Button */}

@@ -20,7 +20,8 @@ import {
   Award,
   Calendar,
   Sparkles,
-  ArrowLeft
+  ArrowLeft,
+  Lock
 } from 'lucide-react';
 import { formatPrice, formatTzsPrice } from '../utils/formatters';
 import { MapLocationPickerModal } from './MapLocationPickerModal';
@@ -152,12 +153,8 @@ export const ProfileView: React.FC = () => {
     showToast('Anwani imeondolewa');
   };
 
-  const handleToggleAdmin = () => {
-    const newRole = user.role === 'admin' ? 'customer' : 'admin';
-    updateUser({ role: newRole });
-    if (newRole === 'admin') {
-      setActiveTab('admin');
-    }
+  const handleOpenAdmin = () => {
+    setActiveTab('admin');
   };
 
   if (!isLoggedIn) {
@@ -231,19 +228,17 @@ export const ProfileView: React.FC = () => {
           </div>
         </div>
 
-        {/* Small Admin Dashboard Switch */}
-        <button
-          onClick={handleToggleAdmin}
-          className={`text-xs font-semibold px-3 py-1.5 rounded-full flex items-center space-x-1.5 transition-all ${
-            user.role === 'admin'
-              ? 'bg-amber-500 text-neutral-950 font-bold shadow-md shadow-amber-500/20'
-              : 'bg-neutral-800/80 hover:bg-neutral-800 text-neutral-300 border border-neutral-700'
-          }`}
-          title="Fungua dashibodi ya Admin"
-        >
-          <ShieldCheck className="w-3.5 h-3.5" />
-          <span>{user.role === 'admin' ? 'Admin Dashboard' : 'Admin'}</span>
-        </button>
+        {/* Admin Access: ONLY visible to verified logged-in Admin */}
+        {isLoggedIn && user.role === 'admin' && (
+          <button
+            onClick={handleOpenAdmin}
+            className="text-xs font-semibold px-3 py-1.5 rounded-full flex items-center space-x-1.5 transition-all cursor-pointer bg-amber-500 text-neutral-950 font-bold shadow-md shadow-amber-500/20"
+            title="Fungua dashibodi ya Admin"
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-neutral-950" />
+            <span>Admin Dashboard</span>
+          </button>
+        )}
       </div>
 
       {/* 1. Main Profile Card */}

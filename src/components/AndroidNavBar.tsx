@@ -237,8 +237,8 @@ export const AndroidNavBar: React.FC = () => {
           </button>
         )}
 
-        {/* Admin Quick Entry if admin */}
-        {user.role === 'admin' && (
+        {/* Admin Quick Entry ONLY if logged in and admin */}
+        {isLoggedIn && user.role === 'admin' && (
           <button
             onClick={() => setActiveTab('admin')}
             title="Admin Dashboard"

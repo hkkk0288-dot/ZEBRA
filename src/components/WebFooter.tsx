@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 
 export const WebFooter: React.FC = () => {
-  const { setActiveTab, setSelectedCategory, theme, setShowGlobalMapModal, appBranding } = useApp();
+  const { setActiveTab, setSelectedCategory, theme, setShowGlobalMapModal, appBranding, user, isLoggedIn } = useApp();
   const isDark = theme === 'dark';
 
   return (
@@ -188,12 +188,14 @@ export const WebFooter: React.FC = () => {
               >
                 Swahili BBQ
               </button>
-              <button
-                onClick={() => setActiveTab('admin')}
-                className="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-400 font-bold"
-              >
-                Admin
-              </button>
+              {isLoggedIn && user.role === 'admin' && (
+                <button
+                  onClick={() => setActiveTab('admin')}
+                  className="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-400 font-bold"
+                >
+                  Admin
+                </button>
+              )}
             </div>
           </div>
         </div>

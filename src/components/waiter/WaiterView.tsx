@@ -340,13 +340,15 @@ export const WaiterView: React.FC = () => {
             <span>Chukua Oda Mpya</span>
           </button>
 
-          <button
-            onClick={() => setActiveTab('admin')}
-            className="flex items-center space-x-1 px-3 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-semibold text-xs transition-colors cursor-pointer"
-          >
-            <span>Admin Panel</span>
-            <ChevronRight className="w-3.5 h-3.5" />
-          </button>
+          {user.role === 'admin' && (
+            <button
+              onClick={() => setActiveTab('admin')}
+              className="flex items-center space-x-1 px-3 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-semibold text-xs transition-colors cursor-pointer"
+            >
+              <span>Admin Panel</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
       </div>
 

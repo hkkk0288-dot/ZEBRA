@@ -292,25 +292,33 @@ export const WebHeader: React.FC = () => {
                       </div>
                     </button>
 
-                    <div className="my-1 border-t border-neutral-100 dark:border-neutral-800" />
+                    {isLoggedIn && user.role === 'admin' && (
+                      <>
+                        <div className="my-1 border-t border-neutral-100 dark:border-neutral-800" />
 
-                    <button
-                      onClick={() => {
-                        setActiveTab('admin');
-                        setShowStaffDropdown(false);
-                      }}
-                      className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left transition-colors cursor-pointer ${
-                        activeTab === 'admin'
-                          ? 'bg-orange-500/15 text-orange-500 font-bold'
-                          : 'hover:bg-neutral-100 dark:hover:bg-neutral-800 text-orange-500'
-                      }`}
-                    >
-                      <ShieldCheck className="w-4 h-4 text-orange-500 shrink-0" />
-                      <div>
-                        <div className="font-bold">Admin Dashboard</div>
-                        <div className="text-[10px] text-neutral-400">Usimamizi na Mipangilio</div>
-                      </div>
-                    </button>
+                        <button
+                          onClick={() => {
+                            setActiveTab('admin');
+                            setShowStaffDropdown(false);
+                          }}
+                          className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left transition-colors cursor-pointer ${
+                            activeTab === 'admin'
+                              ? 'bg-orange-500/15 text-orange-500 font-bold'
+                              : 'hover:bg-neutral-100 dark:hover:bg-neutral-800 text-orange-500'
+                          }`}
+                        >
+                          <ShieldCheck className="w-4 h-4 text-orange-500 shrink-0" />
+                          <div>
+                            <div className="font-bold flex items-center space-x-1.5">
+                              <span>Admin Dashboard</span>
+                            </div>
+                            <div className="text-[10px] text-neutral-400">
+                              Usimamizi na Mipangilio
+                            </div>
+                          </div>
+                        </button>
+                      </>
+                    )}
                   </div>
                 </>
               )}
@@ -366,6 +374,22 @@ export const WebHeader: React.FC = () => {
                   <User className="w-3.5 h-3.5 text-emerald-500" />
                   <span className="truncate max-w-[70px] text-xs">{user.name.split(' ')[0] || 'Akaunti'}</span>
                 </button>
+
+                {/* Direct Admin Access only for logged-in Admin */}
+                {user.role === 'admin' && (
+                  <button
+                    onClick={() => setActiveTab('admin')}
+                    className={`px-2.5 py-1.5 rounded-xl transition-all flex items-center space-x-1 text-xs font-bold cursor-pointer ${
+                      activeTab === 'admin'
+                        ? 'bg-amber-500 text-neutral-950 font-black shadow-xs'
+                        : 'bg-amber-500/15 text-amber-500 hover:bg-amber-500/25 border border-amber-500/30'
+                    }`}
+                    title="Dashibodi ya Admin"
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    <span>Admin</span>
+                  </button>
+                )}
 
                 <button
                   onClick={logout}
