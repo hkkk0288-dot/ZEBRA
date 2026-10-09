@@ -17,14 +17,14 @@ export function formatTzsPrice(tzsAmount: number): string {
  *   - If the amount is a large TZS value (> 500), it converts to USD (/ 2600).
  *   - Otherwise formats as standard USD ($X.XX).
  */
-export function formatPrice(amount: number, currency: 'USD' | 'TZS' = 'USD'): string {
+export function formatPrice(amount: number, currency: 'USD' | 'TZS' = 'TZS'): string {
   const safeAmount = Number(amount) || 0;
   if (currency === 'TZS') {
-    // Prevent double conversion: if value is already in TZS range (e.g. 500 TZS up to millions), don't multiply by 2600!
-    const tzsAmount = safeAmount > 200 ? Math.round(safeAmount) : Math.round(safeAmount * USD_TO_TZS_RATE);
+    // Prevent double conversion: if value is already in TZS range (e.g. > 100 TZS up to millions), don't multiply by 2600!
+    const tzsAmount = safeAmount > 100 ? Math.round(safeAmount) : Math.round(safeAmount * USD_TO_TZS_RATE);
     return `${tzsAmount.toLocaleString()} TZS`;
   }
-  const usdAmount = safeAmount > 500 ? (safeAmount / USD_TO_TZS_RATE) : safeAmount;
+  const usdAmount = safeAmount > 100 ? (safeAmount / USD_TO_TZS_RATE) : safeAmount;
   return `$${usdAmount.toFixed(2)}`;
 }
 

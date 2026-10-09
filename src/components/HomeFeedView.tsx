@@ -88,6 +88,9 @@ export const HomeFeedView: React.FC = () => {
 
   const bestSellers = filteredItems.filter(i => i.isBestSeller);
   const otherItems = filteredItems.filter(i => !i.isBestSeller);
+  const isAllCategory = selectedCategory === 'all';
+  // When looking at All Menu, showcase Best Sellers in top grid; when category selected, show ALL category dishes so nothing is hidden
+  const gridDishes = isAllCategory ? (bestSellers.length > 0 ? bestSellers : filteredItems) : filteredItems;
 
   const handleQuickAdd = (e: React.MouseEvent, item: MenuItem) => {
     e.stopPropagation();
@@ -334,7 +337,7 @@ export const HomeFeedView: React.FC = () => {
                   : categories.find(c => c.id === selectedCategory)?.name || 'Vyakula'}
               </h2>
               <span className="text-[10px] font-bold text-neutral-400 bg-neutral-200/50 dark:bg-neutral-800/80 px-2 py-0.5 rounded-full">
-                {bestSellers.length}
+                {gridDishes.length}
               </span>
             </div>
 
@@ -350,7 +353,7 @@ export const HomeFeedView: React.FC = () => {
 
           {/* Responsive Modern Food Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
-            {bestSellers.map(dish => {
+            {gridDishes.map(dish => {
               const imgCount = dish.images?.length || 1;
               return (
                 <div
@@ -424,8 +427,12 @@ export const HomeFeedView: React.FC = () => {
                       <span className="text-xs sm:text-base font-extrabold text-emerald-600 dark:text-emerald-400">
                         {formatPrice(dish.price, currency)}
                       </span>
-                      {currency === 'USD' && (
-                        <span className="text-[9px] sm:text-[11px] text-neutral-400 font-mono hidden xs:inline">
+                      {currency === 'TZS' ? (
+                        <span className="text-[10px] text-neutral-400 font-mono inline">
+                          ≈ {formatPrice(dish.price, 'USD')}
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-neutral-400 font-mono inline">
                           ≈ {formatPrice(dish.price, 'TZS')}
                         </span>
                       )}
@@ -466,7 +473,7 @@ export const HomeFeedView: React.FC = () => {
         </div>
 
         {/* Full Menu & Swahili Specialties Section */}
-        {otherItems.length > 0 && (
+        {isAllCategory && otherItems.length > 0 && (
           <div className="space-y-2 pt-1">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-1.5">

@@ -244,7 +244,10 @@ export const OrderTrackingView: React.FC = () => {
             {order.orderType === 'dine_in' && (
               <button
                 type="button"
-                onClick={() => openSplitBill(null, order)}
+                onClick={() => {
+                  const tzs = order.total > 100 ? Math.round(order.total) : Math.round(order.total * 2600);
+                  openSplitBill(null, order, tzs, order.tableNumber || `Oda #${order.orderNumber}`);
+                }}
                 className="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 text-xs font-semibold flex items-center space-x-1.5 border border-amber-500/40 transition-all active:scale-95 shadow-sm cursor-pointer"
                 title="Gawana Bili Mezani"
               >
@@ -406,7 +409,10 @@ export const OrderTrackingView: React.FC = () => {
 
                 <button
                   type="button"
-                  onClick={() => openSplitBill(null, order)}
+                  onClick={() => {
+                    const tzs = order.total > 100 ? Math.round(order.total) : Math.round(order.total * 2600);
+                    openSplitBill(null, order, tzs, order.tableNumber || `Oda #${order.orderNumber}`);
+                  }}
                   className="p-2.5 rounded-2xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/25 flex items-center justify-center space-x-1.5 text-xs font-bold transition-all cursor-pointer"
                 >
                   <Users className="w-3.5 h-3.5" />

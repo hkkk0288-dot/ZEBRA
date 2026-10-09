@@ -356,7 +356,7 @@ export const MapLocationPickerModal: React.FC<MapLocationPickerModalProps> = ({
             <div className="min-w-0 flex-1">
               <h3 className="font-extrabold text-xs sm:text-base font-display flex items-center space-x-1.5 truncate">
                 <span>{title || 'Eneo Lako la Kuletewa Chakula'}</span>
-                <span className="text-[10px] bg-emerald-500/20 text-emerald-400 font-bold px-1.5 py-0.2 rounded-full border border-emerald-500/30 hidden xs:inline-block">
+                <span className="text-[10px] bg-emerald-500/20 text-emerald-400 font-bold px-1.5 py-0.5 rounded-full border border-emerald-500/30 inline-block">
                   Dar Live Map
                 </span>
               </h3>

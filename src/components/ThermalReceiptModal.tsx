@@ -36,7 +36,7 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
   onlineOrder,
   onClose
 }) => {
-  const { appBranding } = useApp();
+  const { appBranding, cart } = useApp();
   const [receiptType, setReceiptType] = useState<'kot' | 'customer_bill'>('customer_bill');
   const [copied, setCopied] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
@@ -50,7 +50,7 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
   const brandTagline = appBranding?.tagline || 'Proudly Tanzanian Fried Chicken';
 
   const orderNumber = tableOrder?.orderNumber || onlineOrder?.orderNumber || 'ORD-001';
-  const tableNumber = tableOrder?.tableNumber || onlineOrder?.tableNumber || 'Table 01';
+  const tableNumber = tableOrder?.tableNumber || onlineOrder?.tableNumber || (cart && cart.length > 0 ? 'Bili ya Sasa' : 'Table 01');
   const waiterName = tableOrder?.waiterName || 'Staff POS';
   const timestamp = tableOrder?.createdAt
     ? new Date(tableOrder.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -68,7 +68,15 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
         total: it.quantity * it.priceTZS,
         notes: it.notes
       }))
-    : (onlineOrder?.items || []).map(ci => ({
+    : onlineOrder?.items
+    ? onlineOrder.items.map(ci => ({
+        name: `${ci.menuItem.name} (${ci.selectedSize.name})`,
+        qty: ci.quantity,
+        price: Math.round(ci.unitPrice * 2600),
+        total: Math.round(ci.totalPrice * 2600),
+        notes: ci.specialInstructions
+      }))
+    : (cart || []).map(ci => ({
         name: `${ci.menuItem.name} (${ci.selectedSize.name})`,
         qty: ci.quantity,
         price: Math.round(ci.unitPrice * 2600),
@@ -76,7 +84,7 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
         notes: ci.specialInstructions
       }));
 
-  const totalAmountTZS = tableOrder?.totalTZS || (onlineOrder ? Math.round(onlineOrder.total * 2600) : 0);
+  const totalAmountTZS = tableOrder?.totalTZS || (onlineOrder ? (onlineOrder.total > 100 ? Math.round(onlineOrder.total) : Math.round(onlineOrder.total * 2600)) : (cart && cart.length > 0 ? Math.round(cart.reduce((s, ci) => s + ci.totalPrice, 0) * 2600) : 0));
   const guestCount = tableOrder?.guestCount || 2;
 
   const handlePrint = async () => {
@@ -263,7 +271,16 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
 
             {/* Receipt Header */}
             {receiptType === 'customer_bill' ? (
-              <div className="text-center space-y-0.5 border-b border-dashed border-neutral-300 pb-2 mb-2">
+              <div className="text-center space-y-1 border-b border-dashed border-neutral-300 pb-2 mb-2">
+                {appBranding?.logoUrl ? (
+                  <img
+                    src={appBranding.logoUrl}
+                    alt={brandName}
+                    className="w-11 h-11 rounded-full object-contain mx-auto mb-1 border border-neutral-300 shadow-2xs"
+                  />
+                ) : (
+                  <div className="text-2xl font-bold mb-1">{appBranding?.logoEmoji || '🍗'}</div>
+                )}
                 <h2 className="text-sm font-black tracking-tight uppercase">{brandName.toUpperCase()}</h2>
                 <p className="text-[10px] text-neutral-600">{brandTagline}</p>
                 <p className="text-[10px] text-neutral-600">Tel: +255 712 345 678 | TIN: 142-990-881</p>

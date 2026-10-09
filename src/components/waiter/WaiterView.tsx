@@ -114,7 +114,8 @@ export const WaiterView: React.FC = () => {
     dismissWaiterCall,
     setActiveQrTable,
     openThermalReceipt,
-    openSplitBill
+    openSplitBill,
+    appBranding
   } = useApp();
 
   const [activeTabFilter, setActiveTabFilter] = useState<'tables' | 'orders' | 'kitchen'>('tables');
@@ -285,13 +286,21 @@ export const WaiterView: React.FC = () => {
       {/* Top Waiter Navigation Bar */}
       <div className="bg-white dark:bg-[#151518] rounded-3xl p-4 sm:p-5 border border-neutral-200 dark:border-neutral-800 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center space-x-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500">
-            <UtensilsCrossed className="w-6 h-6" />
+          <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 overflow-hidden shadow-sm shrink-0">
+            {appBranding?.logoUrl ? (
+              <img
+                src={appBranding.logoUrl}
+                alt={appBranding?.appName || 'Waiter POS'}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-2xl">{appBranding?.logoEmoji || '🍗'}</span>
+            )}
           </div>
           <div>
             <div className="flex items-center space-x-2">
               <h1 className="text-lg sm:text-xl font-bold font-display tracking-tight text-neutral-900 dark:text-white">
-                Waiter & Floor Service Terminal
+                {appBranding?.appName || 'Kookoos'} Waiter Terminal
               </h1>
               <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center space-x-1">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -299,7 +308,7 @@ export const WaiterView: React.FC = () => {
               </span>
             </div>
             <p className="text-xs text-neutral-500 dark:text-neutral-400">
-              Mhudumu: <strong className="text-neutral-800 dark:text-neutral-200">{waiterDisplayName}</strong> • Kituo: Kookoos Mwenge HQ Dining Hall
+              Mhudumu: <strong className="text-neutral-800 dark:text-neutral-200">{waiterDisplayName}</strong> • Kituo: {appBranding?.appName || 'Kookoos'} Dining Hall
             </p>
           </div>
         </div>
@@ -585,7 +594,7 @@ export const WaiterView: React.FC = () => {
                 {/* Split Bill Button */}
                 <button
                   type="button"
-                  onClick={() => openSplitBill(order)}
+                  onClick={() => openSplitBill(order, null, order.totalTZS, order.tableNumber)}
                   className="px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 font-bold text-xs transition-all cursor-pointer flex items-center space-x-1"
                   title="Gawana Bili ya Meza"
                 >

@@ -23,6 +23,7 @@ export const CartView: React.FC = () => {
     discountAmount,
     totalAmount,
     currency,
+    setCurrency,
     placeOrder,
     setActiveTab,
     goBack,
@@ -268,8 +269,30 @@ Thank you for choosing ${appBranding.appName}! 🍗🔥`;
           </div>
         )}
 
-        {/* 2-Column Responsive Layout for Desktop, 1-Column for Phone Frame */}
-        <div className={androidFrame ? 'space-y-5' : 'lg:grid lg:grid-cols-12 lg:gap-8 items-start'}>
+        {cart.length === 0 ? (
+          <div className="py-16 text-center flex flex-col items-center justify-center space-y-4 max-w-md mx-auto">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-amber-500/10 text-amber-500 flex items-center justify-center text-3xl sm:text-4xl shadow-inner border border-amber-500/20">
+              🛒
+            </div>
+            <div className="space-y-1.5">
+              <h2 className="text-xl sm:text-2xl font-bold font-display text-neutral-900 dark:text-white">
+                Kapu Lako Lipo Wazi
+              </h2>
+              <p className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400">
+                Hujaweka chakula chochote kwenye kapu bado. Chagua vyakula vitamu kutoka menyu ya {appBranding?.appName || 'Kookoos'}.
+              </p>
+            </div>
+            <button
+              onClick={() => setActiveTab('home')}
+              className="px-6 py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-neutral-950 font-black text-sm shadow-lg shadow-amber-500/30 transition-all cursor-pointer active:scale-95 flex items-center space-x-2"
+            >
+              <UtensilsCrossed className="w-4 h-4" />
+              <span>Chagua Vyakula Kwenye Menyu</span>
+            </button>
+          </div>
+        ) : (
+          /* 2-Column Responsive Layout for Desktop, 1-Column for Phone Frame */
+          <div className={androidFrame ? 'space-y-5' : 'lg:grid lg:grid-cols-12 lg:gap-8 items-start'}>
           
           {/* Left Column: Items & Delivery Address */}
           <div className={androidFrame ? 'space-y-4' : 'lg:col-span-7 space-y-5'}>
@@ -694,7 +717,15 @@ Thank you for choosing ${appBranding.appName}! 🍗🔥`;
 
                 <button
                   type="button"
-                  onClick={() => openSplitBill()}
+                  onClick={() => {
+                    const cartTzs = Math.round(effectiveTotal * 2600);
+                    const tableName = activeTable?.name
+                      ? `Meza ${activeTable.name}`
+                      : diningMode === 'dine_in'
+                      ? 'Mezani (Dine-In)'
+                      : 'Oda ya Sasa';
+                    openSplitBill(null, null, cartTzs, tableName);
+                  }}
                   className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-neutral-950 font-bold text-xs shadow-xs transition-colors cursor-pointer"
                 >
                   Gawana Bili
@@ -916,14 +947,28 @@ Thank you for choosing ${appBranding.appName}! 🍗🔥`;
               )}
 
               <div className={`border-t pt-3 flex justify-between items-baseline ${isDark ? 'border-neutral-800' : 'border-neutral-200'}`}>
-                <span className={`text-base font-extrabold font-display ${isDark ? 'text-white' : 'text-neutral-950'}`}>
-                  Total
-                </span>
+                <div className="flex items-center space-x-2">
+                  <span className={`text-base font-extrabold font-display ${isDark ? 'text-white' : 'text-neutral-950'}`}>
+                    Total
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setCurrency(currency === 'TZS' ? 'USD' : 'TZS')}
+                    className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-neutral-800/80 text-amber-400 border border-neutral-700 hover:bg-neutral-700 transition-colors cursor-pointer"
+                    title="Badili sarafu ya malipo"
+                  >
+                    {currency === 'TZS' ? 'TZS' : '$ USD'}
+                  </button>
+                </div>
                 <div className="text-right">
                   <span className="text-2xl font-black font-display text-emerald-500">
                     {formatPrice(effectiveTotal, currency)}
                   </span>
-                  {currency === 'USD' && (
+                  {currency === 'TZS' ? (
+                    <div className={`text-xs font-mono font-medium ${isDark ? 'text-neutral-400' : 'text-neutral-600'}`}>
+                      ≈ {formatPrice(effectiveTotal, 'USD')}
+                    </div>
+                  ) : (
                     <div className={`text-xs font-mono font-medium ${isDark ? 'text-neutral-400' : 'text-neutral-600'}`}>
                       ≈ {formatPrice(effectiveTotal, 'TZS')}
                     </div>
@@ -969,6 +1014,7 @@ Thank you for choosing ${appBranding.appName}! 🍗🔥`;
             </div>
           </div>
         </div>
+        )}
       </div>
 
       {/* Interactive Map Location Picker Modal */}

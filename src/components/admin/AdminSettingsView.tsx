@@ -146,7 +146,7 @@ export const AdminSettingsView: React.FC<{ onNavigateToTab?: (tab: string) => vo
                 className="w-full h-full object-cover"
               />
             ) : (
-              <span>{appBranding.logoEmoji || '🦓'}</span>
+              <span>{appBranding.logoEmoji || '🍗'}</span>
             )}
           </div>
           <div>

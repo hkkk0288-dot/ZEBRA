@@ -39,6 +39,7 @@ import {
 import { uploadVideoToCloudinary, uploadImageToCloudinary } from '../../services/cloudinaryService';
 import { MapLocationPickerModal, LocationPickerResult } from '../MapLocationPickerModal';
 import { AdminThemeColorsView } from './AdminThemeColorsView';
+import { compressLogoImage } from '../../utils/imageCompressor';
 
 // Thumbnail component for video / image splash slides with IndexedDB and YouTube resolution
 const SplashSlideThumbnail: React.FC<{ slide: SplashMediaItem }> = ({ slide }) => {
@@ -245,31 +246,46 @@ export const AdminBrandingView: React.FC = () => {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // Handle Logo Upload from device
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle Logo Upload from device (auto-compressed to lightweight high-res square avatar)
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 8 * 1024 * 1024) {
-      showToast('Ukubwa wa faili usizidi MB 8');
+    if (file.size > 15 * 1024 * 1024) {
+      showToast('Ukubwa wa faili usizidi MB 15');
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result as string;
-      setLogoUrlInput(dataUrl);
-      updateAppBranding({ logoUrl: dataUrl });
-      showToast('Logo ya App imepakiwa na kuhifadhiwa! ✅');
-    };
-    reader.readAsDataURL(file);
+    try {
+      showToast('Inaboresha na kubana picha ya logo...');
+      const compressedDataUrl = await compressLogoImage(file, 384, 384, 0.88);
+      setLogoUrlInput(compressedDataUrl);
+      updateAppBranding({ logoUrl: compressedDataUrl });
+      showToast('Logo ya App imepakiwa na kuhifadhiwa kikamilifu! ✅');
+    } catch (err) {
+      console.warn('Compress logo failed, fallback to reader:', err);
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        setLogoUrlInput(dataUrl);
+        updateAppBranding({ logoUrl: dataUrl });
+        showToast('Logo ya App imepakiwa na kuhifadhiwa! ✅');
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   // Save Logo & Brand Info
-  const handleSaveBranding = (e: React.FormEvent) => {
+  const handleSaveBranding = async (e: React.FormEvent) => {
     e.preventDefault();
+    let finalLogo = logoUrlInput.trim();
+    if (finalLogo && finalLogo.startsWith('data:image') && finalLogo.length > 150000) {
+      try {
+        finalLogo = await compressLogoImage(finalLogo, 384, 384, 0.88);
+      } catch {}
+    }
     updateAppBranding({
-      logoUrl: logoUrlInput.trim(),
+      logoUrl: finalLogo,
       logoEmoji: logoEmojiInput.trim() || '🍗',
       appName: appNameInput.trim() || 'Kookoos',
       tagline: taglineInput.trim() || 'Proudly Tanzanian Fried Chicken • Dar es Salaam'
@@ -1012,7 +1028,7 @@ export const AdminBrandingView: React.FC = () => {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <span className="text-4xl">{logoEmojiInput || '🦓'}</span>
+                    <span className="text-4xl">{logoEmojiInput || '🍗'}</span>
                   )}
                 </div>
 

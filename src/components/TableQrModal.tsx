@@ -620,9 +620,17 @@ export const TableQrModal: React.FC<TableQrModalProps> = ({
                   <div className="relative z-10 pt-5 px-6 flex items-start justify-between">
                     {/* Left: Kookoos Mascot + Brand Name */}
                     <div className="flex items-center space-x-3 text-left">
-                      {/* Stylized Kookoos Chicken Mascot */}
-                      <div className="w-12 h-12 rounded-2xl bg-amber-500/95 p-1.5 shadow-lg border border-amber-300 flex items-center justify-center shrink-0 text-2xl">
-                        🍗
+                      {/* Stylized Kookoos Brand Logo */}
+                      <div className="w-12 h-12 rounded-2xl bg-amber-500/95 p-1 shadow-lg border border-amber-300 flex items-center justify-center shrink-0 text-2xl overflow-hidden">
+                        {appBranding?.logoUrl ? (
+                          <img
+                            src={appBranding.logoUrl}
+                            alt={fields.restaurantName}
+                            className="w-full h-full object-cover rounded-xl"
+                          />
+                        ) : (
+                          <span>{appBranding?.logoEmoji || '🍗'}</span>
+                        )}
                       </div>
 
                       <div>

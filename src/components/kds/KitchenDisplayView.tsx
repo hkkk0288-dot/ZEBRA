@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 export const KitchenDisplayView: React.FC = () => {
-  const { orders, tableOrders, updateOrderStatus, setActiveTab, goBack, currency, openThermalReceipt } = useApp();
+  const { orders, tableOrders, updateOrderStatus, setActiveTab, goBack, currency, openThermalReceipt, appBranding } = useApp();
 
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [filterType, setFilterType] = useState<'all' | 'preparing' | 'ready'>('all');
@@ -70,13 +70,21 @@ export const KitchenDisplayView: React.FC = () => {
       {/* Top Header */}
       <div className="flex flex-wrap items-center justify-between pb-4 border-b border-neutral-800 gap-3 shrink-0">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-2xl bg-amber-500 text-neutral-950 font-black flex items-center justify-center text-xl shadow-lg shadow-amber-500/20">
-            🍳
+          <div className="w-10 h-10 rounded-2xl bg-amber-500 text-neutral-950 font-black flex items-center justify-center text-xl shadow-lg shadow-amber-500/20 overflow-hidden border border-white/10 shrink-0">
+            {appBranding?.logoUrl ? (
+              <img
+                src={appBranding.logoUrl}
+                alt={appBranding?.appName || 'KDS'}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span>{appBranding?.logoEmoji || '🍳'}</span>
+            )}
           </div>
           <div>
             <div className="flex items-center space-x-2">
               <h1 className="text-lg sm:text-xl font-black font-display text-white">
-                Kitchen Display System (KDS)
+                {appBranding?.appName || 'Kookoos'} KDS (Kitchen)
               </h1>
               <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 font-extrabold text-[10px] border border-amber-500/30">
                 WAPISHI JIKONI

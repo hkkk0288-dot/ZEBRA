@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
+@custom-variant xs (@media (min-width: 380px));
 
 :root {
   --brand-primary: #f59e0b;

@@ -53,7 +53,7 @@ const INITIAL_TOKENS: OssTokenItem[] = [
 ];
 
 export const OrderStatusScreenView: React.FC = () => {
-  const { menuItems, currency, orders, setActiveTab, goBack, activeTable } = useApp();
+  const { menuItems, currency, orders, setActiveTab, goBack, activeTable, appBranding } = useApp();
 
   const [tokens, setTokens] = useState<OssTokenItem[]>(INITIAL_TOKENS);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -255,11 +255,19 @@ export const OrderStatusScreenView: React.FC = () => {
           </button>
           <div>
             <div className="flex items-center space-x-2.5">
-              <div className="w-8 h-8 rounded-xl bg-teal-500 text-neutral-950 font-black flex items-center justify-center text-base shadow-md shadow-teal-500/30">
-                📺
+              <div className="w-8 h-8 rounded-xl bg-teal-500 text-neutral-950 font-black flex items-center justify-center text-base shadow-md shadow-teal-500/30 overflow-hidden border border-white/10 shrink-0">
+                {appBranding?.logoUrl ? (
+                  <img
+                    src={appBranding.logoUrl}
+                    alt={appBranding?.appName || 'OSS'}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span>{appBranding?.logoEmoji || '🍗'}</span>
+                )}
               </div>
               <h1 className="text-lg sm:text-xl font-black font-display tracking-tight text-white">
-                Order Status Screen (OSS)
+                {appBranding?.appName || 'Kookoos'} OSS Screen
               </h1>
               <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-extrabold text-[10px] border border-emerald-500/30 animate-pulse">
                 LIVE TV QUEUE

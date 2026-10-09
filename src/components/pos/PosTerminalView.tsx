@@ -498,13 +498,21 @@ export const PosTerminalView: React.FC = () => {
       {/* Top Header Bar */}
       <div className="px-4 py-3 bg-[#111723] border-b border-neutral-800 flex flex-wrap items-center justify-between gap-3 shrink-0">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-2xl bg-amber-500 text-neutral-950 font-black flex items-center justify-center text-xl shadow-lg shadow-amber-500/20">
-            🍗
+          <div className="w-10 h-10 rounded-2xl bg-amber-500 text-neutral-950 font-black flex items-center justify-center text-xl shadow-lg shadow-amber-500/20 overflow-hidden border border-white/10 shrink-0">
+            {appBranding?.logoUrl ? (
+              <img
+                src={appBranding.logoUrl}
+                alt={appBranding?.appName || 'POS'}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span>{appBranding?.logoEmoji || '🍗'}</span>
+            )}
           </div>
           <div>
             <div className="flex items-center space-x-2">
               <h1 className="font-bold text-base sm:text-lg font-display tracking-wide text-white">
-                Kookoos POS Terminal
+                {appBranding?.appName || 'Kookoos'} POS Terminal
               </h1>
               <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-extrabold border border-emerald-500/30">
                 POINT OF SALE
@@ -1454,7 +1462,16 @@ export const PosTerminalView: React.FC = () => {
             {/* Paper Receipt Body */}
             <div id="pos-receipt-paper" className="p-5 space-y-3 bg-[#fffefc] border-b border-dashed border-neutral-300">
               <div className="text-center space-y-1">
-                <div className="text-2xl font-black">🍗 {appBranding?.appName?.toUpperCase() || 'KOOKOOS'}</div>
+                {appBranding?.logoUrl ? (
+                  <img
+                    src={appBranding.logoUrl}
+                    alt={appBranding?.appName || 'Logo'}
+                    className="w-11 h-11 rounded-full object-contain mx-auto mb-1 border border-neutral-300 shadow-2xs"
+                  />
+                ) : (
+                  <div className="text-2xl font-black mb-1">{appBranding?.logoEmoji || '🍗'}</div>
+                )}
+                <div className="text-sm font-black tracking-tight">{appBranding?.appName?.toUpperCase() || 'KOOKOOS'}</div>
                 <div className="text-[10px] text-neutral-600">{appBranding?.tagline || 'Proudly Tanzanian Fried Chicken • Dar es Salaam'}</div>
                 <div className="text-[10px] text-neutral-600">Simu: +255 712 345 678 | TIN: 142-990-881</div>
               </div>

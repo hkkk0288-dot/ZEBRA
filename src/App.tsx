@@ -66,6 +66,8 @@ const MainContent: React.FC = () => {
     setShowSplitBillModal,
     splitBillTableOrder,
     splitBillOnlineOrder,
+    splitBillCustomAmount,
+    splitBillCustomTableName,
     showRiderTrackerModal,
     setShowRiderTrackerModal,
     trackingOrder,
@@ -140,11 +142,12 @@ const MainContent: React.FC = () => {
               <img
                 src={appBranding.logoUrl}
                 alt={appBranding.appName}
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = 'none';
+                }}
                 className="w-5 h-5 rounded-md object-cover"
               />
-            ) : (
-              <span className="text-base">{appBranding.logoEmoji || '🦓'}</span>
-            )}
+            ) : null}
             <span className="font-bold text-white tracking-wide font-display text-xs sm:text-sm">
               {appBranding.appName}
             </span>
@@ -232,7 +235,7 @@ const MainContent: React.FC = () => {
               className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-500/20 transition-all whitespace-nowrap"
             >
               <Monitor className="w-3.5 h-3.5" />
-              <span className="hidden xs:inline">Full Website</span>
+              <span className="inline">Full Website</span>
             </button>
           </div>
         </header>
@@ -320,6 +323,8 @@ const MainContent: React.FC = () => {
           <SplitBillModal
             tableOrder={splitBillTableOrder}
             onlineOrder={splitBillOnlineOrder}
+            customAmountTZS={splitBillCustomAmount}
+            customTableName={splitBillCustomTableName}
             onClose={() => setShowSplitBillModal(false)}
           />
         )}

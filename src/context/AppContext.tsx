@@ -189,7 +189,14 @@ interface AppContextType {
   setShowSplitBillModal: (open: boolean) => void;
   splitBillTableOrder: TableOrder | null;
   splitBillOnlineOrder: Order | null;
-  openSplitBill: (tableOrder?: TableOrder | null, onlineOrder?: Order | null) => void;
+  splitBillCustomAmount: number | null;
+  splitBillCustomTableName: string | null;
+  openSplitBill: (
+    tableOrder?: TableOrder | null,
+    onlineOrder?: Order | null,
+    customAmountTZS?: number | null,
+    customTableName?: string | null
+  ) => void;
 
   // Loyalty Rewards
   loyaltyPoints: number;
@@ -295,7 +302,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return (saved as 'dark' | 'light') || 'dark';
   });
 
-  const [currency, setCurrency] = useState<'USD' | 'TZS'>('USD');
+  const [currency, setCurrencyState] = useState<'USD' | 'TZS'>(() => {
+    const saved = localStorage.getItem('zebra_currency');
+    return (saved as 'USD' | 'TZS') || 'TZS';
+  });
+
+  const setCurrency = (c: 'USD' | 'TZS') => {
+    setCurrencyState(c);
+    localStorage.setItem('zebra_currency', c);
+  };
   const [androidFrame, setAndroidFrameState] = useState<boolean>(() => {
     const saved = localStorage.getItem('zebra_android_frame');
     return saved === 'true'; // Default to false so user gets full website view
@@ -672,9 +687,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [showSplitBillModal, setShowSplitBillModal] = useState(false);
   const [splitBillTableOrder, setSplitBillTableOrder] = useState<TableOrder | null>(null);
   const [splitBillOnlineOrder, setSplitBillOnlineOrder] = useState<Order | null>(null);
-  const openSplitBill = (tOrder?: TableOrder | null, oOrder?: Order | null) => {
+  const [splitBillCustomAmount, setSplitBillCustomAmount] = useState<number | null>(null);
+  const [splitBillCustomTableName, setSplitBillCustomTableName] = useState<string | null>(null);
+
+  const openSplitBill = (
+    tOrder?: TableOrder | null,
+    oOrder?: Order | null,
+    customAmount?: number | null,
+    customTable?: string | null
+  ) => {
     setSplitBillTableOrder(tOrder || null);
     setSplitBillOnlineOrder(oOrder || null);
+    setSplitBillCustomAmount(customAmount || null);
+    setSplitBillCustomTableName(customTable || null);
     setShowSplitBillModal(true);
   };
 
@@ -701,6 +726,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // App Branding & Splash Screen State
   const [appBranding, setAppBranding] = useState<AppBrandingConfig>(() => {
+    const savedCustomLogo = localStorage.getItem('zebra_custom_logo');
     const saved = localStorage.getItem('zebra_app_branding');
     if (saved) {
       try {
@@ -713,17 +739,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           ? 'Proudly Tanzanian Fried Chicken • Dar es Salaam'
           : parsed.tagline;
 
+        const effectiveLogoUrl = savedCustomLogo || (typeof parsed.logoUrl === 'string' && parsed.logoUrl ? parsed.logoUrl : DEFAULT_BRANDING_CONFIG.logoUrl);
+
         return {
           ...DEFAULT_BRANDING_CONFIG,
           ...parsed,
           appName,
           logoEmoji,
           tagline,
+          logoUrl: effectiveLogoUrl,
           branches: parsed.branches && parsed.branches.length > 0 ? parsed.branches : DEFAULT_BRANDING_CONFIG.branches
         };
       } catch {}
     }
-    return DEFAULT_BRANDING_CONFIG;
+    return {
+      ...DEFAULT_BRANDING_CONFIG,
+      ...(savedCustomLogo ? { logoUrl: savedCustomLogo } : {})
+    };
   });
 
   const [showSplashPreview, setShowSplashPreview] = useState(false);
@@ -731,6 +763,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Helper to persist branding safely without QuotaExceededError or circular structure errors
   const safePersistBranding = (branding: AppBrandingConfig) => {
     try {
+      // Save dedicated custom logo key
+      if (branding.logoUrl) {
+        try {
+          localStorage.setItem('zebra_custom_logo', branding.logoUrl);
+        } catch {}
+      } else if (branding.logoUrl === '') {
+        try {
+          localStorage.removeItem('zebra_custom_logo');
+        } catch {}
+      }
+
       // In localStorage, ensure only pure serializable primitives are saved
       const cleanSlides = (branding.splashSlides || []).map(slide => {
         let media = typeof slide.mediaUrl === 'string' ? slide.mediaUrl : '';
@@ -846,6 +889,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     metaThemeColor.setAttribute('content', primary);
   }, [appBranding.themeColor, appBranding.themePreset, appBranding.themeSecondaryColor, appBranding.adminThemeStyle]);
+
+  // Dynamically sync browser tab favicon and title to admin branding
+  useEffect(() => {
+    if (appBranding.appName) {
+      document.title = `${appBranding.appName} | ${appBranding.tagline || 'Proudly Tanzanian Fried Chicken'}`;
+    }
+    if (appBranding.logoUrl) {
+      let link: HTMLLinkElement | null = document.querySelector("link[rel*='icon']");
+      if (!link) {
+        link = document.createElement('link');
+        link.type = 'image/x-icon';
+        link.rel = 'shortcut icon';
+        document.getElementsByTagName('head')[0].appendChild(link);
+      }
+      link.href = appBranding.logoUrl;
+    }
+  }, [appBranding.appName, appBranding.tagline, appBranding.logoUrl]);
+
+  // Persist menuItems to localStorage whenever updated
+  useEffect(() => {
+    try {
+      localStorage.setItem('zebra_menu', JSON.stringify(menuItems));
+    } catch {}
+  }, [menuItems]);
 
   const setSystemThemeColor = (
     color: string,
@@ -1630,6 +1697,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setShowSplitBillModal,
         splitBillTableOrder,
         splitBillOnlineOrder,
+        splitBillCustomAmount,
+        splitBillCustomTableName,
         openSplitBill,
         loyaltyPoints,
         addLoyaltyPoints,

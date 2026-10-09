@@ -91,11 +91,11 @@ export const GlobalMapModal: React.FC<GlobalMapModalProps> = ({
                 <h3 className="font-extrabold text-xs sm:text-base font-display truncate">
                   {isSingle ? 'Eneo la Mgahawa & Ramani' : 'Ramani ya Matawi ya Kookoos'}
                 </h3>
-                <span className="hidden xs:inline-flex px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 font-bold text-[10px] border border-amber-500/30">
+                <span className="inline-flex px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 font-bold text-[10px] border border-amber-500/30">
                   {branches.length} Matawi
                 </span>
               </div>
-              <p className="text-[10px] sm:text-xs text-neutral-400 truncate max-w-[180px] xs:max-w-xs sm:max-w-md">
+              <p className="text-[10px] sm:text-xs text-neutral-400 truncate max-w-[200px] sm:max-w-md">
                 {isSingle ? 'Kookoos Mwenge HQ & Eneo la kuletewa chakula' : 'Matawi 8 ya Kookoos Dar es Salaam'}
               </p>
             </div>
@@ -117,7 +117,7 @@ export const GlobalMapModal: React.FC<GlobalMapModalProps> = ({
               title="Badilisha eneo lako la delivery"
             >
               <MapPin className="w-3.5 h-3.5" />
-              <span className="hidden xs:inline">Eneo Langu</span>
+              <span className="inline">Eneo Langu</span>
             </button>
 
             {/* Toggle view: Carousel vs Full List */}
@@ -243,7 +243,7 @@ export const GlobalMapModal: React.FC<GlobalMapModalProps> = ({
                   <span className="font-bold text-neutral-300 flex items-center space-x-1.5">
                     <span className="text-amber-400">🍗</span>
                     <span>Matawi ya Kookoos ({branches.length})</span>
-                    <span className="text-neutral-500 text-[10px] hidden xs:inline">• Telezesha kidole kuona yote</span>
+                    <span className="text-neutral-500 text-[10px] inline">• Telezesha kidole kuona yote</span>
                   </span>
                   <button
                     type="button"

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Users,
@@ -8,18 +8,23 @@ import {
   Receipt,
   Plus,
   Minus,
-  Sparkles,
+  Edit2,
+  Check,
   CreditCard,
   Banknote,
-  Share2
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { TableOrder, Order, BillSplitShare } from '../types';
-import { formatPrice, formatTzsPrice } from '../utils/formatters';
+import { formatTzsPrice } from '../utils/formatters';
 import { playPaymentSuccessChime } from '../utils/soundEffects';
+import { useApp } from '../context/AppContext';
 
 interface SplitBillModalProps {
   tableOrder?: TableOrder | null;
   onlineOrder?: Order | null;
+  customAmountTZS?: number | null;
+  customTableName?: string | null;
   onClose: () => void;
   onPaymentComplete?: () => void;
 }
@@ -27,21 +32,89 @@ interface SplitBillModalProps {
 export const SplitBillModal: React.FC<SplitBillModalProps> = ({
   tableOrder,
   onlineOrder,
+  customAmountTZS,
+  customTableName,
   onClose,
   onPaymentComplete
 }) => {
-  // Ensure we get a realistic total in TZS
-  const rawOrderTotal = tableOrder?.totalTZS || (onlineOrder ? onlineOrder.total : 50000);
-  const totalAmountTZS = rawOrderTotal > 500 ? rawOrderTotal : Math.round(rawOrderTotal * 2600);
-  const tableNumber = tableOrder?.tableNumber || onlineOrder?.tableNumber || 'Table 01';
-  const orderNumber = tableOrder?.orderNumber || onlineOrder?.orderNumber || 'TBL-001';
+  const { cart, appliedPromo, orders, tableOrders } = useApp();
+
+  // Compute realistic, current total in TZS based on context
+  const getInitialTotal = (): number => {
+    if (customAmountTZS && customAmountTZS > 0) {
+      return customAmountTZS > 100 ? Math.round(customAmountTZS) : Math.round(customAmountTZS * 2600);
+    }
+    if (tableOrder?.totalTZS && tableOrder.totalTZS > 0) {
+      return tableOrder.totalTZS > 100 ? Math.round(tableOrder.totalTZS) : Math.round(tableOrder.totalTZS * 2600);
+    }
+    if (onlineOrder?.total && onlineOrder.total > 0) {
+      return onlineOrder.total > 100 ? Math.round(onlineOrder.total) : Math.round(onlineOrder.total * 2600);
+    }
+    // Calculate from current cart if available
+    if (cart && cart.length > 0) {
+      const cartSubtotal = cart.reduce((sum, item) => sum + item.totalPrice, 0);
+      const discount = appliedPromo
+        ? (cartSubtotal * (appliedPromo.discountPercent || 0)) / 100
+        : 0;
+      const effectiveTotalUSD = Math.max(0, cartSubtotal - discount);
+      return Math.round(effectiveTotalUSD * 2600);
+    }
+    if (tableOrders && tableOrders.length > 0) {
+      return tableOrders[0].totalTZS;
+    }
+    if (orders && orders.length > 0) {
+      return orders[0].total > 100 ? Math.round(orders[0].total) : Math.round(orders[0].total * 2600);
+    }
+    return 26000;
+  };
+
+  const [totalAmountTZS, setTotalAmountTZS] = useState<number>(getInitialTotal);
+  const [isEditingTotal, setIsEditingTotal] = useState<boolean>(false);
+  const [tempTotalInput, setTempTotalInput] = useState<string>(() => String(getInitialTotal()));
+  const [showItemsList, setShowItemsList] = useState<boolean>(false);
+
+  const tableNumber =
+    customTableName ||
+    tableOrder?.tableNumber ||
+    onlineOrder?.tableNumber ||
+    (cart.length > 0 ? 'Bili ya Rukwama (Current Cart)' : 'Table 01');
+
+  const orderNumber =
+    tableOrder?.orderNumber ||
+    onlineOrder?.orderNumber ||
+    (cart.length > 0 ? 'ODA-SASA' : 'TBL-001');
+
+  // Collect item names and prices for review
+  const billItems = React.useMemo(() => {
+    if (tableOrder?.items && tableOrder.items.length > 0) {
+      return tableOrder.items.map(it => ({
+        name: it.name,
+        qty: it.quantity,
+        priceTZS: it.priceTZS
+      }));
+    }
+    if (onlineOrder?.items && onlineOrder.items.length > 0) {
+      return onlineOrder.items.map(ci => ({
+        name: `${ci.menuItem.name} (${ci.selectedSize.name})`,
+        qty: ci.quantity,
+        priceTZS: Math.round(ci.unitPrice * 2600)
+      }));
+    }
+    if (cart && cart.length > 0) {
+      return cart.map(ci => ({
+        name: `${ci.menuItem.name} (${ci.selectedSize.name})`,
+        qty: ci.quantity,
+        priceTZS: Math.round(ci.unitPrice * 2600)
+      }));
+    }
+    return [];
+  }, [tableOrder, onlineOrder, cart]);
 
   const [guestCount, setGuestCount] = useState<number>(tableOrder?.guestCount || 3);
-  const [splitMode, setSplitMode] = useState<'equal' | 'custom'>('equal');
 
   // Generate shares for equal split
   const perPersonAmount = Math.ceil(totalAmountTZS / guestCount);
-  
+
   const [shares, setShares] = useState<BillSplitShare[]>(() => {
     return Array.from({ length: guestCount }).map((_, idx) => ({
       id: `share-${idx + 1}`,
@@ -52,12 +125,11 @@ export const SplitBillModal: React.FC<SplitBillModalProps> = ({
     }));
   });
 
-  const handleGuestCountChange = (newCount: number) => {
-    if (newCount < 2 || newCount > 12) return;
-    setGuestCount(newCount);
-    const newPerPerson = Math.ceil(totalAmountTZS / newCount);
+  // Recompute shares when guestCount or totalAmountTZS changes
+  const updateShares = (count: number, newTotal: number) => {
+    const newPerPerson = Math.ceil(newTotal / count);
     setShares(prev => {
-      return Array.from({ length: newCount }).map((_, idx) => {
+      return Array.from({ length: count }).map((_, idx) => {
         const existing = prev[idx];
         return {
           id: existing?.id || `share-${idx + 1}`,
@@ -70,6 +142,22 @@ export const SplitBillModal: React.FC<SplitBillModalProps> = ({
         };
       });
     });
+  };
+
+  const handleGuestCountChange = (newCount: number) => {
+    if (newCount < 2 || newCount > 12) return;
+    setGuestCount(newCount);
+    updateShares(newCount, totalAmountTZS);
+  };
+
+  const handleApplyCustomTotal = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const parsed = parseInt(tempTotalInput.replace(/\D/g, ''), 10);
+    if (!isNaN(parsed) && parsed > 0) {
+      setTotalAmountTZS(parsed);
+      updateShares(guestCount, parsed);
+    }
+    setIsEditingTotal(false);
   };
 
   const handleMarkPaid = (shareId: string, method: string) => {
@@ -109,7 +197,7 @@ export const SplitBillModal: React.FC<SplitBillModalProps> = ({
                 <span>Gawana Bili ya Meza (Split Bill)</span>
               </h2>
               <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                {tableNumber} • Jumla Kuu: {formatTzsPrice(totalAmountTZS)}
+                {tableNumber} • Jumla ya Sasa: <span className="font-bold text-emerald-500">{formatTzsPrice(totalAmountTZS)}</span>
               </p>
             </div>
           </div>
@@ -124,6 +212,88 @@ export const SplitBillModal: React.FC<SplitBillModalProps> = ({
 
         <div className="p-4 sm:p-5 space-y-4 max-h-[75vh] overflow-y-auto">
           
+          {/* Bill Total Banner & Edit Option */}
+          <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between">
+            <div>
+              <span className="text-[11px] uppercase tracking-wider font-extrabold text-neutral-500 dark:text-neutral-400">
+                Jumla Kuu ya Kulipa (Current Total)
+              </span>
+              {isEditingTotal ? (
+                <form onSubmit={handleApplyCustomTotal} className="flex items-center space-x-2 mt-1">
+                  <input
+                    type="number"
+                    value={tempTotalInput}
+                    onChange={e => setTempTotalInput(e.target.value)}
+                    className="w-32 px-2.5 py-1 text-sm font-bold font-mono rounded-lg border border-emerald-500 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:outline-none"
+                    autoFocus
+                  />
+                  <button
+                    type="submit"
+                    className="p-1 rounded-lg bg-emerald-500 text-white font-bold text-xs hover:bg-emerald-600 transition-colors"
+                  >
+                    <Check className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingTotal(false)}
+                    className="p-1 rounded-lg bg-neutral-200 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 text-xs"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </form>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <span className="text-xl font-black font-display text-emerald-600 dark:text-emerald-400">
+                    {formatTzsPrice(totalAmountTZS)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTempTotalInput(String(totalAmountTZS));
+                      setIsEditingTotal(true);
+                    }}
+                    className="p-1 rounded-md text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-emerald-500/10 transition-colors text-[11px] flex items-center space-x-1"
+                    title="Badilisha Kiasi cha Bili"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                    <span>Hariri</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {billItems.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowItemsList(!showItemsList)}
+                className="text-xs font-bold text-neutral-600 dark:text-neutral-300 flex items-center space-x-1 px-2.5 py-1.5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 hover:bg-neutral-100 transition-colors"
+              >
+                <UtensilsCrossed className="w-3.5 h-3.5 text-amber-500" />
+                <span>Vyakula ({billItems.length})</span>
+                {showItemsList ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+              </button>
+            )}
+          </div>
+
+          {/* Expandable Bill Items Breakdown */}
+          {showItemsList && billItems.length > 0 && (
+            <div className="p-3 rounded-2xl bg-neutral-50 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 space-y-1.5 text-xs animate-fadeIn">
+              <p className="font-bold text-[11px] text-neutral-500 uppercase tracking-wider">
+                Vyakula vya Oda Hii:
+              </p>
+              {billItems.map((item, idx) => (
+                <div key={idx} className="flex justify-between items-center text-neutral-700 dark:text-neutral-300 py-0.5">
+                  <span className="truncate max-w-[240px]">
+                    {item.qty}x {item.name}
+                  </span>
+                  <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                    {formatTzsPrice(item.priceTZS * item.qty)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Progress Banner */}
           <div className={`p-4 rounded-2xl border transition-all ${
             isFullySettled
@@ -188,7 +358,7 @@ export const SplitBillModal: React.FC<SplitBillModalProps> = ({
           {/* Each Guest's Share Card */}
           <div className="space-y-2.5">
             <p className="text-xs font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
-              Kila Mgeni Analipa: {formatTzsPrice(perPersonAmount)}
+              Kila Mgeni Analipa: <span className="text-emerald-500">{formatTzsPrice(perPersonAmount)}</span>
             </p>
 
             {shares.map((share, idx) => (

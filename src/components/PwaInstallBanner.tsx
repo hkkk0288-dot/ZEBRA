@@ -13,6 +13,11 @@ export const PwaInstallBanner: React.FC = () => {
   const [showBanner, setShowBanner] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
   const [showInstallGuide, setShowInstallGuide] = useState(false);
+  const [logoImgError, setLogoImgError] = useState(false);
+
+  useEffect(() => {
+    setLogoImgError(false);
+  }, [appBranding.logoUrl]);
 
   useEffect(() => {
     // Check if already in standalone PWA mode
@@ -77,8 +82,17 @@ export const PwaInstallBanner: React.FC = () => {
       <div className="fixed bottom-20 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 sm:max-w-md z-50 animate-bounce-once">
         <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white p-3.5 rounded-2xl shadow-2xl border border-emerald-400/40 flex items-center justify-between gap-3">
           <div className="flex items-center space-x-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 text-xl border border-white/30">
-              {appBranding.logoEmoji || '🍗'}
+            <div className="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 overflow-hidden border border-white/30 shadow-md">
+              {appBranding.logoUrl && !logoImgError ? (
+                <img
+                  src={appBranding.logoUrl}
+                  alt={appBranding.appName}
+                  className="w-full h-full object-cover rounded-2xl"
+                  onError={() => setLogoImgError(true)}
+                />
+              ) : (
+                <span className="text-xl">{appBranding.logoEmoji || '🍗'}</span>
+              )}
             </div>
             <div className="min-w-0">
               <div className="flex items-center space-x-1.5">
@@ -119,9 +133,19 @@ export const PwaInstallBanner: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="w-full max-w-sm bg-white dark:bg-[#121824] rounded-3xl p-5 text-neutral-900 dark:text-white space-y-4 shadow-2xl border border-neutral-200 dark:border-neutral-800">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Smartphone className="w-5 h-5 text-emerald-500" />
-                <h3 className="font-bold text-sm">Jinsi ya Kusakinisha App (PWA)</h3>
+              <div className="flex items-center space-x-2.5">
+                <div className="w-8 h-8 rounded-xl overflow-hidden shrink-0 flex items-center justify-center bg-emerald-500/10 border border-emerald-500/20">
+                  {appBranding.logoUrl && !logoImgError ? (
+                    <img
+                      src={appBranding.logoUrl}
+                      alt={appBranding.appName}
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                  ) : (
+                    <span className="text-sm">{appBranding.logoEmoji || '🍗'}</span>
+                  )}
+                </div>
+                <h3 className="font-bold text-sm">Jinsi ya Kusakinisha {appBranding.appName} (PWA)</h3>
               </div>
               <button
                 type="button"

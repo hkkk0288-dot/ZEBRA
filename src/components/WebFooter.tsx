@@ -33,7 +33,7 @@ export const WebFooter: React.FC = () => {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span>{appBranding.logoEmoji || '🦓'}</span>
+                  <span>{appBranding.logoEmoji || '🍗'}</span>
                 )}
               </div>
               <div>

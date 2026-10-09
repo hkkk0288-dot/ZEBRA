@@ -24,6 +24,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { useApp } from '../context/AppContext';
 import { FoodAppMascot } from './FoodAppMascot';
+import { AppLogo } from './AppLogo';
 import confetti from 'canvas-confetti';
 
 export const AuthView: React.FC = () => {
@@ -40,7 +41,8 @@ export const AuthView: React.FC = () => {
     goBack,
     androidFrame,
     authRedirectMessage,
-    pendingAction
+    pendingAction,
+    appBranding
   } = useApp();
 
   // Mode: 'login' | 'signup'
@@ -365,9 +367,27 @@ export const AuthView: React.FC = () => {
           </div>
         )}
 
-        {/* 1. Mascot Illustration (Exact match to screenshots) */}
-        <div className="mb-5">
-          <FoodAppMascot size={androidFrame ? 'sm' : 'md'} />
+        {/* 1. Brand Logo & Title */}
+        <div className="mb-4 flex flex-col items-center text-center space-y-2">
+          {appBranding?.logoUrl ? (
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-amber-500/10 border-2 border-amber-500/30 overflow-hidden shadow-xl shadow-amber-500/20 p-1 flex items-center justify-center">
+              <img
+                src={appBranding.logoUrl}
+                alt={appBranding?.appName || 'App Logo'}
+                className="w-full h-full object-cover rounded-2xl"
+              />
+            </div>
+          ) : (
+            <FoodAppMascot size={androidFrame ? 'sm' : 'md'} />
+          )}
+          <div>
+            <h2 className="text-xl sm:text-2xl font-black font-display tracking-tight text-white">
+              {appBranding?.appName || 'Kookoos'}
+            </h2>
+            <p className="text-xs text-amber-400 font-medium">
+              {appBranding?.tagline || 'Proudly Tanzanian Fried Chicken'}
+            </p>
+          </div>
         </div>
 
         {/* 2. Segmented Pill Tab Switcher: Log In | Sign Up */}
