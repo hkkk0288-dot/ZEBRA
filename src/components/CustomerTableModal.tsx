@@ -11,12 +11,17 @@ import {
   QrCode,
   Camera,
   RotateCcw,
-  AlertCircle
+  AlertCircle,
+  Phone,
+  Video,
+  MessageSquare,
+  Headset
 } from 'lucide-react';
 import jsQR from 'jsqr';
 import { RestaurantTable } from '../types';
 import { playScanSuccessSound } from '../utils/soundEffects';
 import { useApp } from '../context/AppContext';
+import { useLiveCall } from '../context/LiveCallContext';
 
 interface CustomerTableModalProps {
   tables: RestaurantTable[];
@@ -36,6 +41,7 @@ export const CustomerTableModal: React.FC<CustomerTableModalProps> = ({
   onCallWaiter
 }) => {
   const { setActiveQrTable, setActiveTab } = useApp();
+  const { openCallModal } = useLiveCall();
   const [modalMode, setModalMode] = useState<'camera' | 'manual'>('camera');
   const [selectedSection, setSelectedSection] = useState<'All' | 'Indoor' | 'Garden Terrace' | 'VIP Lounge'>('All');
   const [callNotice, setCallNotice] = useState<string | null>(null);
@@ -295,6 +301,54 @@ export const CustomerTableModal: React.FC<CustomerTableModalProps> = ({
                 >
                   🧾 Lete Bili
                 </button>
+              </div>
+
+              {/* Real-Time Live Call & Chat Direct Actions */}
+              <div className="p-3 rounded-2xl bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/10 border border-amber-500/30 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 flex items-center space-x-1.5">
+                    <Headset className="w-3.5 h-3.5" />
+                    <span>Mawasiliano ya Moja kwa Moja na Mhudumu:</span>
+                  </span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                </div>
+                <div className="grid grid-cols-3 gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      openCallModal('audio', activeTable.name);
+                    }}
+                    className="py-2 px-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-bold flex items-center justify-center space-x-1 shadow-xs transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                  >
+                    <Phone className="w-3.5 h-3.5" />
+                    <span>Simu ya Sauti</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      openCallModal('video', activeTable.name);
+                    }}
+                    className="py-2 px-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold flex items-center justify-center space-x-1 shadow-xs transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                  >
+                    <Video className="w-3.5 h-3.5" />
+                    <span>Simu ya Video</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      openCallModal('chat', activeTable.name);
+                    }}
+                    className="py-2 px-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-white text-[11px] font-bold flex items-center justify-center space-x-1 shadow-xs transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    <span>Chati Live</span>
+                  </button>
+                </div>
               </div>
 
               {/* OSS Screen shortcut for table */}

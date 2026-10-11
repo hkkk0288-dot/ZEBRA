@@ -101,6 +101,66 @@ export function playWaiterCallChime(): void {
 }
 
 /**
+ * Modern telephone ringing tone (pleasant European/mobile chime)
+ */
+export function playPhoneRingSound(): void {
+  if (!isSoundEnabled()) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  const now = ctx.currentTime;
+  const osc1 = ctx.createOscillator();
+  const osc2 = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  osc1.type = 'sine';
+  osc1.frequency.setValueAtTime(440, now);
+  osc2.type = 'sine';
+  osc2.frequency.setValueAtTime(480, now);
+
+  gain.gain.setValueAtTime(0.001, now);
+  gain.gain.exponentialRampToValueAtTime(0.2, now + 0.05);
+  gain.gain.setValueAtTime(0.2, now + 0.7);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.85);
+
+  osc1.connect(gain);
+  osc2.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc1.start(now);
+  osc2.start(now);
+  osc1.stop(now + 0.85);
+  osc2.stop(now + 0.85);
+}
+
+/**
+ * Chat message pop sound
+ */
+export function playMessagePopSound(): void {
+  if (!isSoundEnabled()) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  const now = ctx.currentTime;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(659.25, now); // E5
+  osc.frequency.exponentialRampToValueAtTime(880, now + 0.08); // A5
+
+  gain.gain.setValueAtTime(0.001, now);
+  gain.gain.exponentialRampToValueAtTime(0.22, now + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.15);
+
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start(now);
+  osc.stop(now + 0.15);
+}
+
+/**
  * Quick pleasant chirp when QR code is scanned successfully
  */
 export function playScanSuccessSound(): void {

@@ -1,4 +1,6 @@
 import express, { Request, Response } from 'express';
+import http from 'http';
+import { WebSocketServer, WebSocket } from 'ws';
 import { createServer as createViteServer } from 'vite';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -10,6 +12,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+const server = http.createServer(app);
 const PORT = 3000;
 const isDev = process.env.NODE_ENV !== 'production';
 
@@ -317,6 +320,326 @@ app.get('/api/mongike/wallet/history', async (_req: Request, res: Response) => {
   }
 });
 
+// ==========================================
+// REAL-TIME WEBSOCKET: LIVE CALL & CHAT SYSTEM
+// ==========================================
+
+interface ConnectedClient {
+  ws: WebSocket;
+  clientId: string;
+  name: string;
+  role: 'customer' | 'waiter' | 'admin';
+  roomId: string;
+  tableNumber?: string;
+}
+
+const connectedClients = new Map<string, ConnectedClient>();
+const roomMessages = new Map<string, any[]>();
+const activeCalls = new Map<string, any>();
+
+// Seed default welcome messages for common tables
+const DEFAULT_WELCOME_MSG = (table: string) => ({
+  id: `msg-welcome-${table}`,
+  roomId: table,
+  senderId: 'sys-waiter',
+  senderName: 'Mhudumu wa Zamu (Neema M.)',
+  senderRole: 'waiter',
+  tableNumber: table,
+  text: `Habari na Karibu Zebra Restaurant! Naitwa Neema, mhudumu wako wa leo kwenye ${table}. Unaweza kuniandikia hapa au kupiga Simu ya Sauti / Video papo kwa hapo ukihitaji chochote.`,
+  timestamp: Date.now() - 5 * 60 * 1000,
+  status: 'delivered'
+});
+
+function getRoomHistory(roomId: string) {
+  if (!roomMessages.has(roomId)) {
+    roomMessages.set(roomId, [DEFAULT_WELCOME_MSG(roomId)]);
+  }
+  return roomMessages.get(roomId)!;
+}
+
+function broadcastToRoom(roomId: string, message: any, excludeClientId?: string) {
+  const payload = JSON.stringify(message);
+  for (const client of connectedClients.values()) {
+    if (client.clientId === excludeClientId) continue;
+    if (client.ws.readyState === WebSocket.OPEN) {
+      if (client.roomId === roomId || client.role === 'waiter' || client.role === 'admin') {
+        client.ws.send(payload);
+      }
+    }
+  }
+}
+
+function broadcastToWaiters(message: any) {
+  const payload = JSON.stringify(message);
+  for (const client of connectedClients.values()) {
+    if (client.ws.readyState === WebSocket.OPEN && (client.role === 'waiter' || client.role === 'admin')) {
+      client.ws.send(payload);
+    }
+  }
+}
+
+function sendToClient(clientId: string, message: any) {
+  const client = connectedClients.get(clientId);
+  if (client && client.ws.readyState === WebSocket.OPEN) {
+    client.ws.send(JSON.stringify(message));
+  }
+}
+
+// REST endpoints for chat and calls
+app.get('/api/live/active-calls', (_req: Request, res: Response) => {
+  const list = Array.from(activeCalls.values()).filter(c => c.status === 'ringing' || c.status === 'connected');
+  res.json({
+    status: 'success',
+    activeCalls: list,
+    connectedUsersCount: connectedClients.size
+  });
+});
+
+app.get('/api/live/messages/:roomId', (req: Request, res: Response) => {
+  const { roomId } = req.params;
+  const messages = getRoomHistory(roomId);
+  res.json({
+    status: 'success',
+    roomId,
+    messages
+  });
+});
+
+// Setup WebSocket server on path /live-ws
+const wss = new WebSocketServer({ server, path: '/live-ws' });
+
+wss.on('connection', (ws: WebSocket) => {
+  let registeredClientId: string | undefined = undefined;
+
+  ws.on('message', (raw: string) => {
+    try {
+      const data = JSON.parse(raw.toString());
+      const { type } = data;
+
+      switch (type) {
+        case 'join': {
+          const { clientId, name, role, roomId, tableNumber } = data;
+          const assignedId = (clientId as string) || `client-${Date.now()}`;
+          registeredClientId = assignedId;
+          
+          connectedClients.set(assignedId, {
+            ws,
+            clientId: assignedId,
+            name: name || 'Mteja',
+            role: role || 'customer',
+            roomId: roomId || 'general',
+            tableNumber: tableNumber || (role === 'customer' ? roomId : undefined)
+          });
+
+          // Send back chat history for this room
+          const history = getRoomHistory(roomId || 'general');
+          ws.send(JSON.stringify({
+            type: 'history',
+            roomId: roomId || 'general',
+            messages: history
+          }));
+
+          // Send active calls if waiter
+          if (role === 'waiter' || role === 'admin') {
+            const currentCalls = Array.from(activeCalls.values()).filter(
+              c => c.status === 'ringing' || c.status === 'connected'
+            );
+            ws.send(JSON.stringify({
+              type: 'active_calls_sync',
+              calls: currentCalls
+            }));
+          }
+
+          // Broadcast user joined
+          broadcastToRoom(roomId || 'general', {
+            type: 'user_joined',
+            clientId: assignedId,
+            name: name || 'Mteja',
+            role: role || 'customer',
+            tableNumber
+          }, assignedId);
+          break;
+        }
+
+        case 'chat_message': {
+          const { roomId, senderId, senderName, senderRole, tableNumber, text, quickAction } = data;
+          if (!text || !text.trim()) return;
+
+          const newMsg = {
+            id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+            roomId: roomId || 'general',
+            senderId: senderId || registeredClientId || 'unknown',
+            senderName: senderName || 'Mteja',
+            senderRole: senderRole || 'customer',
+            tableNumber: tableNumber || roomId,
+            text: text.trim(),
+            quickAction: quickAction || undefined,
+            timestamp: Date.now(),
+            status: 'delivered'
+          };
+
+          const history = getRoomHistory(roomId || 'general');
+          history.push(newMsg);
+          if (history.length > 200) history.shift();
+
+          // Broadcast to everyone in room and all waiters
+          broadcastToRoom(roomId || 'general', {
+            type: 'chat_message',
+            message: newMsg
+          });
+          break;
+        }
+
+        case 'chat_typing': {
+          const { roomId, senderName, isTyping } = data;
+          broadcastToRoom(roomId || 'general', {
+            type: 'chat_typing',
+            roomId: roomId || 'general',
+            senderName,
+            isTyping: Boolean(isTyping)
+          }, registeredClientId || undefined);
+          break;
+        }
+
+        case 'call_initiate': {
+          const { callId, roomId, callerId, callerName, callerRole, tableNumber, callType } = data;
+          const session = {
+            id: callId || `call-${Date.now()}`,
+            roomId: roomId || 'general',
+            callerId: callerId || registeredClientId,
+            callerName: callerName || 'Mteja wa Meza',
+            callerRole: callerRole || 'customer',
+            tableNumber: tableNumber || roomId,
+            callType: callType === 'video' ? 'video' : 'audio',
+            status: 'ringing',
+            startedAt: Date.now()
+          };
+
+          activeCalls.set(session.id, session);
+
+          // Broadcast incoming call to room & all staff/waiters
+          broadcastToRoom(session.roomId, {
+            type: 'incoming_call',
+            call: session
+          });
+          broadcastToWaiters({
+            type: 'incoming_call',
+            call: session
+          });
+          break;
+        }
+
+        case 'call_accept': {
+          const { callId, responderId, responderName, responderRole } = data;
+          const session = activeCalls.get(callId);
+          if (session) {
+            session.status = 'connected';
+            session.responderId = responderId || registeredClientId;
+            session.responderName = responderName || 'Mhudumu';
+            session.responderRole = responderRole || 'waiter';
+            session.startedAt = Date.now();
+
+            broadcastToRoom(session.roomId, {
+              type: 'call_accepted',
+              call: session
+            });
+            broadcastToWaiters({
+              type: 'call_accepted',
+              call: session
+            });
+          }
+          break;
+        }
+
+        case 'call_reject': {
+          const { callId, reason } = data;
+          const session = activeCalls.get(callId);
+          if (session) {
+            session.status = 'rejected';
+            broadcastToRoom(session.roomId, {
+              type: 'call_rejected',
+              callId,
+              reason: reason || 'Mhudumu yuko bize kwa sasa'
+            });
+            broadcastToWaiters({
+              type: 'call_rejected',
+              callId
+            });
+            activeCalls.delete(callId);
+          }
+          break;
+        }
+
+        case 'call_end': {
+          const { callId } = data;
+          const session = activeCalls.get(callId);
+          if (session) {
+            session.status = 'ended';
+            session.endedAt = Date.now();
+            session.durationSeconds = Math.round((session.endedAt - session.startedAt) / 1000);
+
+            broadcastToRoom(session.roomId, {
+              type: 'call_ended',
+              callId,
+              durationSeconds: session.durationSeconds
+            });
+            broadcastToWaiters({
+              type: 'call_ended',
+              callId
+            });
+            activeCalls.delete(callId);
+          }
+          break;
+        }
+
+        case 'webrtc_signal': {
+          // WebRTC Signaling: offer, answer, or ice-candidate
+          const { callId, roomId, targetPeerId, signalType, data: signalData } = data;
+          const payload = {
+            type: 'webrtc_signal',
+            callId,
+            roomId,
+            from: registeredClientId || 'unknown',
+            signalType,
+            data: signalData
+          };
+
+          if (targetPeerId) {
+            sendToClient(targetPeerId, payload);
+          } else {
+            // Forward to peers in the call
+            broadcastToRoom(roomId || 'general', payload, registeredClientId || undefined);
+          }
+          break;
+        }
+
+        default:
+          break;
+      }
+    } catch (err) {
+      console.warn('[WS Message Error]:', err);
+    }
+  });
+
+  ws.on('close', () => {
+    if (registeredClientId) {
+      const client = connectedClients.get(registeredClientId);
+      if (client) {
+        broadcastToRoom(client.roomId, {
+          type: 'user_left',
+          clientId: registeredClientId,
+          name: client.name
+        }, registeredClientId);
+      }
+      connectedClients.delete(registeredClientId);
+    }
+  });
+
+  ws.on('error', (err) => {
+    console.warn('[WS Client Error]:', err);
+  });
+});
+
 // Setup Vite middleware in dev or static files in production
 async function initServer() {
   if (isDev) {
@@ -332,8 +655,8 @@ async function initServer() {
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`[Zebra Server] Server running on port ${PORT} with Mongike Payment Gateway`);
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log(`[Zebra Server] Server running on port ${PORT} with WebSockets & Mongike Gateway`);
   });
 }
 

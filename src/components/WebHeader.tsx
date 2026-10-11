@@ -32,8 +32,11 @@ import {
 import { formatPrice } from '../utils/formatters';
 import { LuckySpinWheelModal } from './LuckySpinWheelModal';
 import { AppLogo } from './AppLogo';
+import { Headset } from 'lucide-react';
+import { useLiveCall } from '../context/LiveCallContext';
 
 export const WebHeader: React.FC = () => {
+  const { openCallModal, unreadMessagesCount } = useLiveCall();
   const {
     activeTab,
     setActiveTab,
@@ -326,6 +329,19 @@ export const WebHeader: React.FC = () => {
                 </>
               )}
             </div>
+
+            {/* Mhudumu Live (Call & Chat) */}
+            <button
+              onClick={() => openCallModal('chat')}
+              className="p-2 xl:px-2.5 xl:py-1.5 rounded-xl transition-all flex items-center space-x-1.5 bg-amber-500/10 hover:bg-amber-500 hover:text-neutral-950 text-amber-500 font-bold border border-amber-500/20 cursor-pointer"
+              title="Mhudumu Live: Chati na Simu za Moja kwa Moja"
+            >
+              <Headset className="w-3.5 h-3.5" />
+              <span className="hidden xl:inline text-xs">Mhudumu Live</span>
+              {unreadMessagesCount > 0 && (
+                <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+              )}
+            </button>
 
             {/* Favorites */}
             <button
@@ -757,6 +773,20 @@ export const WebHeader: React.FC = () => {
                     <span>POS Terminal (Cashier)</span>
                   </span>
                   <span className="text-[10px] text-neutral-400">Counter</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    openCallModal('chat');
+                    setShowMobileDrawer(false);
+                  }}
+                  className="w-full flex items-center justify-between p-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-xs font-bold transition-colors text-amber-500 border border-amber-500/20"
+                >
+                  <span className="flex items-center space-x-2.5">
+                    <Headset className="w-4 h-4 text-amber-500" />
+                    <span>Mhudumu Live (Call & Chat)</span>
+                  </span>
+                  <span className="text-[10px] bg-emerald-500 text-white font-bold px-1.5 py-0.5 rounded-full">Live</span>
                 </button>
 
                 <button

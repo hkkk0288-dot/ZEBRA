@@ -57,5 +57,19 @@ service cloud.firestore {
       allow read: if true;
       allow create, update, delete: if true;
     }
+
+    // Live Chats Collection (Table to Waiter messaging)
+    match /live_chats/{chatId} {
+      allow read: if true;
+      allow create, update: if true;
+      allow delete: if isAdmin();
+    }
+
+    // Live Calls Collection (Table to Waiter audio/video sessions)
+    match /live_calls/{callId} {
+      allow read: if true;
+      allow create, update: if true;
+      allow delete: if isAdmin();
+    }
   }
 }

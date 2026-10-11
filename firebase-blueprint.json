@@ -114,6 +114,41 @@
         "createdAt": { "type": "number" }
       },
       "required": ["id", "title", "description", "ctaText", "active"]
+    },
+    "LiveChat": {
+      "title": "LiveChat",
+      "description": "Real-time communication message between customer table and restaurant waiter",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "roomId": { "type": "string", "maxLength": 128 },
+        "senderId": { "type": "string", "maxLength": 128 },
+        "senderName": { "type": "string", "maxLength": 100 },
+        "senderRole": { "type": "string", "enum": ["customer", "waiter", "admin"] },
+        "tableNumber": { "type": "string", "maxLength": 50 },
+        "text": { "type": "string", "maxLength": 1000 },
+        "timestamp": { "type": "number" },
+        "status": { "type": "string", "enum": ["sent", "delivered", "read"] }
+      },
+      "required": ["id", "roomId", "senderId", "senderName", "senderRole", "text"]
+    },
+    "LiveCall": {
+      "title": "LiveCall",
+      "description": "Live audio or video call log between customer table and waiter",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "roomId": { "type": "string", "maxLength": 128 },
+        "callerId": { "type": "string", "maxLength": 128 },
+        "callerName": { "type": "string", "maxLength": 100 },
+        "callerRole": { "type": "string", "enum": ["customer", "waiter", "admin"] },
+        "tableNumber": { "type": "string", "maxLength": 50 },
+        "callType": { "type": "string", "enum": ["audio", "video"] },
+        "status": { "type": "string", "enum": ["ringing", "connected", "ended", "rejected", "missed"] },
+        "startedAt": { "type": "number" },
+        "durationSeconds": { "type": "number" }
+      },
+      "required": ["id", "roomId", "callerId", "callerName", "callType", "status"]
     }
   },
   "firestore": {
@@ -136,6 +171,14 @@
     "/banners/{bannerId}": {
       "schema": "SlideBanner",
       "description": "Hero promotional banners rotating on the home page"
+    },
+    "/live_chats/{chatId}": {
+      "schema": "LiveChat",
+      "description": "Live chat messages between dining tables and waiters"
+    },
+    "/live_calls/{callId}": {
+      "schema": "LiveCall",
+      "description": "Live audio/video call sessions and history"
     }
   }
 }

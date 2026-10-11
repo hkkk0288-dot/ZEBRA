@@ -33,6 +33,10 @@ import { SplitBillModal } from './components/SplitBillModal';
 import { LiveRiderTrackerModal } from './components/LiveRiderTrackerModal';
 import { ScratchCardModal } from './components/ScratchCardModal';
 import { AdminAuthGuard } from './components/admin/AdminAuthGuard';
+import { LiveCallProvider } from './context/LiveCallContext';
+import { LiveCallModal } from './components/live/LiveCallModal';
+import { IncomingCallBanner } from './components/live/IncomingCallBanner';
+import { LiveFloatingButton } from './components/live/LiveFloatingButton';
 import { Smartphone, Monitor, ShieldCheck, User, LogIn, Store, Tv, ArrowLeft, Lock } from 'lucide-react';
 
 const MainContent: React.FC = () => {
@@ -490,7 +494,12 @@ const MainContent: React.FC = () => {
 export default function App() {
   return (
     <AppProvider>
-      <MainContent />
+      <LiveCallProvider>
+        <MainContent />
+        <LiveCallModal />
+        <IncomingCallBanner />
+        <LiveFloatingButton />
+      </LiveCallProvider>
     </AppProvider>
   );
 }

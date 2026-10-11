@@ -21,8 +21,10 @@ import {
   QrCode,
   Gift,
   Tv,
-  Store
+  Store,
+  Headset
 } from 'lucide-react';
+import { useLiveCall } from '../context/LiveCallContext';
 import { MenuItem } from '../types';
 import { motion } from 'motion/react';
 import { FoodImage } from './FoodImage';
@@ -62,6 +64,8 @@ export const HomeFeedView: React.FC = () => {
     setShowScratchModal,
     appBranding
   } = useApp();
+
+  const { openCallModal } = useLiveCall();
 
   const isSingle = (appBranding.restaurantMode || 'single') === 'single';
   const isMulti = appBranding.restaurantMode === 'multi';
@@ -305,6 +309,14 @@ export const HomeFeedView: React.FC = () => {
 
         {/* Quick Platform Services Bar - visible on mobile so no customer misses features */}
         <div className="flex items-center space-x-2 overflow-x-auto no-scrollbar py-1">
+          <button
+            onClick={() => openCallModal('chat')}
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-2xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-500 border border-amber-500/30 text-xs font-bold shrink-0 transition-all cursor-pointer"
+          >
+            <Headset className="w-3.5 h-3.5" />
+            <span>Mhudumu Live (Call & Chat)</span>
+          </button>
+
           <button
             onClick={() => setShowCustomerTableModal(true)}
             className="flex items-center space-x-1.5 px-3 py-1.5 rounded-2xl bg-teal-500/10 hover:bg-teal-500/20 text-teal-600 dark:text-teal-400 border border-teal-500/25 text-xs font-bold shrink-0 transition-all cursor-pointer"

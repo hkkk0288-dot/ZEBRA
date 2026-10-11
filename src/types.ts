@@ -355,5 +355,48 @@ export interface ScratchReward {
   icon: string;
 }
 
+// Real-Time Live Call & Chat Types
+export type CallType = 'audio' | 'video';
+export type CallStatus = 'ringing' | 'connected' | 'ended' | 'rejected' | 'missed';
+
+export interface LiveChatMessage {
+  id: string;
+  roomId: string;
+  senderId: string;
+  senderName: string;
+  senderRole: 'customer' | 'waiter' | 'admin';
+  tableNumber?: string;
+  text: string;
+  quickAction?: 'bill' | 'water' | 'napkin' | 'call_waiter' | 'extra_plate' | 'hurry' | 'custom';
+  timestamp: number;
+  status: 'sent' | 'delivered' | 'read';
+}
+
+export interface LiveCallSession {
+  id: string;
+  roomId: string;
+  callerId: string;
+  callerName: string;
+  callerRole: 'customer' | 'waiter' | 'admin';
+  tableNumber?: string;
+  responderId?: string;
+  responderName?: string;
+  responderRole?: 'customer' | 'waiter' | 'admin';
+  callType: CallType;
+  status: CallStatus;
+  startedAt?: number;
+  endedAt?: number;
+  durationSeconds?: number;
+}
+
+export interface WebRtcSignalPayload {
+  type: 'offer' | 'answer' | 'candidate';
+  callId: string;
+  roomId: string;
+  from: string;
+  target?: string;
+  data: any;
+}
+
 
 

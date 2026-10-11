@@ -22,9 +22,15 @@ import {
   Layers,
   ChefHat,
   QrCode,
-  Users
+  Users,
+  Phone,
+  Video,
+  MessageSquare,
+  Headset,
+  PhoneCall
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { useLiveCall } from '../../context/LiveCallContext';
 import { MenuItem, TableOrder, TableOrderItem, RestaurantTable } from '../../types';
 import {
   fetchTableOrdersFromFirestore,
@@ -118,7 +124,19 @@ export const WaiterView: React.FC = () => {
     appBranding
   } = useApp();
 
-  const [activeTabFilter, setActiveTabFilter] = useState<'tables' | 'orders' | 'kitchen'>('tables');
+  const {
+    openCallModal,
+    activeCall,
+    incomingCall,
+    unreadMessagesCount,
+    initiateCall,
+    messages,
+    sendChatMessage
+  } = useLiveCall();
+
+  const [activeTabFilter, setActiveTabFilter] = useState<'tables' | 'orders' | 'live_calls'>('tables');
+  const [liveSelectedTable, setLiveSelectedTable] = useState('Table 01');
+  const [liveReplyText, setLiveReplyText] = useState('');
   const [selectedTable, setSelectedTable] = useState<RestaurantTable | null>(null);
   const [showNewOrderModal, setShowNewOrderModal] = useState(false);
   const [showBillModal, setShowBillModal] = useState<TableOrder | null>(null);
@@ -417,6 +435,26 @@ export const WaiterView: React.FC = () => {
             {orders.filter(o => o.status !== 'closed' && o.status !== 'paid').length}
           </span>
         </button>
+
+        <button
+          onClick={() => setActiveTabFilter('live_calls')}
+          className={`flex items-center space-x-2 px-4 py-2 rounded-2xl text-xs font-bold transition-all ${
+            activeTabFilter === 'live_calls'
+              ? 'bg-amber-500 text-neutral-950 shadow-md shadow-amber-500/20'
+              : 'bg-white dark:bg-[#151518] text-neutral-600 dark:text-neutral-400 hover:text-neutral-900'
+          }`}
+        >
+          <Headset className="w-4 h-4" />
+          <span>Live Calls & Chati ya Meza</span>
+          {(activeCall || incomingCall) && (
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
+          )}
+          {unreadMessagesCount > 0 && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-rose-500 text-white font-bold">
+              {unreadMessagesCount}
+            </span>
+          )}
+        </button>
       </div>
 
       {/* VIEW 1: TABLES FLOOR PLAN */}
@@ -504,19 +542,32 @@ export const WaiterView: React.FC = () => {
                     </div>
                   )}
 
-                  {/* QR Code Action Button */}
-                  <div className="mt-2.5 pt-2 border-t border-neutral-100 dark:border-neutral-800 flex items-center justify-between">
+                  {/* Action Buttons: QR Code & Live Call/Chat */}
+                  <div className="mt-2.5 pt-2 border-t border-neutral-100 dark:border-neutral-800 grid grid-cols-2 gap-1.5">
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         setActiveQrTable(table);
                       }}
-                      className="w-full py-1.5 px-2.5 rounded-xl bg-neutral-100 hover:bg-emerald-500 hover:text-white dark:bg-neutral-800 dark:hover:bg-emerald-600 text-neutral-700 dark:text-neutral-300 font-bold text-[11px] flex items-center justify-center space-x-1.5 transition-colors cursor-pointer"
+                      className="py-1.5 px-2 rounded-xl bg-neutral-100 hover:bg-emerald-500 hover:text-white dark:bg-neutral-800 dark:hover:bg-emerald-600 text-neutral-700 dark:text-neutral-300 font-bold text-[11px] flex items-center justify-center space-x-1 transition-colors cursor-pointer"
                       title={`Tengeneza na chapisha QR Code ya ${table.name}`}
                     >
                       <QrCode className="w-3.5 h-3.5 text-emerald-500 group-hover:text-white" />
-                      <span>QR Code ya Meza</span>
+                      <span>QR Code</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openCallModal('chat', table.name);
+                      }}
+                      className="py-1.5 px-2 rounded-xl bg-amber-500/10 hover:bg-amber-500 hover:text-white text-amber-600 dark:text-amber-400 font-bold text-[11px] flex items-center justify-center space-x-1 transition-colors cursor-pointer border border-amber-500/20"
+                      title={`Piga simu au chati na ${table.name}`}
+                    >
+                      <Headset className="w-3.5 h-3.5 text-amber-500 group-hover:text-white" />
+                      <span>Simu / Chati</span>
                     </button>
                   </div>
                 </div>
@@ -634,6 +685,297 @@ export const WaiterView: React.FC = () => {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* VIEW 3: LIVE CALLS & TABLE CHAT CENTER */}
+      {activeTabFilter === 'live_calls' && (
+        <div className="space-y-4">
+          {/* Top Live Calling Bar & Active Call Alert */}
+          {(activeCall || incomingCall) && (
+            <div className="bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-emerald-500/20 border-2 border-amber-500 rounded-3xl p-4 sm:p-5 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4 animate-pulse">
+              <div className="flex items-center space-x-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500 flex items-center justify-center text-white shadow-md shadow-amber-500/30">
+                  {incomingCall?.callType === 'video' || activeCall?.callType === 'video' ? (
+                    <Video className="w-6 h-6 animate-bounce" />
+                  ) : (
+                    <PhoneCall className="w-6 h-6 animate-bounce" />
+                  )}
+                </div>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500 text-white">
+                      {incomingCall ? 'Simu Mpya Inapiga!' : 'Simu Inaendelea'}
+                    </span>
+                    <span className="text-xs text-neutral-400">
+                      {incomingCall?.tableNumber || activeCall?.tableNumber || 'Meza'}
+                    </span>
+                  </div>
+                  <h4 className="text-base font-bold text-neutral-900 dark:text-white mt-0.5">
+                    {incomingCall?.callerName || activeCall?.callerName || 'Mteja wa Meza'}
+                  </h4>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <button
+                  type="button"
+                  onClick={() => openCallModal(activeCall?.callType || incomingCall?.callType || 'audio', activeCall?.tableNumber || incomingCall?.tableNumber)}
+                  className="px-5 py-2.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-500/30 flex items-center space-x-2 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                >
+                  <Headset className="w-4 h-4" />
+                  <span>Fungua Skrini ya Simu</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Dual Column Workspace: Left Tables, Right Table Live Chat */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            {/* Left: All Restaurant Tables with Call Actions */}
+            <div className="lg:col-span-5 space-y-3">
+              <div className="bg-white dark:bg-[#151518] rounded-3xl p-4 border border-neutral-200 dark:border-neutral-800 shadow-sm">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-neutral-400 flex items-center space-x-1.5">
+                    <Users className="w-4 h-4 text-amber-500" />
+                    <span>Meza za Mgahawa & Mawasiliano</span>
+                  </h4>
+                  <span className="text-[11px] text-emerald-500 font-bold">Live System</span>
+                </div>
+
+                <div className="space-y-2 max-h-[520px] overflow-y-auto no-scrollbar pr-1">
+                  {tables.map((tbl) => {
+                    const isSelected = liveSelectedTable === tbl.name;
+                    return (
+                      <div
+                        key={tbl.id}
+                        onClick={() => setLiveSelectedTable(tbl.name)}
+                        className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                          isSelected
+                            ? 'bg-amber-500/10 border-amber-500 shadow-sm'
+                            : 'bg-neutral-50 dark:bg-neutral-900/60 border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700'
+                        }`}
+                      >
+                        <div className="flex items-center space-x-2.5">
+                          <div
+                            className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs ${
+                              isSelected
+                                ? 'bg-amber-500 text-white'
+                                : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300'
+                            }`}
+                          >
+                            {tbl.name.replace(/[^0-9]/g, '') || tbl.name.substring(0, 2)}
+                          </div>
+                          <div>
+                            <div className="flex items-center space-x-2">
+                              <h5 className="font-bold text-xs text-neutral-900 dark:text-white">
+                                {tbl.name}
+                              </h5>
+                              <span
+                                className={`text-[9px] px-1.5 py-0.2 rounded-full ${
+                                  tbl.status === 'occupied'
+                                    ? 'bg-amber-500/20 text-amber-500'
+                                    : 'bg-emerald-500/20 text-emerald-500'
+                                }`}
+                              >
+                                {tbl.status === 'occupied' ? 'Wateja Wapo' : 'Wazi'}
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-neutral-400">{tbl.section}</p>
+                          </div>
+                        </div>
+
+                        {/* Call Action Buttons */}
+                        <div className="flex items-center space-x-1.5">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openCallModal('audio', tbl.name);
+                            }}
+                            className="p-2 rounded-xl bg-neutral-200 dark:bg-neutral-800 hover:bg-emerald-500 hover:text-white text-neutral-700 dark:text-neutral-300 transition-colors"
+                            title={`Piga simu ya sauti kwa ${tbl.name}`}
+                          >
+                            <Phone className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openCallModal('video', tbl.name);
+                            }}
+                            className="p-2 rounded-xl bg-neutral-200 dark:bg-neutral-800 hover:bg-amber-500 hover:text-white text-neutral-700 dark:text-neutral-300 transition-colors"
+                            title={`Piga simu ya video kwa ${tbl.name}`}
+                          >
+                            <Video className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openCallModal('chat', tbl.name);
+                            }}
+                            className="p-2 rounded-xl bg-neutral-200 dark:bg-neutral-800 hover:bg-blue-500 hover:text-white text-neutral-700 dark:text-neutral-300 transition-colors"
+                            title={`Fungua chati ya ${tbl.name}`}
+                          >
+                            <MessageSquare className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Real-time Live Chat & Action Stream for selected table */}
+            <div className="lg:col-span-7 space-y-3">
+              <div className="bg-white dark:bg-[#151518] rounded-3xl p-4 sm:p-5 border border-neutral-200 dark:border-neutral-800 shadow-sm flex flex-col h-[580px]">
+                {/* Chat Header for Selected Table */}
+                <div className="flex items-center justify-between pb-3 border-b border-neutral-100 dark:border-neutral-800">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 rounded-2xl bg-amber-500 flex items-center justify-center text-white font-bold">
+                      <MessageSquare className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm text-neutral-900 dark:text-white flex items-center space-x-2">
+                        <span>Mazungumzo ya Moja kwa Moja na {liveSelectedTable}</span>
+                      </h4>
+                      <p className="text-[11px] text-neutral-400">
+                        Mhudumu: <strong className="text-amber-500">{waiterDisplayName}</strong>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <button
+                      type="button"
+                      onClick={() => openCallModal('audio', liveSelectedTable)}
+                      className="px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white border border-emerald-500/20 font-bold text-xs flex items-center space-x-1.5 transition-colors cursor-pointer"
+                    >
+                      <Phone className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Piga Sauti</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => openCallModal('video', liveSelectedTable)}
+                      className="px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-white border border-amber-500/20 font-bold text-xs flex items-center space-x-1.5 transition-colors cursor-pointer"
+                    >
+                      <Video className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Piga Video</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Quick Waiter Response Chips */}
+                <div className="py-2.5 flex items-center space-x-2 overflow-x-auto no-scrollbar border-b border-neutral-100 dark:border-neutral-800">
+                  <span className="text-[10px] text-neutral-400 shrink-0 font-bold uppercase">Majibu ya Haraka:</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sendChatMessage(`Naja sasa hivi mezani kwenu (${liveSelectedTable})!`);
+                    }}
+                    className="px-2.5 py-1 rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-amber-500 hover:text-white text-[11px] text-neutral-700 dark:text-neutral-300 shrink-0 transition-colors cursor-pointer"
+                  >
+                    👋 "Naja sasa hivi!"
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sendChatMessage(`Bili yenu ya ${liveSelectedTable} inaandaliwa na itafika mara moja.`);
+                    }}
+                    className="px-2.5 py-1 rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-amber-500 hover:text-white text-[11px] text-neutral-700 dark:text-neutral-300 shrink-0 transition-colors cursor-pointer"
+                  >
+                    🧾 "Bili inaletwa"
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sendChatMessage(`Chupa ya maji baridi inaletwa meza yenu.`);
+                    }}
+                    className="px-2.5 py-1 rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-amber-500 hover:text-white text-[11px] text-neutral-700 dark:text-neutral-300 shrink-0 transition-colors cursor-pointer"
+                  >
+                    💧 "Maji yanaletwa"
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sendChatMessage(`Chakula chenu kimekamilika jikoni na kinaletwa sasa hivi.`);
+                    }}
+                    className="px-2.5 py-1 rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-amber-500 hover:text-white text-[11px] text-neutral-700 dark:text-neutral-300 shrink-0 transition-colors cursor-pointer"
+                  >
+                    🍽️ "Chakula kinakuja"
+                  </button>
+                </div>
+
+                {/* Message Log */}
+                <div className="flex-1 overflow-y-auto p-3 space-y-3">
+                  {messages.length === 0 ? (
+                    <div className="h-full flex flex-col items-center justify-center text-center text-neutral-400">
+                      <Headset className="w-10 h-10 text-amber-500 opacity-40 mb-2" />
+                      <p className="text-xs font-semibold">Chumba cha Mazungumzo ya Moja kwa Moja</p>
+                      <p className="text-[11px] text-neutral-500 max-w-xs mt-1">
+                        Mjumbe wowote mteja atakaoandika kutoka {liveSelectedTable} utatokea hapa kwa sekunde hiyo hiyo.
+                      </p>
+                    </div>
+                  ) : (
+                    messages.map((m) => {
+                      const isWaiter = m.senderRole === 'waiter' || m.senderRole === 'admin';
+                      return (
+                        <div
+                          key={m.id}
+                          className={`flex flex-col ${isWaiter ? 'items-end' : 'items-start'}`}
+                        >
+                          <div className="flex items-center space-x-1.5 text-[10px] text-neutral-400 mb-0.5 px-1">
+                            <span className="font-semibold text-neutral-700 dark:text-neutral-300">
+                              {m.senderName}
+                            </span>
+                            <span>•</span>
+                            <span>{new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                          </div>
+                          <div
+                            className={`max-w-[85%] px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed shadow-sm ${
+                              isWaiter
+                                ? 'bg-amber-500 text-white rounded-tr-sm font-medium'
+                                : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 border border-neutral-200 dark:border-neutral-700 rounded-tl-sm'
+                            }`}
+                          >
+                            {m.text}
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+
+                {/* Reply Form */}
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!liveReplyText.trim()) return;
+                    sendChatMessage(liveReplyText.trim());
+                    setLiveReplyText('');
+                  }}
+                  className="pt-3 border-t border-neutral-100 dark:border-neutral-800 flex items-center space-x-2"
+                >
+                  <input
+                    type="text"
+                    value={liveReplyText}
+                    onChange={(e) => setLiveReplyText(e.target.value)}
+                    placeholder={`Jibu mteja wa ${liveSelectedTable}...`}
+                    className="flex-1 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-2xl px-4 py-2.5 text-xs text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:border-amber-500"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!liveReplyText.trim()}
+                    className="p-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white shadow-md shadow-amber-500/20 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                  >
+                    <Send className="w-4 h-4" />
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
