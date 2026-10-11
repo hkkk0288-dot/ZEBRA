@@ -144,8 +144,8 @@ const MainContent: React.FC = () => {
     }
   };
 
-  // If in Phone Mockup mode
-  if (androidFrame) {
+  // If in Phone Mockup mode (Only in customer storefront, never cramp operations or admin)
+  if (androidFrame && !isOperationsView) {
     return (
       <div
         className={`min-h-screen flex flex-col items-center justify-start transition-colors duration-300 ${
@@ -189,24 +189,16 @@ const MainContent: React.FC = () => {
 
             {/* Direct access to POS & OSS */}
             <button
-              onClick={() => setActiveTab(activeTab === 'pos' ? 'home' : 'pos')}
-              className={`flex items-center space-x-1 px-2.5 sm:px-3 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer ${
-                activeTab === 'pos'
-                  ? 'bg-teal-500 text-white shadow-sm shadow-teal-500/40'
-                  : 'bg-neutral-800 text-teal-400 hover:bg-neutral-700'
-              }`}
+              onClick={() => setActiveTab('pos')}
+              className="flex items-center space-x-1 px-2.5 sm:px-3 py-1 rounded-full text-[11px] font-bold bg-neutral-800 text-teal-400 hover:bg-neutral-700 transition-all cursor-pointer"
             >
               <Store className="w-3.5 h-3.5" />
               <span>POS</span>
             </button>
 
             <button
-              onClick={() => setActiveTab(activeTab === 'oss' ? 'home' : 'oss')}
-              className={`flex items-center space-x-1 px-2.5 sm:px-3 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer ${
-                activeTab === 'oss'
-                  ? 'bg-emerald-500 text-neutral-950 shadow-sm font-extrabold'
-                  : 'bg-neutral-800 text-emerald-400 hover:bg-neutral-700'
-              }`}
+              onClick={() => setActiveTab('oss')}
+              className="flex items-center space-x-1 px-2.5 sm:px-3 py-1 rounded-full text-[11px] font-bold bg-neutral-800 text-emerald-400 hover:bg-neutral-700 transition-all cursor-pointer"
             >
               <Tv className="w-3.5 h-3.5" />
               <span>OSS</span>
@@ -228,25 +220,12 @@ const MainContent: React.FC = () => {
             {/* Admin entry in Phone Mockup Toolbar - ONLY visible to logged-in admin */}
             {isLoggedIn && user.role === 'admin' && (
               <button
-                onClick={() => setActiveTab(activeTab === 'admin' ? 'home' : 'admin')}
-                className={`flex items-center space-x-1 px-2.5 sm:px-3 py-1 rounded-full text-[11px] font-bold transition-colors ${
-                  activeTab === 'admin'
-                    ? 'bg-amber-500 text-neutral-900'
-                    : 'bg-neutral-800 text-amber-400 hover:bg-neutral-700'
-                }`}
+                onClick={() => setActiveTab('admin')}
+                className="flex items-center space-x-1 px-2.5 sm:px-3 py-1 rounded-full text-[11px] font-bold bg-neutral-800 text-amber-400 hover:bg-neutral-700 transition-colors"
                 title="Dashibodi ya Admin"
               >
-                {activeTab === 'admin' ? (
-                  <>
-                    <User className="w-3.5 h-3.5" />
-                    <span>Rudi App</span>
-                  </>
-                ) : (
-                  <>
-                    <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Admin</span>
-                  </>
-                )}
+                <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+                <span>Admin</span>
               </button>
             )}
 
@@ -264,7 +243,7 @@ const MainContent: React.FC = () => {
         {/* Mobile Mockup Device Enclosure - Full-bleed on actual mobile screens, sleek phone enclosure on desktop */}
         <main className="w-full flex-1 flex justify-center p-0 sm:py-6 sm:px-4">
           <div
-            className={`relative w-full sm:max-w-[420px] min-h-screen sm:min-h-0 sm:h-[90vh] sm:rounded-[44px] sm:border-[8px] sm:border-[#222228] sm:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col ${
+            className={`relative w-full sm:max-w-[420px] min-h-screen sm:min-h-0 sm:h-[90vh] sm:rounded-[44px] sm:border-[8px] sm:border-[#222228] sm:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col [transform:translateZ(0)] ${
               isDark ? 'dark bg-[#0f0f11] text-white' : 'bg-[#fafafa] text-neutral-900'
             }`}
           >
@@ -272,7 +251,7 @@ const MainContent: React.FC = () => {
             <AndroidStatusBar theme={theme} />
 
             {/* View Container */}
-            <div className="flex-1 overflow-y-auto no-scrollbar relative">
+            <div className="flex-1 overflow-y-auto no-scrollbar relative pb-24">
               {renderActiveView()}
             </div>
 

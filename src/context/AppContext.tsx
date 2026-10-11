@@ -313,8 +313,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('zebra_currency', c);
   };
   const [androidFrame, setAndroidFrameState] = useState<boolean>(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      return false; // Real mobile screens and tablets always get 100% full responsive website
+    }
     const saved = localStorage.getItem('zebra_android_frame');
-    return saved === 'true'; // Default to false so user gets full website view
+    return saved === 'true';
   });
 
   const setAndroidFrame = (val: boolean) => {

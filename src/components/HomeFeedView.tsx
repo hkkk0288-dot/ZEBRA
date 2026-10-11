@@ -17,7 +17,11 @@ import {
   Smartphone,
   ShieldCheck,
   CheckCircle2,
-  Utensils
+  Utensils,
+  QrCode,
+  Gift,
+  Tv,
+  Store
 } from 'lucide-react';
 import { MenuItem } from '../types';
 import { motion } from 'motion/react';
@@ -54,6 +58,8 @@ export const HomeFeedView: React.FC = () => {
     customerDeliveryLocation,
     setCustomerDeliveryLocation,
     setShowLocationPickerModal,
+    openRiderTracker,
+    setShowScratchModal,
     appBranding
   } = useApp();
 
@@ -296,6 +302,49 @@ export const HomeFeedView: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Quick Platform Services Bar - visible on mobile so no customer misses features */}
+        <div className="flex items-center space-x-2 overflow-x-auto no-scrollbar py-1">
+          <button
+            onClick={() => setShowCustomerTableModal(true)}
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-2xl bg-teal-500/10 hover:bg-teal-500/20 text-teal-600 dark:text-teal-400 border border-teal-500/25 text-xs font-bold shrink-0 transition-all cursor-pointer"
+          >
+            <QrCode className="w-3.5 h-3.5" />
+            <span>{activeTable ? `Meza ${activeTable.name}` : 'Meza Yangu (Dine-in)'}</span>
+          </button>
+
+          <button
+            onClick={() => openRiderTracker()}
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 text-xs font-bold shrink-0 transition-all cursor-pointer"
+          >
+            <span>🛵</span>
+            <span>Rider Tracker</span>
+          </button>
+
+          <button
+            onClick={() => setShowScratchModal(true)}
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/25 text-xs font-bold shrink-0 transition-all cursor-pointer"
+          >
+            <Gift className="w-3.5 h-3.5" />
+            <span>Kadi ya Zawadi</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('oss')}
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-2xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 border border-cyan-500/25 text-xs font-bold shrink-0 transition-all cursor-pointer"
+          >
+            <Tv className="w-3.5 h-3.5" />
+            <span>Token Screen</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('pos')}
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-2xl bg-neutral-800/60 hover:bg-neutral-800 text-neutral-300 border border-neutral-700/60 text-xs font-bold shrink-0 transition-all cursor-pointer"
+          >
+            <Store className="w-3.5 h-3.5 text-emerald-400" />
+            <span>POS Counter</span>
+          </button>
+        </div>
 
         {/* Categories Bar - Sleek, Compact Horizontal Scroll */}
         <div className="flex items-center space-x-1.5 sm:space-x-2 overflow-x-auto no-scrollbar py-0.5">

@@ -5,16 +5,12 @@ import {
   Eye,
   EyeOff,
   ArrowLeft,
-  KeyRound,
   CheckCircle2,
   AlertTriangle,
   User,
-  Sparkles,
-  LogOut,
-  ChevronRight
+  LogOut
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { INITIAL_USERS } from './adminMockData';
 import confetti from 'canvas-confetti';
 
 interface AdminAuthGuardProps {
@@ -26,8 +22,8 @@ export const AdminAuthGuard: React.FC<AdminAuthGuardProps> = ({ onBack, onSucces
   const { user, isLoggedIn, login, logout, appBranding } = useApp();
 
   const [authMethod, setAuthMethod] = useState<'password' | 'pin'>('password');
-  const [identifier, setIdentifier] = useState('david@zebradsm.com');
-  const [password, setPassword] = useState('zebra2026');
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
   const [pin, setPin] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -47,7 +43,7 @@ export const AdminAuthGuard: React.FC<AdminAuthGuardProps> = ({ onBack, onSucces
 
     if (authMethod === 'pin') {
       if (!pin || pin.length < 4) {
-        setErrorMessage('Tafadhali ingiza PIN ya Admin yenye tarakimu 4 au zaidi (mfano: 2026).');
+        setErrorMessage('Tafadhali ingiza PIN ya Admin.');
         return;
       }
       // PIN verification
@@ -55,12 +51,12 @@ export const AdminAuthGuard: React.FC<AdminAuthGuardProps> = ({ onBack, onSucces
         idToUse = 'david@zebradsm.com';
         passToUse = 'zebra2026';
       } else {
-        setErrorMessage('PIN uliyoweka si sahihi. Jaribu PIN: 2026 au tumia nenosiri.');
+        setErrorMessage('PIN uliyoweka si sahihi. Jaribu tena au tumia nenosiri.');
         return;
       }
     } else {
       if (!idToUse) {
-        setErrorMessage('Tafadhali weka barua pepe, jina au namba ya simu ya Admin.');
+        setErrorMessage('Tafadhali weka barua pepe au jina la mtumiaji la Admin.');
         return;
       }
       if (!passToUse) {
@@ -82,26 +78,13 @@ export const AdminAuthGuard: React.FC<AdminAuthGuardProps> = ({ onBack, onSucces
           }
         }, 900);
       } else {
-        setErrorMessage('Taarifa hazijathibitishwa. Hakikisha akaunti hii ina mamlaka ya Admin.');
+        setErrorMessage('Taarifa si sahihi. Hakikisha una mamlaka ya Msimamizi (Admin).');
       }
     } catch (err: any) {
       setErrorMessage(err?.message || 'Hitilafu imetokea wakati wa kuingia. Tafadhali jaribu tena.');
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleQuickFill = (email: string, pass: string) => {
-    setAuthMethod('password');
-    setIdentifier(email);
-    setPassword(pass);
-    setErrorMessage(null);
-  };
-
-  const handleQuickPin = (quickPin: string) => {
-    setAuthMethod('pin');
-    setPin(quickPin);
-    setErrorMessage(null);
   };
 
   return (
@@ -219,7 +202,7 @@ export const AdminAuthGuard: React.FC<AdminAuthGuardProps> = ({ onBack, onSucces
                     type="text"
                     value={identifier}
                     onChange={e => setIdentifier(e.target.value)}
-                    placeholder="david@zebradsm.com au David Michael Johnson"
+                    placeholder="Weka barua pepe au jina la Admin..."
                     required
                     className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/70 text-neutral-900 dark:text-white text-xs outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all font-medium"
                   />
@@ -268,9 +251,6 @@ export const AdminAuthGuard: React.FC<AdminAuthGuardProps> = ({ onBack, onSucces
                   className="w-full text-center tracking-[0.5em] text-xl font-mono py-3 rounded-2xl border-2 border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/70 text-neutral-900 dark:text-white outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all"
                 />
               </div>
-              <p className="text-[11px] text-center text-neutral-400 mt-2">
-                PIN ya kawaida ya jaribio: <strong className="text-amber-500">2026</strong>
-              </p>
             </div>
           )}
 
@@ -290,58 +270,6 @@ export const AdminAuthGuard: React.FC<AdminAuthGuardProps> = ({ onBack, onSucces
             )}
           </button>
         </form>
-
-        {/* Quick Admin Test Credentials Section */}
-        <div className="mt-6 pt-5 border-t border-neutral-100 dark:border-neutral-800">
-          <p className="text-[11px] font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-2 flex items-center space-x-1">
-            <Sparkles className="w-3 h-3 text-amber-500" />
-            <span>Akaunti za Mfano za Admin (Quick Fill):</span>
-          </p>
-
-          <div className="space-y-1.5">
-            <button
-              type="button"
-              onClick={() => handleQuickFill('david@zebradsm.com', 'zebra2026')}
-              className="w-full text-left p-2 rounded-xl bg-neutral-50 hover:bg-neutral-100 dark:bg-neutral-800/50 dark:hover:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-xs flex items-center justify-between transition-colors cursor-pointer"
-            >
-              <div>
-                <p className="font-bold text-neutral-900 dark:text-white text-[11px]">
-                  👑 David Michael Johnson (Super Admin)
-                </p>
-                <p className="text-[10px] text-neutral-400">david@zebradsm.com • zebra2026</p>
-              </div>
-              <ChevronRight className="w-3.5 h-3.5 text-neutral-400" />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleQuickFill('amour@amourcodes.com', 'zebra2026')}
-              className="w-full text-left p-2 rounded-xl bg-neutral-50 hover:bg-neutral-100 dark:bg-neutral-800/50 dark:hover:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-xs flex items-center justify-between transition-colors cursor-pointer"
-            >
-              <div>
-                <p className="font-bold text-neutral-900 dark:text-white text-[11px]">
-                  👑 Amour Ally (AmourCodes Super Admin)
-                </p>
-                <p className="text-[10px] text-neutral-400">amour@amourcodes.com • zebra2026</p>
-              </div>
-              <ChevronRight className="w-3.5 h-3.5 text-neutral-400" />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleQuickPin('2026')}
-              className="w-full text-left p-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 text-xs flex items-center justify-between transition-colors cursor-pointer"
-            >
-              <div className="flex items-center space-x-2">
-                <KeyRound className="w-3.5 h-3.5 text-amber-500" />
-                <span className="font-bold text-amber-600 dark:text-amber-400 text-[11px]">
-                  Tumia PIN ya Haraka (2026)
-                </span>
-              </div>
-              <ChevronRight className="w-3.5 h-3.5 text-amber-500" />
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );

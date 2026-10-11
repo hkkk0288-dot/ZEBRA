@@ -118,7 +118,7 @@ export const SlideBannerCarousel: React.FC<SlideBannerCarouselProps> = ({
     }
   };
 
-  const isAdmin = user.role === 'admin' || user.systemRole === 'Super Admin' || user.permissions?.canManageSettings;
+  const isAdmin = isLoggedIn && (user.role === 'admin' || user.systemRole === 'Super Admin' || user.permissions?.canManageSettings);
 
   return (
     <div

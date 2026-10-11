@@ -25,7 +25,9 @@ import {
   LogOut,
   Volume2,
   VolumeX,
-  Gift
+  Gift,
+  Menu,
+  X
 } from 'lucide-react';
 import { formatPrice } from '../utils/formatters';
 import { LuckySpinWheelModal } from './LuckySpinWheelModal';
@@ -73,6 +75,7 @@ export const WebHeader: React.FC = () => {
   const isDark = theme === 'dark';
   const [showLuckyWheel, setShowLuckyWheel] = useState(false);
   const [showStaffDropdown, setShowStaffDropdown] = useState(false);
+  const [showMobileDrawer, setShowMobileDrawer] = useState(false);
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   const cartTotal = cart.reduce((sum, item) => sum + item.totalPrice, 0);
@@ -434,16 +437,6 @@ export const WebHeader: React.FC = () => {
               </button>
             )}
 
-            {/* Table Reservation Button (Weka Meza) - Visible on xl+ */}
-            <button
-              onClick={() => setShowReservationModal(true)}
-              className="hidden xl:flex items-center space-x-1 px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/30 text-xs font-bold transition-all cursor-pointer shrink-0"
-              title="Weka nafasi ya meza mapema"
-            >
-              <Calendar className="w-3.5 h-3.5 text-amber-500" />
-              <span>Weka Meza</span>
-            </button>
-
             {/* Live Rider Tracker button */}
             <button
               onClick={() => openRiderTracker()}
@@ -537,6 +530,15 @@ export const WebHeader: React.FC = () => {
                 {cartCount === 0 ? 'Cart' : formatPrice(cartTotal, currency)}
               </span>
             </button>
+
+            {/* Mobile Menu Button - Opens Full Platform Drawer so NO features are hidden on phone view */}
+            <button
+              onClick={() => setShowMobileDrawer(prev => !prev)}
+              className="lg:hidden p-2 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 hover:text-emerald-500 transition-colors shrink-0 cursor-pointer"
+              title="Menyu Kamili ya Simu"
+            >
+              {showMobileDrawer ? <X className="w-4 h-4 text-rose-500" /> : <Menu className="w-4 h-4" />}
+            </button>
           </div>
         </div>
 
@@ -558,6 +560,325 @@ export const WebHeader: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Full-Featured Mobile Slide-Out Drawer ("sioni fulu kunavitu sivioni" - now EVERYTHING is 100% visible) */}
+      {showMobileDrawer && (
+        <div className="fixed inset-0 z-50 lg:hidden flex justify-end">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
+            onClick={() => setShowMobileDrawer(false)}
+          />
+
+          {/* Drawer Content */}
+          <div className="relative w-[85%] max-w-sm h-full bg-white dark:bg-[#121215] text-neutral-900 dark:text-white z-50 shadow-2xl flex flex-col overflow-y-auto animate-in slide-in-from-right duration-200">
+            {/* Drawer Top Header */}
+            <div className="p-4 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <AppLogo size="sm" />
+                <div>
+                  <h3 className="font-extrabold text-sm font-display tracking-tight text-neutral-900 dark:text-white">
+                    {appBranding.appName}
+                  </h3>
+                  <p className="text-[10px] text-neutral-400">Masaki • Slipway • Dar es Salaam</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowMobileDrawer(false)}
+                className="p-2 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:text-white transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Drawer Body Items */}
+            <div className="p-4 space-y-4 flex-1 overflow-y-auto">
+              {/* Delivery / Lipa Namba Info */}
+              <div className="p-3 rounded-2xl bg-gradient-to-r from-amber-500/15 to-orange-500/15 border border-amber-500/30 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Lipa Namba ya Haraka</span>
+                  <span className="text-[10px] font-mono font-bold bg-amber-500 text-neutral-950 px-2 py-0.5 rounded-full">445566</span>
+                </div>
+                <p className="text-[11px] text-neutral-600 dark:text-neutral-300">
+                  M-Pesa (*150*00#), Tigo Pesa, Airtel & Halopesa.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowMobileDrawer(false);
+                    setShowLocationPickerModal(true);
+                  }}
+                  className="w-full mt-1 flex items-center justify-between text-[11px] font-semibold text-emerald-500 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-2.5 py-1.5 rounded-xl border border-emerald-500/20"
+                >
+                  <span className="flex items-center space-x-1 truncate">
+                    <MapPin className="w-3 h-3 shrink-0" />
+                    <span className="truncate">{customerDeliveryLocation}</span>
+                  </span>
+                  <span className="text-[10px] font-bold shrink-0">Badili</span>
+                </button>
+              </div>
+
+              {/* Customer Quick Features */}
+              <div className="space-y-1">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 px-1">Huduma & Menyu</p>
+
+                <button
+                  onClick={() => {
+                    setActiveTab('home');
+                    setShowMobileDrawer(false);
+                  }}
+                  className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 text-xs font-bold transition-colors"
+                >
+                  <span className="flex items-center space-x-2.5">
+                    <Store className="w-4 h-4 text-emerald-500" />
+                    <span>Menyu Kuu (All Dishes)</span>
+                  </span>
+                  <span className="text-[10px] text-neutral-400">Tazama</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setShowCustomerTableModal(true);
+                    setShowMobileDrawer(false);
+                  }}
+                  className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 text-xs font-bold transition-colors"
+                >
+                  <span className="flex items-center space-x-2.5">
+                    <QrCode className="w-4 h-4 text-teal-400" />
+                    <span>Meza Yangu & Dine-in</span>
+                  </span>
+                  <span className="text-[10px] font-bold text-teal-400 bg-teal-400/10 px-2 py-0.5 rounded-full">
+                    {activeTable ? `Meza ${activeTable.name}` : 'Chagua'}
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    openRiderTracker();
+                    setShowMobileDrawer(false);
+                  }}
+                  className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 text-xs font-bold transition-colors"
+                >
+                  <span className="flex items-center space-x-2.5">
+                    <span className="text-sm">🛵</span>
+                    <span>Live GPS Rider Tracker</span>
+                  </span>
+                  <span className="text-[10px] font-bold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full">Ramani</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setShowLuckyWheel(true);
+                    setShowMobileDrawer(false);
+                  }}
+                  className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 text-xs font-bold transition-colors"
+                >
+                  <span className="flex items-center space-x-2.5">
+                    <span className="text-sm">🎡</span>
+                    <span>Gurudumu la Bahati (Spin & Win)</span>
+                  </span>
+                  <span className="text-[10px] font-bold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-full">Zawadi</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setShowScratchModal(true);
+                    setShowMobileDrawer(false);
+                  }}
+                  className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 text-xs font-bold transition-colors"
+                >
+                  <span className="flex items-center space-x-2.5">
+                    <Gift className="w-4 h-4 text-amber-500" />
+                    <span>Kadi ya Kujikuna (Scratch Card)</span>
+                  </span>
+                  <span className="text-[10px] font-bold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-full">Free</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setActiveTab('favorites');
+                    setShowMobileDrawer(false);
+                  }}
+                  className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 text-xs font-bold transition-colors"
+                >
+                  <span className="flex items-center space-x-2.5">
+                    <Heart className="w-4 h-4 text-rose-500" />
+                    <span>Vyakula Vilivyopendwa</span>
+                  </span>
+                  <span className="text-[10px] text-neutral-400">{user.favoriteItemIds.length}</span>
+                </button>
+
+                {isLoggedIn && (
+                  <button
+                    onClick={() => {
+                      setActiveTab('orders');
+                      setShowMobileDrawer(false);
+                    }}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 text-xs font-bold transition-colors"
+                  >
+                    <span className="flex items-center space-x-2.5">
+                      <Clock className="w-4 h-4 text-amber-500" />
+                      <span>Fuatilia Oda Zangu</span>
+                    </span>
+                    <span className="text-[10px] text-amber-400 font-bold bg-amber-400/10 px-2 py-0.5 rounded-full">
+                      {activeOrdersCount} hai
+                    </span>
+                  </button>
+                )}
+              </div>
+
+              {/* Operations & Staff Quick Access */}
+              <div className="space-y-1 pt-2 border-t border-neutral-100 dark:border-neutral-800/80">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 px-1">Skrini za Operesheni</p>
+
+                <button
+                  onClick={() => {
+                    setActiveTab('oss');
+                    setShowMobileDrawer(false);
+                  }}
+                  className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 text-xs font-bold transition-colors"
+                >
+                  <span className="flex items-center space-x-2.5">
+                    <Tv className="w-4 h-4 text-teal-400" />
+                    <span>OSS Token TV Display</span>
+                  </span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                </button>
+
+                <button
+                  onClick={() => {
+                    setActiveTab('pos');
+                    setShowMobileDrawer(false);
+                  }}
+                  className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 text-xs font-bold transition-colors"
+                >
+                  <span className="flex items-center space-x-2.5">
+                    <Store className="w-4 h-4 text-teal-400" />
+                    <span>POS Terminal (Cashier)</span>
+                  </span>
+                  <span className="text-[10px] text-neutral-400">Counter</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setActiveTab('waiter');
+                    setShowMobileDrawer(false);
+                  }}
+                  className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 text-xs font-bold transition-colors"
+                >
+                  <span className="flex items-center space-x-2.5">
+                    <UtensilsCrossed className="w-4 h-4 text-amber-400" />
+                    <span>Waiter POS (Wahudumu)</span>
+                  </span>
+                  <span className="text-[10px] text-neutral-400">Meza</span>
+                </button>
+
+                {/* Admin Dashboard: ONLY visible to logged-in Admin */}
+                {isLoggedIn && user.role === 'admin' && (
+                  <button
+                    onClick={() => {
+                      setActiveTab('admin');
+                      setShowMobileDrawer(false);
+                    }}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/30 text-xs font-extrabold transition-colors"
+                  >
+                    <span className="flex items-center space-x-2.5">
+                      <ShieldCheck className="w-4 h-4 text-amber-500" />
+                      <span>Admin Dashboard</span>
+                    </span>
+                    <span className="text-[10px] bg-amber-500 text-neutral-950 font-bold px-1.5 py-0.5 rounded">Msimamizi</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Preferences Settings */}
+              <div className="space-y-2 pt-2 border-t border-neutral-100 dark:border-neutral-800/80">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 px-1">Mipangilio</p>
+
+                <div className="grid grid-cols-2 gap-2 text-xs font-bold">
+                  <button
+                    onClick={toggleLanguage}
+                    className="p-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/60 flex items-center justify-center space-x-1"
+                  >
+                    <span>{language === 'sw' ? '🇹🇿 Kiswahili' : '🇬🇧 English'}</span>
+                  </button>
+
+                  <button
+                    onClick={() => setCurrency(currency === 'USD' ? 'TZS' : 'USD')}
+                    className="p-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/60 flex items-center justify-center space-x-1"
+                  >
+                    <span>{currency === 'USD' ? '$ USD' : 'TZS'}</span>
+                  </button>
+
+                  <button
+                    onClick={toggleSound}
+                    className="p-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/60 flex items-center justify-center space-x-1"
+                  >
+                    {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-emerald-500" /> : <VolumeX className="w-3.5 h-3.5 text-neutral-400" />}
+                    <span>{soundEnabled ? 'Sauti: On' : 'Sauti: Off'}</span>
+                  </button>
+
+                  <button
+                    onClick={toggleTheme}
+                    className="p-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/60 flex items-center justify-center space-x-1"
+                  >
+                    {isDark ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 text-neutral-700" />}
+                    <span>{isDark ? 'Dark Mode' : 'Light Mode'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Drawer Bottom Auth Section */}
+            <div className="p-4 border-t border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/50">
+              {isLoggedIn ? (
+                <div className="flex items-center justify-between">
+                  <div
+                    onClick={() => {
+                      setActiveTab('profile');
+                      setShowMobileDrawer(false);
+                    }}
+                    className="flex items-center space-x-2.5 cursor-pointer"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center font-bold text-xs">
+                      {user.avatar ? (
+                        <img src={user.avatar} alt="" className="w-full h-full object-cover rounded-full" />
+                      ) : (
+                        <User className="w-4 h-4" />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-neutral-900 dark:text-white truncate">{user.name}</p>
+                      <p className="text-[10px] text-neutral-400 truncate">{user.email || user.phone}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      logout();
+                      setShowMobileDrawer(false);
+                    }}
+                    className="p-2 text-rose-500 hover:bg-rose-500/10 rounded-xl transition-colors"
+                    title="Toka"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => {
+                    setActiveTab('auth');
+                    setShowMobileDrawer(false);
+                  }}
+                  className="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-neutral-950 font-black text-xs flex items-center justify-center space-x-2 shadow-md shadow-amber-500/20"
+                >
+                  <LogIn className="w-4 h-4" />
+                  <span>Ingia au Jisajili (Customer Login)</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Lucky Spin Wheel Modal */}
       <LuckySpinWheelModal
