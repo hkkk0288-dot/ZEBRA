@@ -20,7 +20,6 @@ import {
   Tv,
   Store,
   Sparkles,
-  ArrowLeft,
   ChevronDown,
   LogOut,
   Volume2,
@@ -40,8 +39,6 @@ export const WebHeader: React.FC = () => {
   const {
     activeTab,
     setActiveTab,
-    goBack,
-    canGoBack,
     customerDeliveryLocation,
     cart,
     orders,
@@ -124,19 +121,6 @@ export const WebHeader: React.FC = () => {
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-3.5">
         <div className="flex items-center justify-between gap-1.5 sm:gap-4">
           <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
-            {/* Global Web Back Button when not on home screen */}
-            {activeTab !== 'home' && (
-              <button
-                type="button"
-                onClick={goBack}
-                className="flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800/90 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-100 border border-neutral-300 dark:border-neutral-700 font-bold text-xs shadow-xs transition-all active:scale-95 cursor-pointer shrink-0"
-                title="Rudi Nyuma (Back)"
-              >
-                <ArrowLeft className="w-4 h-4 text-emerald-500" />
-                <span className="inline">Rudi</span>
-              </button>
-            )}
-
             {/* Logo & Brand */}
             <div
               onClick={() => setActiveTab('home')}

@@ -238,7 +238,7 @@ export const CustomerTableModal: React.FC<CustomerTableModalProps> = ({
           </button>
         </div>
 
-        <div className="p-4 sm:p-5 space-y-4 max-h-[75vh] overflow-y-auto">
+        <div className="p-3.5 sm:p-4 space-y-2.5 max-h-[75vh] overflow-y-auto">
           {/* Active Table Status If Already Seated */}
           {activeTable && (
             <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between">

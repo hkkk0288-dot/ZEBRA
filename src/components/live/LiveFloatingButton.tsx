@@ -1,5 +1,5 @@
 import React from 'react';
-import { Headset, Phone, MessageSquare, Video } from 'lucide-react';
+import { Headset, Phone, Video } from 'lucide-react';
 import { useLiveCall } from '../../context/LiveCallContext';
 import { useApp } from '../../context/AppContext';
 
@@ -8,7 +8,7 @@ export const LiveFloatingButton: React.FC = () => {
   const { activeTab, androidFrame } = useApp();
 
   // Hide in operations screens where waiter station or POS has its own full panel
-  if (activeTab === 'pos' || activeTab === 'oss' || activeTab === 'kds') {
+  if (activeTab === 'pos' || activeTab === 'oss' || activeTab === 'kds' || activeTab === 'admin' || activeTab === 'waiter') {
     return null;
   }
 
@@ -17,52 +17,40 @@ export const LiveFloatingButton: React.FC = () => {
   return (
     <div
       className={`fixed ${
-        androidFrame ? 'bottom-20 left-4' : 'bottom-6 left-4 sm:left-6'
-      } z-40 flex items-center space-x-2`}
+        androidFrame ? 'bottom-24 right-3' : 'bottom-24 right-4 sm:bottom-8 sm:right-8'
+      } z-40 flex items-center justify-center`}
     >
       <button
         type="button"
         onClick={() => openCallModal(isCallActive ? (activeCall?.callType || 'chat') : 'chat')}
-        className={`group relative flex items-center space-x-2.5 px-3.5 sm:px-4 py-2.5 rounded-full shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 border ${
+        className={`group relative flex items-center justify-center w-12 h-12 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95 border cursor-pointer ${
           isCallActive
-            ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-emerald-400 shadow-emerald-500/30 animate-pulse'
-            : 'bg-neutral-900/90 hover:bg-neutral-900 text-white border-amber-500/30 hover:border-amber-500 shadow-black/40 backdrop-blur-md'
+            ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-emerald-400 shadow-emerald-500/40 animate-pulse'
+            : 'bg-gradient-to-tr from-amber-500 via-amber-600 to-orange-500 text-white border-amber-400/50 shadow-amber-500/30 hover:shadow-amber-500/50'
         }`}
         title="Mhudumu Live: Chati na Piga Simu"
       >
-        <div className="relative">
-          <div className="w-7 h-7 rounded-full bg-amber-500 flex items-center justify-center text-white">
-            {isCallActive ? (
-              activeCall?.callType === 'video' ? (
-                <Video className="w-3.5 h-3.5" />
-              ) : (
-                <Phone className="w-3.5 h-3.5" />
-              )
-            ) : (
-              <Headset className="w-3.5 h-3.5" />
-            )}
-          </div>
-          {/* Online green indicator */}
-          <span
-            className={`absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-neutral-900 ${
-              socketConnected ? 'bg-emerald-500' : 'bg-amber-400'
-            }`}
-          />
-        </div>
+        {isCallActive ? (
+          activeCall?.callType === 'video' ? (
+            <Video className="w-5 h-5 animate-pulse" />
+          ) : (
+            <Phone className="w-5 h-5 animate-bounce" />
+          )
+        ) : (
+          <Headset className="w-5 h-5 transition-transform group-hover:scale-110" />
+        )}
 
-        <div className="flex flex-col text-left">
-          <span className="text-[11px] font-bold tracking-tight leading-tight flex items-center space-x-1">
-            <span>Mhudumu Live</span>
-            {isCallActive && <span className="text-[9px] text-emerald-200 uppercase font-mono">• Active</span>}
-          </span>
-          <span className="text-[9px] text-neutral-300 leading-tight">
-            {isCallActive ? 'Simu inaendelea' : 'Chat & Call Mezani'}
-          </span>
-        </div>
+        {/* Online green indicator */}
+        <span
+          className={`absolute top-0 right-0 w-3 h-3 rounded-full border-2 border-neutral-900 ${
+            socketConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-300'
+          }`}
+          title={socketConnected ? 'Mhudumu Yuko Hewani (Online)' : 'Inaunganisha...'}
+        />
 
         {/* Unread badge */}
         {unreadMessagesCount > 0 && (
-          <span className="ml-1 px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-bold animate-bounce">
+          <span className="absolute -top-1 -left-1 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-600 border border-white text-white text-[10px] font-black flex items-center justify-center shadow-md animate-bounce">
             {unreadMessagesCount}
           </span>
         )}

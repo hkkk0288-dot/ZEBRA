@@ -37,14 +37,12 @@ import { LiveCallProvider } from './context/LiveCallContext';
 import { LiveCallModal } from './components/live/LiveCallModal';
 import { IncomingCallBanner } from './components/live/IncomingCallBanner';
 import { LiveFloatingButton } from './components/live/LiveFloatingButton';
-import { Smartphone, Monitor, ShieldCheck, User, LogIn, Store, Tv, ArrowLeft, Lock } from 'lucide-react';
+import { Smartphone, Monitor, ShieldCheck, User, LogIn, Store, Tv, Lock } from 'lucide-react';
 
 const MainContent: React.FC = () => {
   const {
     activeTab,
     setActiveTab,
-    goBack,
-    canGoBack,
     customerDeliveryLocation,
     setCustomerDeliveryLocation,
     theme,
@@ -179,18 +177,6 @@ const MainContent: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-1.5 sm:space-x-3 shrink-0">
-            {/* Back Button in Mockup Toolbar if not on home */}
-            {canGoBack && activeTab !== 'home' && (
-              <button
-                onClick={goBack}
-                className="flex items-center space-x-1 px-2.5 sm:px-3 py-1 rounded-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/40 text-[11px] font-bold transition-all active:scale-95 cursor-pointer shadow-xs"
-                title="Rudi Nyuma (Back)"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Rudi</span>
-              </button>
-            )}
-
             {/* Direct access to POS & OSS */}
             <button
               onClick={() => setActiveTab('pos')}
@@ -255,7 +241,7 @@ const MainContent: React.FC = () => {
             <AndroidStatusBar theme={theme} />
 
             {/* View Container */}
-            <div className="flex-1 overflow-y-auto no-scrollbar relative pb-24">
+            <div className={`flex-1 overflow-y-auto no-scrollbar relative ${isOperationsView ? 'pb-2' : 'pb-16 sm:pb-20'}`}>
               {renderActiveView()}
             </div>
 
@@ -372,13 +358,13 @@ const MainContent: React.FC = () => {
       {!isOperationsView && <WebHeader />}
 
       {/* Main View Container (No storefront bottom padding in operations views) */}
-      <main className={`flex-1 w-full relative ${isOperationsView ? '' : 'pb-24 sm:pb-28 lg:pb-8'}`}>
+      <main className="flex-1 w-full relative">
         {renderActiveView()}
       </main>
 
       {/* Website Footer - Desktop always, Mobile only on home feed - Hidden in Admin and Operations Views */}
       {!isOperationsView && (
-        <div className={`pb-16 lg:pb-0 ${activeTab === 'home' ? 'block' : 'hidden lg:block'}`}>
+        <div className={activeTab === 'home' ? 'block' : 'hidden lg:block'}>
           <WebFooter />
         </div>
       )}

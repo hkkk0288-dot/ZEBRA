@@ -235,19 +235,16 @@ Thank you for choosing ${appBranding.appName}! 🍗🔥`;
         
         {/* Full Web Breadcrumbs & Clear All Button */}
         {!androidFrame && (
-          <div className="flex items-center justify-between mb-6 pb-4 border-b border-neutral-800/80">
+          <div className="flex items-center justify-between mb-6 pb-4 border-b border-neutral-200 dark:border-neutral-800/80">
             <div className="flex items-center space-x-3.5">
               <button
+                type="button"
                 onClick={goBack}
-                className={`px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm flex items-center space-x-1.5 border transition-all active:scale-95 cursor-pointer ${
-                  isDark
-                    ? 'bg-neutral-900 hover:bg-neutral-800 text-white border-neutral-800 shadow-sm'
-                    : 'bg-white hover:bg-neutral-100 text-neutral-900 border-neutral-200 shadow-xs'
-                }`}
-                title="Rudi Nyuma kwenye Menu"
+                className="flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-100 border border-neutral-300 dark:border-neutral-700 font-bold text-xs shadow-xs transition-all active:scale-95 cursor-pointer"
+                title="Rudi Nyuma"
               >
                 <ArrowLeft className="w-4 h-4 text-emerald-500" />
-                <span>Rudi Menu</span>
+                <span>Rudi</span>
               </button>
               <div>
                 <h1 className="text-2xl font-bold font-display text-neutral-900 dark:text-white tracking-tight">

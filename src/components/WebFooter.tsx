@@ -16,11 +16,11 @@ export const WebFooter: React.FC = () => {
 
   return (
     <footer
-      className={`w-full mt-16 border-t transition-colors ${
+      className={`w-full mt-4 sm:mt-6 border-t transition-colors ${
         isDark ? 'bg-[#0a0a0c] border-neutral-800 text-neutral-300' : 'bg-neutral-100 border-neutral-300 text-neutral-700'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Col 1: Brand & About */}
           <div className="space-y-4">

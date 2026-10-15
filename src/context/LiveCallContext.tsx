@@ -33,6 +33,8 @@ interface LiveCallContextType {
   callDuration: number;
   unreadMessagesCount: number;
   clearUnreadCount: () => void;
+  notificationPermission: NotificationPermission;
+  requestNotificationPermission: () => Promise<boolean>;
 }
 
 const LiveCallContext = createContext<LiveCallContextType | undefined>(undefined);
@@ -56,6 +58,37 @@ export const LiveCallProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [callDuration, setCallDuration] = useState(0);
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>(
+    typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'default'
+  );
+
+  const requestNotificationPermission = useCallback(async (): Promise<boolean> => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      try {
+        const perm = await Notification.requestPermission();
+        setNotificationPermission(perm);
+        return perm === 'granted';
+      } catch {
+        return false;
+      }
+    }
+    return false;
+  }, []);
+
+  const dismissSystemNotifications = useCallback(() => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then((reg) => {
+        reg.getNotifications().then((notifications) => {
+          notifications.forEach((n) => {
+            if (n.tag && n.tag.includes('incoming-call')) {
+              n.close();
+            }
+          });
+        });
+      }).catch(() => {});
+    }
+  }, []);
 
   const webrtcManagerRef = useRef<WebRtcManager | null>(null);
   const ringIntervalRef = useRef<any>(null);
@@ -125,12 +158,35 @@ export const LiveCallProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         ringIntervalRef.current = setInterval(() => {
           playPhoneRingSound();
         }, 2200);
+
+        // Trigger Service Worker Native System Notification with action buttons: "Pokea Simu" and "Kataa"
+        if (typeof window !== 'undefined' && 'serviceWorker' in navigator && Notification.permission === 'granted') {
+          navigator.serviceWorker.ready.then((reg) => {
+            const isVideo = call.callType === 'video';
+            const notificationOpts: any = {
+              body: `${call.tableNumber ? `Chumba: ${call.tableNumber} • ` : ''}${isVideo ? 'Simu ya Video' : 'Simu ya Sauti'}.\nBofya "Pokea Simu" kuanza kuongea moja kwa moja!`,
+              icon: '/icon-192.png',
+              badge: '/favicon.svg',
+              tag: `incoming-call-${call.id}`,
+              renotify: true,
+              requireInteraction: true,
+              vibrate: [300, 150, 300, 150, 300, 150, 400],
+              actions: [
+                { action: 'answer_call', title: '📞 Pokea Simu' },
+                { action: 'decline_call', title: '❌ Kataa Simu' }
+              ],
+              data: { callId: call.id, callerName: call.callerName, tableNumber: call.tableNumber, callType: call.callType }
+            };
+            reg.showNotification(`📞 Simu Inayoingia: ${call.callerName || 'Mteja wa Meza'}`, notificationOpts);
+          }).catch(() => {});
+        }
       }
     });
 
     const unsubCallAccepted = liveSocketService.on('call_accepted', async (data) => {
       const call: LiveCallSession = data.call;
       clearInterval(ringIntervalRef.current);
+      dismissSystemNotifications();
       setIncomingCall(null);
       setActiveCall(call);
 
@@ -150,6 +206,7 @@ export const LiveCallProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const unsubCallRejected = liveSocketService.on('call_rejected', () => {
       clearInterval(ringIntervalRef.current);
       clearInterval(timerIntervalRef.current);
+      dismissSystemNotifications();
       setIncomingCall(null);
       setActiveCall(null);
       if (webrtcManagerRef.current) {
@@ -163,6 +220,7 @@ export const LiveCallProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const unsubCallEnded = liveSocketService.on('call_ended', () => {
       clearInterval(ringIntervalRef.current);
       clearInterval(timerIntervalRef.current);
+      dismissSystemNotifications();
       setIncomingCall(null);
       setActiveCall(null);
       if (webrtcManagerRef.current) {
@@ -285,23 +343,25 @@ export const LiveCallProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     timerIntervalRef.current = setInterval(() => {
       setCallDuration((d) => d + 1);
     }, 1000);
-  }, [incomingCall, userName, userRole]);
+  }, [incomingCall, userName, userRole, dismissSystemNotifications]);
 
   // Reject incoming call
   const rejectIncomingCall = useCallback(
     (reason?: string) => {
       if (!incomingCall) return;
       clearInterval(ringIntervalRef.current);
+      dismissSystemNotifications();
       liveSocketService.rejectCall(incomingCall.id, reason);
       setIncomingCall(null);
     },
-    [incomingCall]
+    [incomingCall, dismissSystemNotifications]
   );
 
   // End current call
   const endCurrentCall = useCallback(() => {
     clearInterval(ringIntervalRef.current);
     clearInterval(timerIntervalRef.current);
+    dismissSystemNotifications();
     if (activeCall) {
       liveSocketService.endCall(activeCall.id);
     }
@@ -315,7 +375,40 @@ export const LiveCallProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setCallDuration(0);
     setIsMuted(false);
     setIsVideoOff(false);
-  }, [activeCall]);
+  }, [activeCall, dismissSystemNotifications]);
+
+  // Handle Action messages received from Service Worker Notification clicks
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      const handleSwMessage = (event: MessageEvent) => {
+        if (event.data && event.data.type === 'NOTIFICATION_CALL_ACTION') {
+          const { action } = event.data;
+          if (action === 'answer') {
+            acceptIncomingCall();
+          } else if (action === 'decline') {
+            rejectIncomingCall('Imekataliwa kupitia notification');
+          } else if (action === 'focus') {
+            setIsCallModalOpen(true);
+          }
+        }
+      };
+      navigator.serviceWorker.addEventListener('message', handleSwMessage);
+      return () => {
+        navigator.serviceWorker.removeEventListener('message', handleSwMessage);
+      };
+    }
+  }, [acceptIncomingCall, rejectIncomingCall]);
+
+  // Handle URL query parameters if launched via notification action
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('action') === 'answer_call') {
+        setIsCallModalOpen(true);
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    }
+  }, []);
 
   const toggleMute = useCallback(() => {
     if (webrtcManagerRef.current) {
@@ -388,7 +481,9 @@ export const LiveCallProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         toggleVideo,
         callDuration,
         unreadMessagesCount,
-        clearUnreadCount
+        clearUnreadCount,
+        notificationPermission,
+        requestNotificationPermission
       }}
     >
       {children}

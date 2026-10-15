@@ -20,19 +20,22 @@ export const PwaInstallBanner: React.FC = () => {
   }, [appBranding.logoUrl]);
 
   useEffect(() => {
-    // Check if already in standalone PWA mode
+    // Check if already in standalone PWA mode or dismissed
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
       (window.navigator as unknown as { standalone?: boolean }).standalone === true;
+    const isDismissed = typeof window !== 'undefined' && sessionStorage.getItem('zebra_pwa_banner_dismissed') === 'true';
 
-    if (isStandalone) {
-      setIsInstalled(true);
+    if (isStandalone || isDismissed) {
+      setIsInstalled(isStandalone);
       return;
     }
 
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      setShowBanner(true);
+      if (!isDismissed) {
+        setShowBanner(true);
+      }
     };
 
     window.addEventListener('beforeinstallprompt', handler);
@@ -43,12 +46,12 @@ export const PwaInstallBanner: React.FC = () => {
       setDeferredPrompt(null);
     });
 
-    // Also show banner initially after 3 seconds for easy install discoverability
+    // Also show banner initially after 4 seconds if not dismissed
     const timer = setTimeout(() => {
-      if (!isStandalone) {
+      if (!isStandalone && !isDismissed) {
         setShowBanner(true);
       }
-    }, 3000);
+    }, 4000);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handler);
@@ -75,34 +78,41 @@ export const PwaInstallBanner: React.FC = () => {
     }
   };
 
+  const handleDismiss = () => {
+    setShowBanner(false);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('zebra_pwa_banner_dismissed', 'true');
+    }
+  };
+
   if (isInstalled || !showBanner) return null;
 
   return (
     <>
-      <div className="fixed bottom-20 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 sm:max-w-md z-50 animate-bounce-once">
-        <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white p-3.5 rounded-2xl shadow-2xl border border-emerald-400/40 flex items-center justify-between gap-3">
-          <div className="flex items-center space-x-3 min-w-0">
-            <div className="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 overflow-hidden border border-white/30 shadow-md">
+      <div className="fixed top-14 left-3 right-3 sm:top-16 sm:right-6 sm:left-auto sm:max-w-sm z-50 animate-fadeIn">
+        <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white p-3 rounded-2xl shadow-2xl border border-emerald-400/40 flex items-center justify-between gap-2.5 backdrop-blur-md">
+          <div className="flex items-center space-x-2.5 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 overflow-hidden border border-white/30 shadow-md">
               {appBranding.logoUrl && !logoImgError ? (
                 <img
                   src={appBranding.logoUrl}
                   alt={appBranding.appName}
-                  className="w-full h-full object-cover rounded-2xl"
+                  className="w-full h-full object-cover rounded-xl"
                   onError={() => setLogoImgError(true)}
                 />
               ) : (
-                <span className="text-xl">{appBranding.logoEmoji || '🍗'}</span>
+                <span className="text-lg">{appBranding.logoEmoji || '🍗'}</span>
               )}
             </div>
             <div className="min-w-0">
               <div className="flex items-center space-x-1.5">
-                <h4 className="font-bold text-xs sm:text-sm truncate">Sakinisha {appBranding.appName} (PWA)</h4>
+                <h4 className="font-bold text-xs truncate">Sakinisha {appBranding.appName}</h4>
                 <span className="px-1.5 py-0.2 rounded-full bg-amber-400 text-neutral-950 font-black text-[9px]">
                   PWA
                 </span>
               </div>
-              <p className="text-[11px] text-emerald-100 truncate">
-                Agiza haraka bila intaneti & pokea taarifa za oda
+              <p className="text-[10px] text-emerald-100 truncate">
+                Agiza haraka & pokea taarifa za oda
               </p>
             </div>
           </div>
@@ -111,14 +121,14 @@ export const PwaInstallBanner: React.FC = () => {
             <button
               type="button"
               onClick={handleInstallClick}
-              className="px-3 py-1.5 rounded-xl bg-white text-emerald-900 font-extrabold text-xs shadow-md hover:bg-emerald-50 active:scale-95 transition-all flex items-center space-x-1 cursor-pointer"
+              className="px-2.5 py-1.5 rounded-xl bg-white text-emerald-900 font-extrabold text-xs shadow-md hover:bg-emerald-50 active:scale-95 transition-all flex items-center space-x-1 cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Install</span>
             </button>
             <button
               type="button"
-              onClick={() => setShowBanner(false)}
+              onClick={handleDismiss}
               className="p-1 rounded-lg text-emerald-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
               title="Funga"
             >

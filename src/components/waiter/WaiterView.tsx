@@ -131,7 +131,9 @@ export const WaiterView: React.FC = () => {
     unreadMessagesCount,
     initiateCall,
     messages,
-    sendChatMessage
+    sendChatMessage,
+    notificationPermission,
+    requestNotificationPermission
   } = useLiveCall();
 
   const [activeTabFilter, setActiveTabFilter] = useState<'tables' | 'orders' | 'live_calls'>('tables');
@@ -292,7 +294,7 @@ export const WaiterView: React.FC = () => {
   });
 
   return (
-    <div className="min-h-screen bg-neutral-100 dark:bg-[#0c0c0e] text-neutral-900 dark:text-white p-3 sm:p-6 space-y-5">
+    <div className="min-h-screen bg-neutral-100 dark:bg-[#0c0c0e] text-neutral-900 dark:text-white p-3 sm:p-5 space-y-3.5 sm:space-y-4 pb-6">
       {/* Toast Notification */}
       {toastMsg && (
         <div className="fixed bottom-6 right-6 z-50 bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 px-5 py-3 rounded-2xl shadow-2xl flex items-center space-x-2 text-xs font-bold border border-white/10 animate-slideUp">
@@ -475,7 +477,7 @@ export const WaiterView: React.FC = () => {
                       setShowNewOrderModal(true);
                     }
                   }}
-                  className={`p-4 rounded-3xl border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between min-h-[170px] ${
+                  className={`p-3.5 sm:p-4 rounded-3xl border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between min-h-[130px] space-y-2 ${
                     table.status === 'occupied'
                       ? 'bg-amber-500/5 dark:bg-amber-500/10 border-amber-500/40 hover:border-amber-500'
                       : table.status === 'billing'
@@ -691,6 +693,28 @@ export const WaiterView: React.FC = () => {
       {/* VIEW 3: LIVE CALLS & TABLE CHAT CENTER */}
       {activeTabFilter === 'live_calls' && (
         <div className="space-y-4">
+          {/* Notification Permission Banner for Background Calls */}
+          {notificationPermission !== 'granted' && (
+            <div className="bg-gradient-to-r from-amber-500/15 via-orange-500/15 to-emerald-500/15 border border-amber-500/30 rounded-2xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+              <div className="flex items-center space-x-3 text-neutral-800 dark:text-neutral-200">
+                <Bell className="w-5 h-5 text-amber-500 shrink-0 animate-bounce" />
+                <div>
+                  <h5 className="font-bold">Pokea Simu za Meza Moja kwa Moja kutoka kwenye Notification</h5>
+                  <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
+                    Washa notifikasi ili mteja anapopiga simu, ikuingie simuni/kwenye kompyuta ikiwa na vitufe vya "Pokea Simu" na "Kataa" hata ukiwa kwenye tab nyingine.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => requestNotificationPermission()}
+                className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shrink-0 shadow-sm transition-all hover:scale-105 active:scale-95 cursor-pointer self-start sm:self-auto"
+              >
+                Ruhusu Notifikasi Sasa
+              </button>
+            </div>
+          )}
+
           {/* Top Live Calling Bar & Active Call Alert */}
           {(activeCall || incomingCall) && (
             <div className="bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-emerald-500/20 border-2 border-amber-500 rounded-3xl p-4 sm:p-5 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4 animate-pulse">
@@ -830,7 +854,7 @@ export const WaiterView: React.FC = () => {
 
             {/* Right: Real-time Live Chat & Action Stream for selected table */}
             <div className="lg:col-span-7 space-y-3">
-              <div className="bg-white dark:bg-[#151518] rounded-3xl p-4 sm:p-5 border border-neutral-200 dark:border-neutral-800 shadow-sm flex flex-col h-[580px]">
+              <div className="bg-white dark:bg-[#151518] rounded-3xl p-4 sm:p-5 border border-neutral-200 dark:border-neutral-800 shadow-sm flex flex-col min-h-[420px] max-h-[580px] flex-1">
                 {/* Chat Header for Selected Table */}
                 <div className="flex items-center justify-between pb-3 border-b border-neutral-100 dark:border-neutral-800">
                   <div className="flex items-center space-x-3">

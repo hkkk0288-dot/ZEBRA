@@ -50,7 +50,8 @@ export const ProfileView: React.FC = () => {
     setAuthMode,
     reservations,
     setShowReservationModal,
-    loyaltyPoints
+    loyaltyPoints,
+    androidFrame
   } = useApp();
 
   const isDark = theme === 'dark';

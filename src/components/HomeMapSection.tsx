@@ -34,7 +34,7 @@ export const HomeMapSection: React.FC<HomeMapSectionProps> = ({
   };
 
   return (
-    <section className="w-full my-4 sm:my-8">
+    <section className="w-full mt-3 sm:mt-5 mb-0">
       <div
         className={`rounded-3xl border overflow-hidden shadow-2xl transition-all ${
           isDark

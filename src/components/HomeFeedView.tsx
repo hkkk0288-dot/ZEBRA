@@ -113,7 +113,7 @@ export const HomeFeedView: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen pb-36 sm:pb-32">
+    <div className="flex flex-col pb-0">
       {/* Mobile Top App Bar (Only shown in Mobile Phone Frame view) */}
       {androidFrame && (
         <div

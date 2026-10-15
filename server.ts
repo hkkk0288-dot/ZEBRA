@@ -405,6 +405,25 @@ app.get('/api/live/messages/:roomId', (req: Request, res: Response) => {
   });
 });
 
+app.post('/api/live/reject-call', (req: Request, res: Response) => {
+  const { callId, reason } = req.body;
+  const session = activeCalls.get(callId);
+  if (session) {
+    session.status = 'rejected';
+    broadcastToRoom(session.roomId, {
+      type: 'call_rejected',
+      callId,
+      reason: reason || 'Kataa kutoka Notification'
+    });
+    broadcastToWaiters({
+      type: 'call_rejected',
+      callId
+    });
+    activeCalls.delete(callId);
+  }
+  res.json({ status: 'success' });
+});
+
 // Setup WebSocket server on path /live-ws
 const wss = new WebSocketServer({ server, path: '/live-ws' });
 

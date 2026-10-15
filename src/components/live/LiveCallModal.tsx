@@ -19,7 +19,8 @@ import {
   UtensilsCrossed,
   Maximize2,
   Minimize2,
-  ChevronDown
+  ChevronDown,
+  Bell
 } from 'lucide-react';
 import { useLiveCall } from '../../context/LiveCallContext';
 import { useApp } from '../../context/AppContext';
@@ -45,7 +46,9 @@ export const LiveCallModal: React.FC = () => {
     toggleMute,
     toggleVideo,
     callDuration,
-    socketConnected
+    socketConnected,
+    notificationPermission,
+    requestNotificationPermission
   } = useLiveCall();
 
   const { tables, theme } = useApp();
@@ -243,6 +246,25 @@ export const LiveCallModal: React.FC = () => {
             </button>
           </div>
         </div>
+
+        {/* Call from Notification Permission Prompt */}
+        {notificationPermission !== 'granted' && (
+          <div className="px-4 py-2 bg-gradient-to-r from-amber-500/15 via-orange-500/15 to-emerald-500/15 border-b border-amber-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+            <div className="flex items-center space-x-2 text-neutral-800 dark:text-neutral-200">
+              <Bell className="w-4 h-4 text-amber-500 shrink-0 animate-bounce" />
+              <span>
+                <strong>Pokea Simu kutoka Notification:</strong> Washa notifikasi ili simu ikipiga uweze kuipokea au kuikataa moja kwa moja hata ukiwa nje ya app!
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => requestNotificationPermission()}
+              className="px-3 py-1 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-[11px] shrink-0 shadow-xs transition-colors cursor-pointer self-start sm:self-auto"
+            >
+              Washa Notifikasi Sasa
+            </button>
+          </div>
+        )}
 
         {/* Tab Switcher */}
         <div className="flex border-b border-black/5 dark:border-white/5 bg-neutral-100/60 dark:bg-neutral-800/40 p-1.5 gap-1.5">
