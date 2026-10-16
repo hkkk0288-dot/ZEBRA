@@ -32,6 +32,7 @@ import { DarEsSalaamMap } from './DarEsSalaamMap';
 import { SlideBannerCarousel } from './SlideBannerCarousel';
 import { GlobalMapModal, MapLayerKey } from './GlobalMapModal';
 import { HomeMapSection } from './HomeMapSection';
+import { AppLogo } from './AppLogo';
 
 export const HomeFeedView: React.FC = () => {
   const {
@@ -62,7 +63,9 @@ export const HomeFeedView: React.FC = () => {
     setShowLocationPickerModal,
     openRiderTracker,
     setShowScratchModal,
-    appBranding
+    appBranding,
+    language,
+    toggleLanguage
   } = useApp();
 
   const { openCallModal } = useLiveCall();

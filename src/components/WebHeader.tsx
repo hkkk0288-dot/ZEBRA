@@ -26,7 +26,8 @@ import {
   VolumeX,
   Gift,
   Menu,
-  X
+  X,
+  Smartphone
 } from 'lucide-react';
 import { formatPrice } from '../utils/formatters';
 import { LuckySpinWheelModal } from './LuckySpinWheelModal';
@@ -65,7 +66,8 @@ export const WebHeader: React.FC = () => {
     setShowScratchModal,
     openRiderTracker,
     t,
-    appBranding
+    appBranding,
+    setAndroidFrame
   } = useApp();
 
   const isSingle = (appBranding.restaurantMode || 'single') === 'single';
@@ -110,7 +112,15 @@ export const WebHeader: React.FC = () => {
             <span className="hidden sm:inline font-mono">
               Lipa Namba: <strong className="text-amber-200">445566</strong>
             </span>
-            <span className="font-semibold text-amber-200 text-[10px]">
+            <button
+              onClick={() => setAndroidFrame(true)}
+              className="flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-black/40 hover:bg-black/60 text-amber-200 hover:text-white text-[10px] font-bold border border-white/20 transition-all cursor-pointer shadow-xs active:scale-95"
+              title="Badili kwenda kwenye muonekano wa Simu (Mobile App View)"
+            >
+              <Smartphone className="w-3 h-3 text-amber-300" />
+              <span>Mobile View</span>
+            </button>
+            <span className="font-semibold text-amber-200 text-[10px] hidden md:inline">
               Dev: AmourCodes
             </span>
           </div>
@@ -414,33 +424,33 @@ export const WebHeader: React.FC = () => {
             )}
           </div>
 
-          {/* Quick Actions (Table, Currency, Theme, Cart) - GUARANTEED TO FIT AND ALWAYS VISIBLE */}
-          <div className="flex items-center space-x-1 sm:space-x-1.5 shrink-0">
+          {/* Desktop Right Cluster - Shown ONLY on lg screens so it never squashes mobile */}
+          <div className="hidden lg:flex items-center space-x-1 xl:space-x-1.5 shrink-0">
             {/* Table / QR Dine-In Indicator */}
             {activeTable ? (
               <button
                 onClick={() => setShowCustomerTableModal(true)}
-                className="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center space-x-1 hover:bg-emerald-500/30 transition-all cursor-pointer shrink-0"
+                className="px-2.5 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center space-x-1 hover:bg-emerald-500/30 transition-all cursor-pointer shrink-0"
                 title="Upo mezani. Bofya kuona maelezo"
               >
-                <UtensilsCrossed className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                <span className="truncate max-w-[65px]">{activeTable.name}</span>
+                <UtensilsCrossed className="w-3.5 h-3.5" />
+                <span className="truncate max-w-[70px]">{activeTable.name}</span>
               </button>
             ) : (
               <button
                 onClick={() => setShowCustomerTableModal(true)}
-                className="flex items-center space-x-1 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 text-xs font-bold transition-all cursor-pointer shrink-0"
+                className="flex items-center space-x-1 px-2.5 py-1.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 text-xs font-bold transition-all cursor-pointer shrink-0"
                 title="Umeketi mezani? Bofya kuingiza namba ya meza au kuchanganua QR"
               >
                 <QrCode className="w-3.5 h-3.5 text-emerald-500" />
-                <span className="hidden sm:inline">Mezani</span>
+                <span>Mezani</span>
               </button>
             )}
 
             {/* Live Rider Tracker button */}
             <button
               onClick={() => openRiderTracker()}
-              className="hidden lg:flex items-center space-x-1 px-2.5 py-1.5 rounded-xl bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 border border-teal-500/30 text-xs font-bold transition-all cursor-pointer shrink-0"
+              className="flex items-center space-x-1 px-2.5 py-1.5 rounded-xl bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 border border-teal-500/30 text-xs font-bold transition-all cursor-pointer shrink-0"
               title="Fuatilia dereva wako kwenye ramani (Live GPS Tracker)"
             >
               <span>🛵</span>
@@ -450,7 +460,7 @@ export const WebHeader: React.FC = () => {
             {/* Scratch & Win Gift Card */}
             <button
               onClick={() => setShowScratchModal(true)}
-              className="p-1.5 sm:p-2 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-500 hover:bg-amber-500/25 transition-colors shrink-0 cursor-pointer"
+              className="p-2 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-500 hover:bg-amber-500/25 transition-colors shrink-0 cursor-pointer"
               title="Kadi ya Zawadi ya Kujikuna (Scratch & Win Card)"
             >
               <Gift className="w-3.5 h-3.5 text-amber-400" />
@@ -459,7 +469,7 @@ export const WebHeader: React.FC = () => {
             {/* Language Switcher (SWA / ENG) */}
             <button
               onClick={toggleLanguage}
-              className={`text-xs font-bold px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-xl border transition-colors shrink-0 cursor-pointer ${
+              className={`text-xs font-bold px-2.5 py-1.5 rounded-xl border transition-colors shrink-0 cursor-pointer ${
                 isDark
                   ? 'bg-neutral-800 border-neutral-700 text-neutral-200 hover:bg-neutral-700'
                   : 'bg-neutral-100 border-neutral-300 text-neutral-800 hover:bg-neutral-200'
@@ -472,7 +482,7 @@ export const WebHeader: React.FC = () => {
             {/* Sound Chimes Toggle */}
             <button
               onClick={toggleSound}
-              className={`p-1.5 sm:p-2 rounded-xl border transition-colors shrink-0 cursor-pointer ${
+              className={`p-2 rounded-xl border transition-colors shrink-0 cursor-pointer ${
                 soundEnabled
                   ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-500'
                   : 'bg-neutral-800/40 border-neutral-700 text-neutral-500'
@@ -485,7 +495,7 @@ export const WebHeader: React.FC = () => {
             {/* Currency Switcher */}
             <button
               onClick={() => setCurrency(currency === 'USD' ? 'TZS' : 'USD')}
-              className={`text-xs font-bold px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-xl border transition-colors shrink-0 cursor-pointer ${
+              className={`text-xs font-bold px-2.5 py-1.5 rounded-xl border transition-colors shrink-0 cursor-pointer ${
                 isDark
                   ? 'bg-neutral-800 border-neutral-700 text-neutral-200 hover:bg-neutral-700'
                   : 'bg-neutral-100 border-neutral-300 text-neutral-800 hover:bg-neutral-200'
@@ -498,7 +508,7 @@ export const WebHeader: React.FC = () => {
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className={`p-1.5 sm:p-2 rounded-xl border transition-colors shrink-0 cursor-pointer ${
+              className={`p-2 rounded-xl border transition-colors shrink-0 cursor-pointer ${
                 isDark
                   ? 'bg-neutral-800 border-neutral-700 text-amber-400 hover:bg-neutral-700'
                   : 'bg-neutral-100 border-neutral-300 text-amber-600 hover:bg-neutral-200'
@@ -508,10 +518,10 @@ export const WebHeader: React.FC = () => {
               {isDark ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
             </button>
 
-            {/* Cart Button - ALWAYS 100% VISIBLE AND FULLY FITTING */}
+            {/* Cart Button */}
             <button
               onClick={() => setActiveTab('cart')}
-              className="flex items-center space-x-1.5 text-white px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl sm:rounded-2xl shadow-md transition-transform active:scale-95 shrink-0 cursor-pointer"
+              className="flex items-center space-x-1.5 text-white px-3.5 py-2 rounded-2xl shadow-md transition-transform active:scale-95 shrink-0 cursor-pointer"
               style={{
                 backgroundColor: 'var(--brand-primary, #f59e0b)',
                 boxShadow: '0 8px 20px -4px var(--brand-primary-shadow, rgba(245, 158, 11, 0.35))'
@@ -521,7 +531,7 @@ export const WebHeader: React.FC = () => {
               <div className="relative">
                 <ShoppingBag className="w-4 h-4" />
                 {cartCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-neutral-900 text-white text-[9px] sm:text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center border border-white">
+                  <span className="absolute -top-2 -right-2 bg-neutral-900 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border border-white">
                     {cartCount}
                   </span>
                 )}
@@ -530,20 +540,147 @@ export const WebHeader: React.FC = () => {
                 {cartCount === 0 ? 'Cart' : formatPrice(cartTotal, currency)}
               </span>
             </button>
+          </div>
 
-            {/* Mobile Menu Button - Opens Full Platform Drawer so NO features are hidden on phone view */}
+          {/* Mobile & Tablet Right Controls - Guaranteed to fit on ALL phone screens without clipping */}
+          <div className="lg:hidden flex items-center space-x-1 sm:space-x-1.5 shrink-0">
+            {/* Currency toggle */}
+            <button
+              onClick={() => setCurrency(currency === 'USD' ? 'TZS' : 'USD')}
+              className={`text-[11px] font-bold px-2 py-1 rounded-xl border transition-colors shrink-0 cursor-pointer ${
+                isDark
+                  ? 'bg-neutral-800 border-neutral-700 text-neutral-200'
+                  : 'bg-neutral-100 border-neutral-300 text-neutral-800'
+              }`}
+              title="Badili Sarafu"
+            >
+              {currency === 'USD' ? '$' : 'TZS'}
+            </button>
+
+            {/* Theme toggle */}
+            <button
+              onClick={toggleTheme}
+              className={`p-1.5 rounded-xl border transition-colors shrink-0 cursor-pointer ${
+                isDark
+                  ? 'bg-neutral-800 border-neutral-700 text-amber-400'
+                  : 'bg-neutral-100 border-neutral-300 text-amber-600'
+              }`}
+              title="Badili Theme"
+            >
+              {isDark ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+            </button>
+
+            {/* Cart Button - ALWAYS 100% VISIBLE ON MOBILE */}
+            <button
+              onClick={() => setActiveTab('cart')}
+              className="flex items-center space-x-1.5 text-white px-2.5 py-1.5 rounded-xl shadow-md transition-transform active:scale-95 shrink-0 cursor-pointer"
+              style={{
+                backgroundColor: 'var(--brand-primary, #f59e0b)',
+                boxShadow: '0 6px 16px -4px var(--brand-primary-shadow, rgba(245, 158, 11, 0.4))'
+              }}
+              title="Angalia Rukwama"
+            >
+              <div className="relative">
+                <ShoppingBag className="w-3.5 h-3.5" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1.5 -right-2 bg-neutral-900 text-white text-[8px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center border border-white">
+                    {cartCount}
+                  </span>
+                )}
+              </div>
+              <span className="text-[11px] font-bold whitespace-nowrap">
+                {cartCount === 0 ? 'Cart' : formatPrice(cartTotal, currency)}
+              </span>
+            </button>
+
+            {/* Mobile Menu Button - ALWAYS 100% VISIBLE */}
             <button
               onClick={() => setShowMobileDrawer(prev => !prev)}
-              className="lg:hidden p-2 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 hover:text-emerald-500 transition-colors shrink-0 cursor-pointer"
-              title="Menyu Kamili ya Simu"
+              className="p-1.5 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 hover:text-emerald-500 transition-colors shrink-0 cursor-pointer"
+              title="Menyu Kamili"
             >
               {showMobileDrawer ? <X className="w-4 h-4 text-rose-500" /> : <Menu className="w-4 h-4" />}
             </button>
           </div>
         </div>
 
+        {/* Mobile Quick Pills Navigation Strip - NEVER HIDDEN on phone & tablet */}
+        <div className="lg:hidden mt-2 pt-2 border-t border-neutral-200/70 dark:border-neutral-800/70 flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-0.5">
+          {/* Table / Mezani */}
+          <button
+            onClick={() => setShowCustomerTableModal(true)}
+            className="flex items-center space-x-1 px-2.5 py-1 rounded-full bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 text-neutral-700 dark:text-neutral-300 text-[11px] font-bold shrink-0 border border-neutral-200 dark:border-neutral-700 cursor-pointer"
+          >
+            <UtensilsCrossed className="w-3 h-3 text-emerald-500" />
+            <span>{activeTable ? `Meza ${activeTable.name}` : 'Mezani'}</span>
+          </button>
+
+          {/* Mhudumu Live */}
+          <button
+            onClick={() => openCallModal('chat')}
+            className="flex items-center space-x-1 px-2.5 py-1 rounded-full bg-amber-500/15 hover:bg-amber-500/25 text-amber-500 border border-amber-500/30 text-[11px] font-bold shrink-0 cursor-pointer"
+          >
+            <Headset className="w-3 h-3 text-amber-400" />
+            <span>Mhudumu Live</span>
+            {unreadMessagesCount > 0 && <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" />}
+          </button>
+
+          {/* GPS Live Tracker */}
+          <button
+            onClick={() => openRiderTracker()}
+            className="flex items-center space-x-1 px-2.5 py-1 rounded-full bg-teal-500/15 text-teal-400 border border-teal-500/30 text-[11px] font-bold shrink-0 cursor-pointer"
+          >
+            <span>🛵</span>
+            <span>Tracker</span>
+          </button>
+
+          {/* POS Terminal */}
+          <button
+            onClick={() => setActiveTab('pos')}
+            className="flex items-center space-x-1 px-2.5 py-1 rounded-full bg-neutral-100 dark:bg-neutral-800 text-teal-400 border border-neutral-200 dark:border-neutral-700 text-[11px] font-bold shrink-0 cursor-pointer"
+          >
+            <Store className="w-3 h-3 text-teal-400" />
+            <span>POS</span>
+          </button>
+
+          {/* OSS Screen */}
+          <button
+            onClick={() => setActiveTab('oss')}
+            className="flex items-center space-x-1 px-2.5 py-1 rounded-full bg-neutral-100 dark:bg-neutral-800 text-emerald-400 border border-neutral-200 dark:border-neutral-700 text-[11px] font-bold shrink-0 cursor-pointer"
+          >
+            <Tv className="w-3 h-3 text-emerald-400" />
+            <span>OSS</span>
+          </button>
+
+          {/* Scratch Card */}
+          <button
+            onClick={() => setShowScratchModal(true)}
+            className="flex items-center space-x-1 px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[11px] font-bold shrink-0 cursor-pointer"
+          >
+            <Gift className="w-3 h-3" />
+            <span>Zawadi</span>
+          </button>
+
+          {/* Language */}
+          <button
+            onClick={toggleLanguage}
+            className="flex items-center space-x-1 px-2.5 py-1 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700 text-[11px] font-bold shrink-0 cursor-pointer"
+          >
+            <span>{language === 'sw' ? '🇹🇿 SWA' : '🇬🇧 ENG'}</span>
+          </button>
+
+          {/* Account / Login */}
+          <button
+            onClick={() => setActiveTab(isLoggedIn ? 'profile' : 'auth')}
+            className="flex items-center space-x-1 px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[11px] font-bold shrink-0 cursor-pointer"
+          >
+            <User className="w-3 h-3" />
+            <span>{isLoggedIn ? (user.name.split(' ')[0] || 'Akaunti') : 'Ingia'}</span>
+          </button>
+        </div>
+
         {/* Mobile Search Bar if viewport is small */}
-        <div className="md:hidden mt-2.5">
+        <div className="md:hidden mt-2">
           <div className="relative w-full">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
             <input
